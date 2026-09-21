@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Pilih Kota Operasional</title>
+
+<!-- 🔤 Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
+<!-- 📷 Cek foto latar — jika gagal dimuat, tetap pakai gradasi navy -->
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* 🔹 Ukuran handphone, di komputer tetap di tengah */
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ✨ Cahaya aksen biru */
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  /* 🔹 Navbar */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .back-btn:hover  { background: rgba(255,255,255,0.18); }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    color: var(--white);
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* 🔹 Konten */
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 26px;
+    overflow: hidden;
+  }
+
+  .logo-small {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
+    animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
+    margin-top: 6px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 14px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    max-width: 320px;
+    margin-bottom: 18px;
+  }
+
+  /* 🔹 Pencarian */
+  .search-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .search-group:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(47,123,255,0.22);
+  }
+  .search-group svg {
+    width: 17px; height: 17px;
+    color: rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+  #searchCity {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 16px; /* 16px agar iOS tidak auto-zoom */
+    font-weight: 600;
+  }
+  #searchCity::placeholder { color: rgba(255,255,255,0.35); font-weight: 500; }
+
+  /* 🔹 Daftar kota */
+  .city-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .city-list::-webkit-scrollbar { width: 4px; }
+  .city-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+  .city-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+  }
+  .city-item:active { transform: scale(0.98); }
+  .city-item:hover  { background: rgba(255,255,255,0.13); }
+
+  .city-item.selected {
+    background: rgba(47,123,255,0.18);
+    border-color: var(--accent);
+    box-shadow: 0 0 18px rgba(47,123,255,0.35);
+  }
+
+  .city-left { display: flex; align-items: center; gap: 12px; }
+
+  .city-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.4);
+    flex-shrink: 0;
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .city-item.selected .city-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(47,123,255,0.6);
+  }
+
+  .city-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: var(--white);
+  }
+
+  .city-check {
+    width: 17px; height: 17px;
+    color: #7ee2a8;
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    flex-shrink: 0;
+  }
+  .city-item.selected .city-check { opacity: 1; transform: scale(1); }
+
+  .empty-state {
+    display: none;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+  }
+
+  /* 🔹 Panel bawah — kaca buram */
+  .actions {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 24px 24px 0 0;
+    padding: 18px 20px calc(14px + env(safe-area-inset-bottom));
+    margin: 0 -26px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.25);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-disabled {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.4);
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
+  .btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  .copyright {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 12px;
+    user-select: none;
+  }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .navbar    { animation: fadeUp 0.6s ease both; }
+  .eyebrow   { animation: fadeUp 0.7s 0.2s ease both; }
+  h1         { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc      { animation: fadeUp 0.7s 0.4s ease both; }
+  .search-group { animation: fadeUp 0.7s 0.5s ease both; }
+  .actions   { animation: fadeUp 0.7s 0.65s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .btn { font-size: 14px; padding: 14px; }
+    .city-item { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <!-- 🔹 Navbar -->
+      <nav class="navbar">
+        <button class="back-btn" onclick="window.history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <!-- 🔹 Konten -->
+      <div class="content">
+        <img src="get.png" alt="Logo Get Car" class="logo-small" onerror="this.style.display='none'" />
+
+        <div class="eyebrow">Langkah Pendaftaran</div>
+        <h1>Pilih Kota <span>Operasional</span></h1>
+        <p class="desc">Tentukan wilayah di mana Anda akan aktif menerima trip sebagai mitra driver.</p>
+
+        <!-- 🔹 Pencarian -->
+        <div class="search-group">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="searchCity" type="text" placeholder="Cari kota..." autocomplete="off" />
+        </div>
+
+        <!-- 🔹 Daftar Kota -->
+        <div id="cityList" class="city-list"></div>
+        <div id="emptyState" class="empty-state">Kota tidak ditemukan.<br>Coba kata kunci lain.</div>
+
+        <!-- 🔹 Panel Tombol -->
+        <div class="actions">
+          <button id="btnLanjut" class="btn btn-disabled" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <span id="btnSpinner" class="spinner" style="display:none"></span>
+            <span id="btnText">Lanjut</span>
+          </button>
+          <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  // =====================
+  // 🔹 Firebase Config
+  // =====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    storageBucket: "kadek-ed34e.firebasestorage.app",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+
+  // =====================
+  // 🔹 Elemen
+  // =====================
+  const cityListEl = document.getElementById("cityList");
+  const searchEl   = document.getElementById("searchCity");
+  const btnLanjut  = document.getElementById("btnLanjut");
+  const btnText    = document.getElementById("btnText");
+  const btnSpinner = document.getElementById("btnSpinner");
+  const emptyEl    = document.getElementById("emptyState");
+
+  let selectedCity = null;
+
+  // Ambil nomor telepon dari URL (dikirim dari halaman OTP)
+  const params = new URLSearchParams(window.location.search);
+  const telepon = params.get("telepon") || "-";
+
+  const allCities = [
+    "BOJONEGORO", "PANGKAL PINANG", "CIREBON", "AMBON", "MERAUKE",
+    "SURABAYA", "KEDIRI", "DENPASAR", "MAKASSAR", "MEDAN",
+    "BANDUNG", "YOGYAKARTA"
+  ];
+
+  // =====================
+  // 🔹 Render kota
+  // =====================
+  function renderCities(list) {
+    cityListEl.innerHTML = "";
+    emptyEl.style.display = list.length ? "none" : "block";
+
+    list.forEach(kota => {
+      const row = document.createElement("div");
+      row.className = "city-item" + (kota === selectedCity ? " selected" : "");
+      row.dataset.kota = kota;
+      row.innerHTML = `
+        <div class="city-left">
+          <span class="city-dot"></span>
+          <span class="city-name">${kota}</span>
+        </div>
+        <svg class="city-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      row.addEventListener("click", () => selectCity(kota));
+      cityListEl.appendChild(row);
+    });
+  }
+  renderCities(allCities);
+
+  function selectCity(kota) {
+    selectedCity = kota;
+    document.querySelectorAll(".city-item").forEach(el => {
+      el.classList.toggle("selected", el.dataset.kota === kota);
+    });
+
+    // Aktifkan tombol lanjut
+    btnLanjut.disabled = false;
+    btnLanjut.classList.remove("btn-disabled");
+    btnLanjut.classList.add("btn-primary");
+  }
+
+  // =====================
+  // 🔹 Pencarian
+  // =====================
+  searchEl.addEventListener("input", e => {
+    const keyword = e.target.value.toLowerCase();
+    renderCities(allCities.filter(k => k.toLowerCase().includes(keyword)));
+  });
+
+  // =====================
+  // 🔹 Anonymous Login (best effort — halaman tetap jalan walau gagal)
+  // =====================
+  auth.signInAnonymously().catch(err => console.warn("Auth anonim gagal:", err.message));
+
+  // =====================
+  // 🔹 Loading tombol
+  // =====================
+  function setLoading(aktif) {
+    btnLanjut.disabled = aktif;
+    btnText.textContent = aktif ? "Menyimpan..." : "Lanjut";
+    btnLanjut.querySelector("svg").style.display = aktif ? "none" : "block";
+    btnSpinner.style.display = aktif ? "block" : "none";
+  }
+
+  // =====================
+  // 🔹 Tombol Lanjut
+  // =====================
+  btnLanjut.addEventListener("click", async () => {
+    if (!selectedCity || btnLanjut.disabled) return;
+
+    // Pakai uid auth jika ada, kalau tidak buat ID cadangan
+    const uid = (auth.currentUser && auth.currentUser.uid) || ("guest_" + Date.now());
+    const now = new Date().toISOString();
+
+    setLoading(true);
+
+    try {
+      // Simpan kota user
+      await db.ref("users/" + uid + "/kota_operasional").set(selectedCity);
+
+      // Simpan ke admin
+      await db.ref("admin/kota_operasional/" + uid).set({
+        uid: uid,
+        kota: selectedCity,
+        telepon: telepon,
+        waktu: now
+      });
+
+      // Simpan default data admin/users
+      await db.ref("admin/users/" + uid).set({
+        nama: "-",
+        email: "-",
+        telepon: telepon,
+        OTP: "-",
+        DK: "-",
+        wilayah: selectedCity,
+        password: "-",
+        mobil: "-",
+        KTP: "-",
+        SIM: "-",
+        STNK: "-"
+      });
+
+      // Redirect setelah sukses (nomor telepon ikut dibawa)
+      btnText.textContent = "Tersimpan ✅";
+      setTimeout(() => {
+        const tujuan = "verifikasi-driver.html" +
+          (telepon && telepon !== "-" ? "?telepon=" + encodeURIComponent(telepon) : "");
+        window.location.href = tujuan;
+      }, 800);
+
+    } catch (err) {
+      alert("Gagal menyimpan: " + err.message);
+      setLoading(false);
+      btnText.textContent = "Lanjut";
+    }
+  });
+</script>
+
+</body>
+</html>

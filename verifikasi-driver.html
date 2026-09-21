@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Pilih Kendaraan</title>
+
+<!-- 🔤 Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<!-- 📷 Cek foto latar — jika gagal dimuat, tetap pakai gradasi navy -->
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* 🔹 Ukuran handphone, di komputer tetap di tengah */
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ✨ Cahaya aksen biru */
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  /* 🔹 Navbar */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .back-btn:hover  { background: rgba(255,255,255,0.18); }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    color: var(--white);
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* 🔹 Konten */
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 26px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .logo-small {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
+    animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 14px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    max-width: 320px;
+    margin-bottom: 22px;
+  }
+
+  /* 🔹 Kartu kendaraan — kaca buram */
+  .vehicle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .vehicle-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 18px;
+    background: var(--glass);
+    border: 1.5px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.18s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .vehicle-card:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(47,123,255,0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.30);
+  }
+  .vehicle-card:active { transform: scale(0.98); }
+
+  .vehicle-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+  /* 🔹 FOTO ASLI KENDARAAN — thumbnail bulat */
+  .vehicle-icon {
+    position: relative;
+    width: 60px; height: 60px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    background: linear-gradient(135deg, #16305c, #0d1f3c);
+  }
+  .vehicle-icon img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .vehicle-icon img.loaded { opacity: 1; }
+  .vehicle-card:hover .vehicle-icon img { transform: scale(1.08); }
+
+  /* Fallback SVG jika foto gagal dimuat */
+  .vehicle-icon .icon-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.85);
+  }
+  .vehicle-icon .icon-fallback svg { width: 30px; height: 30px; }
+  .vehicle-icon.no-photo img { display: none; }
+  .vehicle-icon.no-photo .icon-fallback { display: flex; }
+
+  .vehicle-name {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    margin-bottom: 2px;
+  }
+  .vehicle-desc {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.4;
+  }
+
+  .vehicle-arrow {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    color: rgba(255,255,255,0.45);
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .vehicle-card:hover .vehicle-arrow {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    user-select: none;
+  }
+
+  /* 🔹 Bottom Sheet — kaca buram */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(3, 8, 18, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .popup-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .popup-content {
+    width: 100%;
+    max-width: 430px;
+    background: rgba(13, 27, 50, 0.92);
+    border: 1px solid var(--glass-border);
+    border-bottom: none;
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 22px calc(22px + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 50px rgba(0,0,0,0.45);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .popup-overlay.active .popup-content { transform: translateY(0); }
+
+  .popup-handle {
+    width: 44px; height: 4px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.25);
+    margin: 0 auto 18px;
+  }
+
+  .popup-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    margin-bottom: 6px;
+  }
+  .popup-title span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .popup-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 18px;
+  }
+
+  .popup-note {
+    text-align: center;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    padding: 14px 0 4px;
+  }
+
+  /* 🔹 Checklist bulat custom — biru menyala */
+  .check-list { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check-circle {
+    width: 24px; height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .check-circle:active { transform: scale(0.88); }
+  .check-circle svg {
+    width: 12px; height: 12px;
+    stroke: var(--white);
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .check-circle.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(47,123,255,0.55);
+  }
+  .check-circle.checked svg { opacity: 1; transform: scale(1); }
+
+  .check-text { font-size: 13.5px; line-height: 1.5; color: rgba(255,255,255,0.85); }
+  .check-text b { color: var(--white); font-weight: 700; }
+
+  /* 🔹 Tombol */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease, opacity 0.2s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
+  .btn-primary:disabled {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.4);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .hidden { display: none !important; }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .navbar       { animation: fadeUp 0.6s ease both; }
+  .eyebrow      { animation: fadeUp 0.7s 0.2s ease both; }
+  h1            { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc         { animation: fadeUp 0.7s 0.4s ease both; }
+  .vehicle-card:nth-child(1) { animation: fadeUp 0.7s 0.5s ease both; }
+  .vehicle-card:nth-child(2) { animation: fadeUp 0.7s 0.6s ease both; }
+  .copyright    { animation: fadeUp 0.7s 0.75s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .popup-content { padding-left: 18px; padding-right: 18px; }
+    .vehicle-icon { width: 52px; height: 52px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <!-- 🔹 Navbar -->
+      <nav class="navbar">
+        <button class="back-btn" onclick="history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <!-- 🔹 Konten -->
+      <div class="content">
+        <img src="get.png" alt="Logo Get Car" class="logo-small" onerror="this.style.display='none'" />
+
+        <div class="eyebrow">Langkah Pendaftaran</div>
+        <h1>Pilih Jenis <span>Kendaraan</span></h1>
+        <p class="desc">Pilih kendaraan yang akan Anda gunakan untuk menerima trip penumpang.</p>
+
+        <!-- 🔹 Daftar Kendaraan -->
+        <div id="vehicleContainer" class="vehicle-list"></div>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 🔹 Bottom Sheet Popup -->
+  <div id="popup" class="popup-overlay">
+    <div class="popup-content">
+      <div class="popup-handle"></div>
+      <div id="popupTitle" class="popup-title">Konfirmasi <span>Kendaraan</span></div>
+      <div id="popupBody" class="popup-body"></div>
+      <button id="popupBtn" class="btn btn-primary" disabled>
+        <svg id="btnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <span id="btnSpinner" class="spinner" style="display:none"></span>
+        <span id="btnText">Tutup</span>
+      </button>
+    </div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    storageBucket: "kadek-ed34e.firebasestorage.app",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a",
+    measurementId: "G-5WSR57JC7V"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.database();
+
+  // ================= ELEMEN =================
+  const container  = document.getElementById("vehicleContainer");
+  const popup      = document.getElementById("popup");
+  const popupTitle = document.getElementById("popupTitle");
+  const popupBody  = document.getElementById("popupBody");
+  const popupBtn   = document.getElementById("popupBtn");
+  const btnText    = document.getElementById("btnText");
+  const btnIcon    = document.getElementById("btnIcon");
+  const btnSpinner = document.getElementById("btnSpinner");
+
+  let selected = null;
+  let currentUser = null;
+
+  // Bawa nomor telepon jika ada di URL (agar alur tetap tersambung)
+  const params = new URLSearchParams(window.location.search);
+  const telepon = params.get("telepon");
+
+  // ================= FOTO ASLI KENDARAAN (Unsplash) =================
+  const vehicles = [
+    {
+      id: "motor",
+      name: "Motor",
+      desc: "Cepat & hemat untuk jarak dekat",
+      photo: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=300&q=80"
+    },
+    {
+      id: "mobil",
+      name: "Mobil",
+      desc: "Nyaman untuk penumpang & barang",
+      photo: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=300&q=80"
+    }
+  ];
+
+  // ================= RENDER KARTU KENDARAAN =================
+  function renderVehicles() {
+    container.innerHTML = "";
+    vehicles.forEach(v => {
+      const card = document.createElement("div");
+      card.className = "vehicle-card";
+      card.innerHTML = `
+        <div class="vehicle-left">
+          <div class="vehicle-icon">
+            <img src="${v.photo}" alt="${v.name}">
+            <div class="icon-fallback">
+              ${v.id === "motor"
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0-2 0v1h-3l-2 5 3 3h5l2-4h-3z"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><path d="M3 16v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3"/><circle cx="7" cy="16.5" r="1.8"/><circle cx="17" cy="16.5" r="1.8"/></svg>'
+              }
+            </div>
+          </div>
+          <div>
+            <div class="vehicle-name">${v.name}</div>
+            <div class="vehicle-desc">${v.desc}</div>
+          </div>
+        </div>
+        <svg class="vehicle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      `;
+
+      // Fade-in saat foto selesai dimuat, fallback SVG jika gagal
+      const img = card.querySelector("img");
+      img.onload  = () => img.classList.add("loaded");
+      img.onerror = () => img.parentElement.classList.add("no-photo");
+
+      card.onclick = () => showPopup(v);
+      container.appendChild(card);
+    });
+  }
+
+  // ================= TAMPILKAN POPUP =================
+  function showPopup(vehicle) {
+    selected = vehicle;
+    btnText.textContent = "Tutup";
+    btnIcon.style.display = "block";
+    btnSpinner.style.display = "none";
+    popupBtn.disabled = false;
+
+    if (vehicle.id === "motor") {
+      popupTitle.innerHTML = `Motor <span>Belum Tersedia</span>`;
+      popupBody.innerHTML = `<div class="popup-note">🚧 Layanan motor sedang dalam pengembangan.<br>Silakan pilih mobil untuk melanjutkan.</div>`;
+    } else if (vehicle.id === "mobil") {
+      popupTitle.innerHTML = `Persyaratan <span>Mobil</span>`;
+      popupBody.innerHTML = `
+        Pastikan semua persyaratan di bawah ini terpenuhi sebelum melanjutkan:
+        <div class="check-list">
+          <div class="check-item">
+            <div class="check-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="check-text">Kendaraan berplat <b>DK</b></span>
+          </div>
+          <div class="check-item">
+            <div class="check-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="check-text">Surat kendaraan di atas tahun <b>2018</b></span>
+          </div>
+          <div class="check-item">
+            <div class="check-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="check-text"><b>STNK</b> masih berlaku (tidak kadaluarsa)</span>
+          </div>
+        </div>
+      `;
+
+      popupBody.querySelectorAll(".check-circle").forEach(c => {
+        c.addEventListener("click", () => {
+          c.classList.toggle("checked");
+          checkAllChecklist();
+        });
+      });
+
+      popupBtn.disabled = true;
+      btnText.textContent = "Lanjutkan";
+    }
+
+    popup.classList.add("active");
+  }
+
+  // ================= CEK SEMUA CHECKLIST =================
+  function checkAllChecklist() {
+    const all = [...popupBody.querySelectorAll(".check-circle")];
+    const allChecked = all.every(c => c.classList.contains("checked"));
+    popupBtn.disabled = !allChecked;
+  }
+
+  // ================= TOMBOL POPUP =================
+  popupBtn.addEventListener("click", () => {
+    if (!selected) return;
+
+    if (selected.id === "motor") {
+      popup.classList.remove("active");
+      return;
+    }
+
+    const allChecked = [...popupBody.querySelectorAll(".check-circle")]
+      .every(c => c.classList.contains("checked"));
+
+    if (selected.id === "mobil" && allChecked) {
+      simpanPilihan();
+    }
+  });
+
+  // ================= SIMPAN PILIHAN =================
+  function setLoading(aktif) {
+    popupBtn.disabled = aktif;
+    btnText.textContent = aktif ? "Menyimpan..." : "Lanjutkan";
+    btnIcon.style.display = aktif ? "none" : "block";
+    btnSpinner.style.display = aktif ? "block" : "none";
+  }
+
+  async function simpanPilihan() {
+    setLoading(true);
+
+    const uid = (currentUser && currentUser.uid) || ("guest_" + Date.now());
+
+    const payload = {
+      jenis: selected.id,
+      nama: selected.name,
+      telepon: telepon || "-",
+      waktu: new Date().toISOString()
+    };
+
+    try {
+      await db.ref("users/" + uid + "/pilihan_kendaraan").set(payload);
+
+      btnText.textContent = "Tersimpan ✅";
+      setTimeout(() => {
+        const tujuan = "pendaftaranBerlanjut.html" +
+          (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
+        window.location.href = tujuan;
+      }, 900);
+    } catch (err) {
+      alert("Gagal menyimpan: " + err.message);
+      setLoading(false);
+    }
+  }
+
+  // ================= KLIK LUAR POPUP = TUTUP =================
+  popup.addEventListener("click", (e) => {
+    if (e.target === popup && selected && selected.id === "motor") {
+      popup.classList.remove("active");
+    }
+  });
+
+  // ================= LOGIN ANONIM =================
+  auth.signInAnonymously()
+    .then(u => currentUser = u.user)
+    .catch(err => console.warn("Auth anonim gagal:", err.message));
+
+  renderVehicles();
+</script>
+
+</body>
+</html>

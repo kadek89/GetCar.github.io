@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Dokumen SKCK & Koperasi</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase — hanya Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --green: #2ecc71;
+    --orange: #ff8a1e;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--white);
+    cursor: pointer;
+  }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 26px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 14px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px; height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    max-width: 320px;
+    margin-bottom: 18px;
+  }
+
+  .info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(70,200,120,0.12);
+    border: 1px solid rgba(70,200,120,0.30);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .info-box svg { width: 20px; height: 20px; flex-shrink: 0; color: #7ee2a8; margin-top: 1px; }
+  .info-box p { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.85); }
+  .info-box b { color: #7ee2a8; }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .progress-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+  }
+  .progress-label b { color: var(--white); font-weight: 800; }
+  .progress-track { flex: 1; display: flex; gap: 6px; }
+  .pseg {
+    flex: 1;
+    height: 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.14);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .pseg.isi {
+    background: linear-gradient(90deg, var(--green), #7ee2a8);
+    box-shadow: 0 0 10px rgba(46,204,113,0.5);
+  }
+
+  /* ============================================================
+     🟩 DROPZONE
+     ============================================================ */
+  .upload-list { display: flex; flex-direction: column; gap: 22px; }
+
+  .upload-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .upload-title { font-size: 16.5px; font-weight: 800; letter-spacing: -0.2px; line-height: 1.35; }
+
+  .info-btn {
+    width: 26px; height: 26px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.75);
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .info-btn:hover {
+    background: rgba(47,123,255,0.25);
+    border-color: var(--accent);
+    color: var(--white);
+  }
+
+  .dropzone {
+    position: relative;
+    width: 100%;
+    height: 170px;
+    border: 2.5px dashed var(--green);
+    border-radius: 10px;
+    background: rgba(46, 204, 113, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease;
+  }
+  .dropzone:hover  { background: rgba(46, 204, 113, 0.10); }
+  .dropzone:active { transform: scale(0.985); }
+  .dropzone.terisi { border-style: solid; border-color: var(--accent); background: rgba(47,123,255,0.08); }
+
+  .dz-empty { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+  .ambil-foto-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 26px;
+    border: 2px solid var(--accent);
+    border-radius: 40px;
+    background: rgba(10, 22, 40, 0.6);
+    color: #4d9aff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .dropzone:hover .ambil-foto-btn { background: var(--accent); color: var(--white); }
+  .ambil-foto-btn svg { width: 18px; height: 18px; }
+
+  .dropzone img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+  .dropzone.terisi img { display: block; }
+  .dropzone.terisi .dz-empty { display: none; }
+
+  .dz-ganti {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 7px 18px;
+    border: none;
+    border-radius: 30px;
+    background: rgba(10, 22, 40, 0.8);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: var(--white);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .dz-hapus {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 28px; height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(10, 22, 40, 0.8);
+    color: #ff9b9b;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .dropzone.terisi .dz-ganti,
+  .dropzone.terisi .dz-hapus { display: flex; }
+
+  .format-hint {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #7ee2a8;
+    margin-top: 10px;
+  }
+  .galeri-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 4px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .galeri-link:hover { color: #6db3ff; }
+
+  .hidden { display: none !important; }
+
+  .privacy-box {
+    margin-top: 20px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 18px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .privacy-box svg { width: 18px; height: 18px; flex-shrink: 0; color: #7ee2a8; margin-top: 2px; }
+  .privacy-box p { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,0.7); }
+  .privacy-box b { color: #7ee2a8; }
+
+  .status {
+    min-height: 20px;
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+  }
+  .status.sukses { color: #7ee2a8; }
+  .status.error  { color: #ff9b9b; }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:disabled {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.4);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ============================================================
+     📋 MODAL KETENTUAN
+     ============================================================ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    background: rgba(3, 8, 18, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .ketentuan-modal {
+    width: 100%;
+    max-width: 430px;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: rgba(13, 27, 50, 0.97);
+    border: 1px solid var(--glass-border);
+    border-bottom: none;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 22px calc(24px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .modal-overlay.active .ketentuan-modal { transform: translateY(0); }
+
+  .ketentuan-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .ketentuan-title {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .ketentuan-close {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .ketentuan-intro {
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 14px;
+  }
+  .ketentuan-divider {
+    width: 90px;
+    height: 5px;
+    border-radius: 5px;
+    background: var(--accent);
+    margin: 0 auto 22px;
+  }
+  .aturan-item { margin-bottom: 20px; }
+  .aturan-num {
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .aturan-num b { color: #6db3ff; }
+  .contoh-row { display: flex; flex-direction: column; gap: 12px; }
+  .contoh-box {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+  }
+  .contoh-box svg { display: block; width: 100%; height: auto; }
+  .contoh-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .contoh-box.benar .contoh-label { color: var(--green); }
+  .contoh-box.salah .contoh-label { color: #ff7b7b; }
+  .cek-bulat {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .contoh-box.benar .cek-bulat { background: var(--green); color: #06240f; }
+  .contoh-box.salah .cek-bulat { background: #ff5a5a; color: #2a0606; }
+
+  /* ============================================================
+     📷 KAMERA LAYAR PENUH
+     ============================================================ */
+  .cam-full {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: #000;
+    display: none;
+    overflow: hidden;
+  }
+  .cam-full.active { display: block; }
+
+  .cam-full video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cam-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 5;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 0;
+  }
+  .cam-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cam-back {
+    width: 42px; height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .cam-back svg { width: 22px; height: 22px; }
+  .cam-tutorial {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  }
+
+  .cam-progress { display: flex; gap: 8px; margin-top: 16px; }
+  .cam-progress > div {
+    flex: 1;
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.35);
+    transition: background 0.4s ease;
+  }
+  .cam-progress > div.isi { background: var(--green); }
+
+  .cam-title {
+    position: absolute;
+    top: calc(120px + env(safe-area-inset-top));
+    left: 0; right: 0;
+    z-index: 5;
+    text-align: center;
+    font-size: clamp(17px, 5vw, 22px);
+    font-weight: 700;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+    padding: 0 24px;
+  }
+
+  .card-guide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -56%);
+    width: min(82vw, 350px);
+    aspect-ratio: 1.3;
+    border-radius: 12px;
+    box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.75);
+  }
+
+  .kf-corner {
+    position: absolute;
+    width: 44px; height: 44px;
+    border: 5px solid var(--orange);
+  }
+  .kf-tl { top: -4px; left: -4px;   border-right: none; border-bottom: none; border-radius: 16px 0 0 0; }
+  .kf-tr { top: -4px; right: -4px;  border-left: none;  border-bottom: none; border-radius: 0 16px 0 0; }
+  .kf-bl { bottom: -4px; left: -4px;  border-right: none; border-top: none;  border-radius: 0 0 0 16px; }
+  .kf-br { bottom: -4px; right: -4px; border-left: none;  border-top: none;  border-radius: 0 0 16px 0; }
+
+  .cam-pill {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(170px + env(safe-area-inset-bottom));
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 88vw;
+    background: rgba(20, 20, 20, 0.85);
+    border-radius: 40px;
+    padding: 14px 22px;
+  }
+  .cam-pill .pi {
+    width: 26px; height: 26px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    font-style: italic;
+  }
+  .cam-pill.oranye .pi { background: var(--orange); color: #1a1a1a; }
+  .cam-pill.oranye span.teks { color: var(--orange); }
+  .cam-pill.hijau .pi { background: var(--green); color: #06240f; }
+  .cam-pill.hijau span.teks { color: var(--green); }
+  .cam-pill span.teks { font-size: 15px; font-weight: 600; white-space: nowrap; }
+
+  .cam-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    padding-bottom: calc(34px + env(safe-area-inset-bottom));
+  }
+  .cam-shutter {
+    width: 74px; height: 74px;
+    border-radius: 50%;
+    border: 5px solid var(--white);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.25), 0 10px 30px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.2s ease;
+  }
+  .cam-shutter:active { transform: scale(0.86); background: var(--orange); }
+
+  .cam-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: var(--white);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cam-flash.kilat { animation: kilat 0.45s ease; }
+  @keyframes kilat {
+    0%   { opacity: 0; }
+    30%  { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .navbar   { animation: fadeUp 0.6s ease both; }
+  .eyebrow  { animation: fadeUp 0.7s 0.2s ease both; }
+  h1        { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc     { animation: fadeUp 0.7s 0.4s ease both; }
+  .info-box { animation: fadeUp 0.7s 0.45s ease both; }
+  .upload-card-anim:nth-child(1) { animation: fadeUp 0.7s 0.55s ease both; }
+  .upload-card-anim:nth-child(2) { animation: fadeUp 0.7s 0.65s ease both; }
+  .privacy-box { animation: fadeUp 0.7s 0.75s ease both; }
+  .dropzone.terisi img { animation: popIn 0.35s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .dropzone { height: 150px; }
+    .cam-pill span.teks { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <nav class="navbar">
+        <button class="back-btn" onclick="history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <div class="content">
+        <div class="eyebrow">Dokumen Pendukung</div>
+        <h1>SKCK & Kartu <span>Koperasi</span></h1>
+        <p class="desc">Langkah terakhir! Kirim SKCK dan kartu anggota koperasi untuk menyelesaikan pendaftaran.</p>
+
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <p><b>Data rekening berhasil dikirim!</b> Kirim 2 dokumen di bawah ini.</p>
+        </div>
+
+        <div class="progress-row">
+          <div class="progress-label"><b id="progNum">0</b>/2 siap</div>
+          <div class="progress-track">
+            <div class="pseg" id="pseg0"></div>
+            <div class="pseg" id="pseg1"></div>
+          </div>
+        </div>
+
+        <div class="upload-list">
+
+          <!-- ================= SKCK ================= -->
+          <div class="upload-card-anim">
+            <div class="upload-head">
+              <div class="upload-title">Foto SKCK</div>
+              <button type="button" class="info-btn" onclick="bukaKetentuan('skck')" aria-label="Ketentuan foto SKCK">i</button>
+            </div>
+            <div class="dropzone" id="zoneSKCK" onclick="klikZone(event, 'skck')">
+              <div class="dz-empty">
+                <button type="button" class="ambil-foto-btn" onclick="event.stopPropagation(); bukaKamera('skck')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  Ambil Foto
+                </button>
+              </div>
+              <img alt="Preview SKCK" />
+              <button type="button" class="dz-ganti" onclick="event.stopPropagation(); bukaKamera('skck')">Ganti Foto</button>
+              <button type="button" class="dz-hapus" onclick="event.stopPropagation(); hapusFoto('skck')" aria-label="Hapus">✕</button>
+            </div>
+            <p class="format-hint">SKCK asli yang masih berlaku. Ukuran maksimal 30MB, format .JPG .JPEG atau .PNG</p>
+            <button type="button" class="galeri-link" onclick="document.getElementById('fileSKCK').click()">atau pilih dari galeri</button>
+            <input type="file" id="fileSKCK" accept="image/*" class="hidden" onchange="dariGaleri(event, 'skck')" />
+          </div>
+
+          <!-- ================= KOPRASI ================= -->
+          <div class="upload-card-anim">
+            <div class="upload-head">
+              <div class="upload-title">Foto Kartu Koperasi</div>
+              <button type="button" class="info-btn" onclick="bukaKetentuan('koprasi')" aria-label="Ketentuan foto koperasi">i</button>
+            </div>
+            <div class="dropzone" id="zoneKoprasi" onclick="klikZone(event, 'koprasi')">
+              <div class="dz-empty">
+                <button type="button" class="ambil-foto-btn" onclick="event.stopPropagation(); bukaKamera('koprasi')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  Ambil Foto
+                </button>
+              </div>
+              <img alt="Preview Koperasi" />
+              <button type="button" class="dz-ganti" onclick="event.stopPropagation(); bukaKamera('koprasi')">Ganti Foto</button>
+              <button type="button" class="dz-hapus" onclick="event.stopPropagation(); hapusFoto('koprasi')" aria-label="Hapus">✕</button>
+            </div>
+            <p class="format-hint">Kartu anggota koperasi atas nama sendiri. Ukuran maksimal 30MB, format .JPG .JPEG atau .PNG</p>
+            <button type="button" class="galeri-link" onclick="document.getElementById('fileKoprasi').click()">atau pilih dari galeri</button>
+            <input type="file" id="fileKoprasi" accept="image/*" class="hidden" onchange="dariGaleri(event, 'koprasi')" />
+          </div>
+
+        </div>
+
+        <div class="privacy-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <p>Dokumen dijaga kerahasiaannya dan hanya digunakan untuk verifikasi.<br><b>Get Car menjamin keamanan data pribadimu.</b></p>
+        </div>
+
+        <p id="status" class="status"></p>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+      <div style="position:relative; z-index:10; padding: 0 26px calc(18px + env(safe-area-inset-bottom));">
+        <button id="btnKirim" class="btn btn-primary" disabled>
+          <svg id="btnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span id="btnSpinner" class="spinner" style="display:none"></span>
+          <span id="btnText">Kirim & Selesaikan</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 🔹 MODAL KETENTUAN -->
+  <div id="ketentuanModal" class="modal-overlay">
+    <div class="ketentuan-modal">
+      <div class="ketentuan-head">
+        <div style="width:32px"></div>
+        <div class="ketentuan-title" id="ketJudul">Ketentuan Foto</div>
+        <button class="ketentuan-close" onclick="tutupKetentuan()">✕</button>
+      </div>
+      <p class="ketentuan-intro">Pastikan Anda mengupload foto sesuai dengan ketentuan berikut:</p>
+      <div class="ketentuan-divider"></div>
+      <div id="ketIsi"></div>
+    </div>
+  </div>
+
+  <!-- 🔹 KAMERA LAYAR PENUH -->
+  <div id="camFull" class="cam-full">
+    <video id="camVideo" autoplay playsinline muted></video>
+
+    <div class="card-guide">
+      <span class="kf-corner kf-tl"></span>
+      <span class="kf-corner kf-tr"></span>
+      <span class="kf-corner kf-bl"></span>
+      <span class="kf-corner kf-br"></span>
+    </div>
+
+    <div class="cam-top">
+      <div class="cam-top-row">
+        <button class="cam-back" onclick="tutupKamera()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <button class="cam-tutorial" onclick="bukaKetentuan(kameraTarget)">Lihat ketentuan</button>
+      </div>
+      <div class="cam-progress">
+        <div id="camSeg0"></div>
+        <div id="camSeg1"></div>
+      </div>
+    </div>
+
+    <h2 class="cam-title" id="camTitle">Dokumen harus muat di kotak</h2>
+
+    <div class="cam-pill oranye" id="camPill">
+      <span class="pi" id="pillIcon">i</span>
+      <span class="teks" id="pillText">Dokumen belum pas di kotak</span>
+    </div>
+
+    <div class="cam-bottom">
+      <button class="cam-shutter" onclick="jepret()" aria-label="Jepret"></button>
+    </div>
+
+    <div class="cam-flash" id="camFlash"></div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE — TANPA STORAGE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= ELEMEN =================
+  const zoneEls = {
+    skck:    document.getElementById("zoneSKCK"),
+    koprasi: document.getElementById("zoneKoprasi")
+  };
+  const btnKirim    = document.getElementById("btnKirim");
+  const btnText     = document.getElementById("btnText");
+  const btnIcon     = document.getElementById("btnIcon");
+  const btnSpinner  = document.getElementById("btnSpinner");
+  const statusEl    = document.getElementById("status");
+  const progNumEl   = document.getElementById("progNum");
+  const psegs       = [
+    document.getElementById("pseg0"),
+    document.getElementById("pseg1")
+  ];
+
+  const camFull     = document.getElementById("camFull");
+  const camVideo    = document.getElementById("camVideo");
+  const camTitle    = document.getElementById("camTitle");
+  const camPill     = document.getElementById("camPill");
+  const pillText    = document.getElementById("pillText");
+  const pillIcon    = document.getElementById("pillIcon");
+  const camSegs     = [
+    document.getElementById("camSeg0"),
+    document.getElementById("camSeg1")
+  ];
+  const camFlash    = document.getElementById("camFlash");
+  const ketentuanModal = document.getElementById("ketentuanModal");
+
+  // ================= STATE =================
+  const foto = { skck: null, koprasi: null };
+  let kameraStream  = null;
+  let kameraTarget  = null;
+  let detektorTimer = null;
+  let pasSejak      = null;
+  let sedangJepret  = false;
+
+  const params  = new URLSearchParams(window.location.search);
+  const telepon = params.get("telepon");
+
+  console.log("📱 Telepon dari URL:", telepon);
+
+  function setStatus(pesan, tipe) {
+    statusEl.textContent = pesan;
+    statusEl.className = "status" + (tipe ? " " + tipe : "");
+  }
+
+  function updateProgress() {
+    const jumlah = Object.values(foto).filter(Boolean).length;
+    progNumEl.textContent = jumlah;
+    psegs.forEach((seg, i) => seg.classList.toggle("isi", i < jumlah));
+    btnKirim.disabled = jumlah < 2;
+  }
+
+  // ============================================================
+  // 📋 KETENTUAN FOTO
+  // ============================================================
+  const KETENTUAN = {
+    skck: {
+      judul: "Ketentuan Foto SKCK",
+      aturan: [
+        "Foto <b>SKCK asli</b> yang masih berlaku — landscape / mendatar",
+        "Semua tulisan terbaca jelas — tidak blur & tidak terpotong",
+        "Bukan fotokopi atau gambar"
+      ]
+    },
+    koprasi: {
+      judul: "Ketentuan Foto Kartu Koperasi",
+      aturan: [
+        "Foto <b>kartu anggota koperasi</b> — landscape / mendatar",
+        "Nama anggota & nomor kartu terbaca jelas",
+        "Kartu atas nama sendiri"
+      ]
+    }
+  };
+
+  function svgDokumen(benar) {
+    const miring = benar ? "" : ' transform="rotate(-12 100 60)"';
+    return `
+    <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="120" fill="#1b2a44"/>
+      <g${miring}>
+        <rect x="25" y="30" width="150" height="60" rx="6" fill="${benar ? "#e8eef7" : "#9fb0c7"}"/>
+        <rect x="33" y="40" width="60" height="7" rx="3" fill="${benar ? "#3b5a86" : "#6b7f9c"}"/>
+        <rect x="33" y="52" width="85" height="5" rx="2.5" fill="${benar ? "#7d95b5" : "#8b9db8"}"/>
+        <rect x="33" y="62" width="70" height="5" rx="2.5" fill="${benar ? "#7d95b5" : "#8b9db8"}"/>
+      </g>
+      ${benar
+        ? '<path d="M18 22l5 5 9-11" stroke="#2ecc71" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+        : '<path d="M18 18l10 10M28 18L18 28" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round"/><text x="100" y="110" font-size="9" text-anchor="middle" fill="#ff9b9b">Miring!</text>'}
+    </svg>`;
+  }
+
+  function bukaKetentuan(tipe) {
+    const k = KETENTUAN[tipe];
+    if (!k) return;
+
+    document.getElementById("ketJudul").textContent = k.judul;
+
+    const isi = document.getElementById("ketIsi");
+    isi.innerHTML = k.aturan.map((a, i) => `
+      <div class="aturan-item">
+        <div class="aturan-num"><b>${i + 1}.</b> ${a}</div>
+        ${i === 0 ? `
+        <div class="contoh-row">
+          <div class="contoh-box benar">
+            ${svgDokumen(true)}
+            <div class="contoh-label"><span class="cek-bulat">✓</span> Benar</div>
+          </div>
+          <div class="contoh-box salah">
+            ${svgDokumen(false)}
+            <div class="contoh-label"><span class="cek-bulat">✕</span> Salah</div>
+          </div>
+        </div>` : ""}
+      </div>
+    `).join("");
+
+    ketentuanModal.classList.add("active");
+  }
+
+  function tutupKetentuan() {
+    ketentuanModal.classList.remove("active");
+  }
+
+  ketentuanModal.addEventListener("click", e => {
+    if (e.target === ketentuanModal) tutupKetentuan();
+  });
+
+  // ============================================================
+  // 🟩 DROPZONE
+  // ============================================================
+  function klikZone(event, tipe) {
+    if (!foto[tipe]) bukaKamera(tipe);
+  }
+
+  function hapusFoto(tipe) {
+    foto[tipe] = null;
+    const zone = zoneEls[tipe];
+    const img  = zone.querySelector("img");
+    if (img.dataset.objUrl) { URL.revokeObjectURL(img.dataset.objUrl); img.dataset.objUrl = null; }
+    img.src = "";
+    zone.classList.remove("terisi");
+    updateProgress();
+    setStatus("Foto " + tipe.toUpperCase() + " dihapus.");
+  }
+
+  // ================= KOMPRES → BASE64 =================
+  function kompresJadiBase64(source) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(source);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 900;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.55));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Foto tidak bisa dibaca")); };
+      img.src = url;
+    });
+  }
+
+  // ================= PREVIEW =================
+  function tampilkanPreview(tipe, blob) {
+    const zone = zoneEls[tipe];
+    const img  = zone.querySelector("img");
+    if (img.dataset.objUrl) URL.revokeObjectURL(img.dataset.objUrl);
+    img.dataset.objUrl = URL.createObjectURL(blob);
+    img.src = img.dataset.objUrl;
+    zone.classList.add("terisi");
+  }
+
+  // ================= DARI GALERI =================
+  function dariGaleri(event, tipe) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    foto[tipe] = file;
+    tampilkanPreview(tipe, file);
+    updateProgress();
+    setStatus("Foto " + tipe.toUpperCase() + " siap." +
+              (Object.values(foto).every(Boolean) ? " Semua dokumen lengkap — silakan kirim!" : ""));
+  }
+
+  // ============================================================
+  // 📷 KAMERA LAYAR PENUH
+  // ============================================================
+  const CAM_TITLE = {
+    skck:    "SKCK-mu harus muat di kotak",
+    koprasi: "Kartu koperasi harus muat di kotak"
+  };
+  const PILL_BELUM = {
+    skck:    "SKCK-mu belum pas di kotak",
+    koprasi: "Kartu koperasi belum pas di kotak"
+  };
+
+  async function bukaKamera(tipe) {
+    kameraTarget = tipe;
+    pasSejak = null;
+    sedangJepret = false;
+
+    camTitle.textContent = CAM_TITLE[tipe];
+    setPill("oranye", PILL_BELUM[tipe]);
+
+    const jumlah = Object.values(foto).filter(Boolean).length;
+    camSegs.forEach((seg, i) => seg.classList.toggle("isi", i < jumlah));
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus("Kamera tidak tersedia. Gunakan galeri.", "error");
+      return;
+    }
+
+    try {
+      kameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 1280 } }
+      });
+      camVideo.srcObject = kameraStream;
+      camFull.classList.add("active");
+      mulaiDeteksi();
+    } catch (err) {
+      console.error("Gagal akses kamera:", err);
+      setStatus("Tidak bisa membuka kamera: " + err.message + ". Gunakan galeri.", "error");
+    }
+  }
+
+  function tutupKamera() {
+    camFull.classList.remove("active");
+    hentikanDeteksi();
+    if (kameraStream) {
+      kameraStream.getTracks().forEach(track => track.stop());
+      kameraStream = null;
+    }
+    camVideo.srcObject = null;
+  }
+
+  function setPill(warna, teks) {
+    camPill.classList.remove("oranye", "hijau");
+    camPill.classList.add(warna);
+    pillIcon.textContent = warna === "hijau" ? "✓" : "i";
+    pillText.textContent = teks;
+  }
+
+  // 🤖 Deteksi dokumen terang → jepret otomatis
+  function mulaiDeteksi() {
+    hentikanDeteksi();
+    const sampel = document.createElement("canvas");
+    sampel.width = 80; sampel.height = 50;
+    const ctx = sampel.getContext("2d", { willReadFrequently: true });
+
+    detektorTimer = setInterval(() => {
+      if (!camFull.classList.contains("active")) return;
+      if (sedangJepret || !camVideo.videoWidth) return;
+
+      ctx.drawImage(camVideo, 0, 0, 80, 50);
+      const data = ctx.getImageData(18, 10, 44, 30).data;
+      let total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        total += (data[i] + data[i+1] + data[i+2]) / 3;
+      }
+      const rataTerang = total / (data.length / 4);
+      const TERDETEKSI = rataTerang > 80; // ⚙️ naikkan ke 100 jika terlalu sensitif
+
+      if (TERDETEKSI) {
+        if (!pasSejak) {
+          pasSejak = Date.now();
+          setPill("hijau", "Posisi pas! Tetap tahan...");
+        } else if (Date.now() - pasSejak > 1200) {
+          sedangJepret = true;
+          setPill("hijau", "Bagus! Mengambil foto...");
+          hentikanDeteksi();
+          setTimeout(jepret, 400);
+        }
+      } else {
+        pasSejak = null;
+        setPill("oranye", PILL_BELUM[kameraTarget]);
+      }
+    }, 250);
+  }
+
+  function hentikanDeteksi() {
+    if (detektorTimer) { clearInterval(detektorTimer); detektorTimer = null; }
+  }
+
+  // ================= JEPRET =================
+  function jepret() {
+    if (!camFull.classList.contains("active")) return;
+    sedangJepret = true;
+    hentikanDeteksi();
+
+    const canvas = document.createElement("canvas");
+    canvas.width  = camVideo.videoWidth  || 1080;
+    canvas.height = camVideo.videoHeight || 1440;
+    canvas.getContext("2d").drawImage(camVideo, 0, 0, canvas.width, canvas.height);
+
+    camFlash.classList.remove("kilat");
+    void camFlash.offsetWidth;
+    camFlash.classList.add("kilat");
+
+    canvas.toBlob(blob => {
+      if (!blob) {
+        sedangJepret = false;
+        setPill("oranye", "Gagal mengambil foto. Coba lagi");
+        return;
+      }
+
+      const tipe = kameraTarget;
+      foto[tipe] = blob;
+
+      tampilkanPreview(tipe, blob);
+      tutupKamera();
+      updateProgress();
+
+      const sisa = Object.values(foto).filter(Boolean).length;
+      setStatus(
+        "Foto " + tipe.toUpperCase() + " berhasil diambil! (" + sisa + "/2)" +
+        (sisa < 2 ? " Lanjutkan dokumen berikutnya." : " Semua lengkap — silakan kirim!"),
+        "sukses"
+      );
+
+      // 🔗 Langsung buka dokumen berikutnya jika belum ada
+      const urutan = ["skck", "koprasi"];
+      const idx = urutan.indexOf(tipe);
+      if (idx < 1 && !foto[urutan[idx + 1]]) {
+        setTimeout(() => bukaKamera(urutan[idx + 1]), 900);
+      }
+    }, "image/jpeg", 0.9);
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      if (camFull.classList.contains("active")) tutupKamera();
+      else if (ketentuanModal.classList.contains("active")) tutupKetentuan();
+    }
+  });
+
+  // ================= KIRIM → REALTIME DATABASE =================
+  function setLoading(aktif) {
+    btnKirim.disabled = aktif;
+    btnText.textContent = aktif ? "Mengirim..." : "Kirim & Selesaikan";
+    btnIcon.style.display = aktif ? "none" : "block";
+    btnSpinner.style.display = aktif ? "block" : "none";
+  }
+
+  btnKirim.addEventListener("click", async () => {
+    if (Object.values(foto).some(f => !f) || btnKirim.disabled) return;
+
+    setLoading(true);
+    setStatus("Menyiapkan 2 dokumen (kompres otomatis)...");
+
+    try {
+      const skckB64    = await kompresJadiBase64(foto.skck);
+      const koprasiB64 = await kompresJadiBase64(foto.koprasi);
+
+      console.log("Ukuran — SKCK:", Math.round(skckB64.length/1024), "KB | Koprasi:", Math.round(koprasiB64.length/1024), "KB");
+
+      setStatus("Mengirim ke server...");
+
+      // Cari record pendaftaran berdasarkan nomor telepon
+      let recordKey = null;
+      if (telepon) {
+        const snap = await db.ref("pendaftaran")
+          .orderByChild("telepon")
+          .equalTo(telepon)
+          .once("value");
+        snap.forEach(child => { recordKey = child.key; });
+      }
+
+      const dataDok = {
+        skck: skckB64,
+        koprasi: koprasiB64,
+        status: "skck_terkirim",
+        waktuSkck: new Date().toLocaleString("id-ID")
+      };
+
+      if (recordKey) {
+        await db.ref("pendaftaran/" + recordKey).update(dataDok);
+        console.log("✅ SKCK & Koprasi tersimpan di pendaftaran/" + recordKey);
+      } else {
+        const teleponSafe = (telepon || "tanpa-nomor").replace(/[^0-9]/g, "");
+        await db.ref("verifikasi/" + teleponSafe).update(dataDok);
+        console.log("⚠️ Record tidak ditemukan — disimpan di verifikasi/" + teleponSafe);
+      }
+
+      setStatus("Semua dokumen terkirim! Pendaftaran selesai — admin akan memverifikasi. ✅", "sukses");
+      btnText.textContent = "Terkirim ✅";
+
+      // 🎉 Sekarang BENAR-BENAR selesai → selesai.html
+      setTimeout(() => {
+        window.location.href = "status.html" +
+          (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
+      }, 2000);
+
+    } catch (err) {
+      console.error("Gagal mengirim:", err);
+      setStatus("Gagal mengirim: " + err.message + ". Coba lagi.", "error");
+      setLoading(false);
+      updateProgress();
+    }
+  });
+
+  updateProgress();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Status Pendaftaran</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase — hanya Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --green: #2ecc71;
+    --amber: #ffb84d;
+    --merah: #ff6b6b;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 26px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  /* 🔹 Logo */
+  .logo-small {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
+    animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
+    margin-bottom: 4px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 10px 0 8px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px; height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-align: center;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    text-align: center;
+    max-width: 320px;
+    margin-bottom: 22px;
+  }
+  .desc b { color: var(--white); }
+
+  /* ============================================================
+     ✅ IKON STATUS BESAR — berubah sesuai kondisi
+     ============================================================ */
+  .status-icon {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    animation: pop 0.8s 0.2s ease both;
+    position: relative;
+  }
+  .status-icon svg { width: 44px; height: 44px; }
+
+  /* Menunggu — amber berdenyut */
+  .status-icon.menunggu {
+    background: rgba(255, 184, 77, 0.14);
+    border: 2.5px solid var(--amber);
+    box-shadow: 0 0 30px rgba(255, 184, 77, 0.35);
+  }
+  .status-icon.menunggu svg { color: var(--amber); }
+  .status-icon.menunggu::after {
+    content: "";
+    position: absolute;
+    inset: -2.5px;
+    border-radius: 50%;
+    border: 2.5px solid var(--amber);
+    animation: denyutRing 2s ease-out infinite;
+  }
+
+  /* Disetujui — hijau */
+  .status-icon.disetujui {
+    background: rgba(46, 204, 113, 0.14);
+    border: 2.5px solid var(--green);
+    box-shadow: 0 0 34px rgba(46, 204, 113, 0.45);
+  }
+  .status-icon.disetujui svg { color: var(--green); }
+
+  /* Ditunda/suspend — merah */
+  .status-icon.ditunda {
+    background: rgba(255, 107, 107, 0.14);
+    border: 2.5px solid var(--merah);
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.35);
+  }
+  .status-icon.ditunda svg { color: var(--merah); }
+
+  @keyframes denyutRing {
+    0%   { transform: scale(1);   opacity: 0.7; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* ============================================================
+     📋 KARTU STATUS UTAMA
+     ============================================================ */
+  .status-card {
+    width: 100%;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 24px;
+    padding: 24px 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .status-judul {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .status-sub {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* Pil status berwarna */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 auto 22px;
+    display: flex;
+    width: fit-content;
+  }
+  .status-pill .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    animation: denyutDot 1.4s ease-in-out infinite;
+  }
+  .sp-amber { background: rgba(255,184,77,0.14);  border: 1.5px solid var(--amber);  color: var(--amber); }
+  .sp-amber .dot { background: var(--amber); }
+  .sp-hijau { background: rgba(46,204,113,0.14);  border: 1.5px solid var(--green);  color: var(--green); }
+  .sp-hijau .dot { background: var(--green); animation: none; }
+  .sp-merah { background: rgba(255,107,107,0.14); border: 1.5px solid var(--merah); color: var(--merah); }
+  .sp-merah .dot { background: var(--merah); animation: none; }
+
+  @keyframes denyutDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(0.75); }
+  }
+
+  /* ============================================================
+     📶 TIMELINE LANGKAH PENDAFTARAN
+     ============================================================ */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tl-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    padding: 7px 0;
+  }
+
+  /* Garis vertikal penghubung */
+  .tl-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 34px;
+    bottom: -12px;
+    width: 2px;
+    background: rgba(46, 204, 113, 0.35);
+  }
+
+  .tl-check {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 204, 113, 0.15);
+    border: 1.5px solid var(--green);
+    z-index: 1;
+  }
+  .tl-check svg {
+    width: 15px; height: 15px;
+    color: var(--green);
+  }
+
+  .tl-teks {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+  }
+  .tl-teks small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+  }
+
+  /* ============================================================
+     ℹ️ INFO & KONTAK
+     ============================================================ */
+  .info-box {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(47,123,255,0.12);
+    border: 1px solid rgba(47,123,255,0.30);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-top: 18px;
+    animation: fadeUp 0.7s 0.55s ease both;
+  }
+  .info-box svg { width: 20px; height: 20px; flex-shrink: 0; color: #6db3ff; margin-top: 1px; }
+  .info-box p { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.85); }
+  .info-box b { color: var(--white); }
+
+  .refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 11px 24px;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 40px;
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+    animation: fadeUp 0.7s 0.65s ease both;
+  }
+  .refresh-btn:hover  { background: rgba(255,255,255,0.15); }
+  .refresh-btn:active { transform: scale(0.96); }
+  .refresh-btn svg { width: 15px; height: 15px; }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 24px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    user-select: none;
+  }
+
+  /* ============================================================
+     🎉 KONFETI saat disetujui
+     ============================================================ */
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 14px;
+    z-index: 500;
+    border-radius: 2px;
+    animation: jatuh linear forwards;
+  }
+  @keyframes jatuh {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0.6; }
+  }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .navbar    { animation: fadeUp 0.6s ease both; }
+  .eyebrow   { animation: fadeUp 0.7s 0.2s ease both; }
+  h1         { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc      { animation: fadeUp 0.7s 0.35s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .status-icon { width: 82px; height: 82px; }
+    .status-icon svg { width: 38px; height: 38px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <nav class="navbar">
+        <div style="width:60px"></div>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <div class="content">
+
+        <img src="get.png" alt="Logo Get Car" class="logo-small" onerror="this.style.display='none'" />
+
+        <div class="eyebrow">Status Pendaftaran</div>
+        <h1 id="judulUtama">Pendaftaran <span>Berhasil Dikirim!</span></h1>
+        <p class="desc" id="descUtama">Selamat! Semua data dan dokumen kamu sudah kami terima lengkap.</p>
+
+        <!-- 🔹 Ikon status besar (berubah realtime) -->
+        <div class="status-icon menunggu" id="statusIcon">
+          <!-- Ikon jam (menunggu) -->
+          <svg id="icoMenunggu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <!-- Ikon centang (disetujui) — disembunyikan dulu -->
+          <svg id="icoSetuju" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <!-- Ikon peringatan (ditunda) — disembunyikan dulu -->
+          <svg id="icoTunda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+
+        <!-- 🔹 Kartu status -->
+        <div class="status-card">
+          <div class="status-pill sp-amber" id="statusPill">
+            <span class="dot"></span>
+            <span id="pillText">Menunggu Verifikasi Admin</span>
+          </div>
+
+          <div class="status-judul" id="cardJudul">Dokumen Sedang Ditinjau</div>
+          <p class="status-sub" id="cardSub">
+            Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini biasanya
+            memakan waktu <b>1×24 jam</b> pada hari kerja. Kamu akan dihubungi
+            melalui nomor telepon yang terdaftar.
+          </p>
+
+          <!-- 📶 Timeline langkah selesai -->
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tl-teks">Verifikasi Nomor & OTP<small>Nomor telepon terkonfirmasi</small></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tl-teks">Data Diri & Alamat Email<small>Data pribadi terkirim</small></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tl-teks">KTP, Selfie & Dokumen Kendaraan<small>SIM, STNK, foto mobil terkirim</small></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tl-teks">Rekening Bank<small>Data pembayaran terkirim</small></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="tl-teks">SKCK & Kartu Koperasi<small>Dokumen pendukung terkirim</small></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🔹 Info bantuan -->
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>Halaman ini <b>otomatis diperbarui</b> saat admin memverifikasi. Simpan atau bookmark halaman ini untuk cek status kapan saja.</p>
+        </div>
+
+        <button class="refresh-btn" onclick="periksaSekarang()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Periksa Status Sekarang
+        </button>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= ELEMEN =================
+  const judulUtama = document.getElementById("judulUtama");
+  const descUtama  = document.getElementById("descUtama");
+  const statusIcon = document.getElementById("statusIcon");
+  const icoMenunggu = document.getElementById("icoMenunggu");
+  const icoSetuju   = document.getElementById("icoSetuju");
+  const icoTunda    = document.getElementById("icoTunda");
+  const statusPill  = document.getElementById("statusPill");
+  const pillText    = document.getElementById("pillText");
+  const cardJudul   = document.getElementById("cardJudul");
+  const cardSub     = document.getElementById("cardSub");
+
+  // ================= AMBIL NOMOR DARI URL =================
+  const params  = new URLSearchParams(window.location.search);
+  let telepon = (params.get("telepon") || "").trim();
+
+  // Normalisasi ke +62...
+  if (telepon.startsWith("0"))       telepon = "+62" + telepon.slice(1);
+  else if (telepon.startsWith("62")) telepon = "+" + telepon;
+  else if (telepon.startsWith("8"))  telepon = "+62" + telepon;
+
+  console.log("📱 Melihat status untuk:", telepon);
+
+  // ================= KONFETI SAAT DISETUJUI =================
+  function hujanKonfeti() {
+    const warna = ["#2ecc71", "#2f7bff", "#ffb84d", "#ff6b6b", "#7ee2a8", "#6db3ff"];
+    for (let i = 0; i < 60; i++) {
+      const k = document.createElement("div");
+      k.className = "confetti";
+      k.style.left = Math.random() * 100 + "vw";
+      k.style.background = warna[Math.floor(Math.random() * warna.length)];
+      k.style.animationDuration = (2 + Math.random() * 2.5) + "s";
+      k.style.animationDelay = (Math.random() * 0.8) + "s";
+      document.body.appendChild(k);
+      setTimeout(() => k.remove(), 5500);
+    }
+  }
+
+  // ================= TAMPILKAN STATUS SESUAI KONDISI =================
+  function tampilkanStatus(status) {
+    // Reset dulu
+    statusIcon.classList.remove("menunggu", "disetujui", "ditunda");
+    statusPill.classList.remove("sp-amber", "sp-hijau", "sp-merah");
+    icoMenunggu.style.display = "none";
+    icoSetuju.style.display   = "none";
+    icoTunda.style.display    = "none";
+
+    if (status === "disetujui" || status === "aktif") {
+      // 🎉 DISETUJUI
+      statusIcon.classList.add("disetujui");
+      statusPill.classList.add("sp-hijau");
+      icoSetuju.style.display = "block";
+      pillText.textContent = "Pendaftaran DISETUJUI!";
+      judulUtama.innerHTML = 'Selamat, Kamu <span>Resmi Menjadi Mitra!</span>';
+      descUtama.innerHTML = "Akun driver Get Car kamu telah <b>aktif</b>. Silakan hubungi admin untuk informasi aktivasi aplikasi dan mulai menerima trip!";
+      cardJudul.textContent = "Verifikasi Berhasil 🎉";
+      cardSub.innerHTML = "Semua dokumen kamu telah <b>diverifikasi dan disetujui</b> oleh admin. Selamat bergabung dengan keluarga besar Get Car — PT Bali Global Trans!";
+      hujanKonfeti();
+
+    } else if (status === "suspend") {
+      // ⚠️ DITUNDA / SUSPEND
+      statusIcon.classList.add("ditunda");
+      statusPill.classList.add("sp-merah");
+      icoTunda.style.display = "block";
+      pillText.textContent = "Pendaftaran Ditunda";
+      judulUtama.innerHTML = 'Pendaftaran <span>Perlu Perhatian</span>';
+      descUtama.innerHTML = "Saat ini pendaftaranmu <b>ditunda</b>. Silakan hubungi admin untuk keterangan lebih lanjut.";
+      cardJudul.textContent = "Menunggu Tindakan Admin";
+      cardSub.innerHTML = "Ada kendala pada pendaftaranmu. Hubungi admin melalui nomor telepon atau kantor PT Bali Global Trans untuk mengetahui detailnya.";
+
+    } else {
+      // ⏳ MENUNGGU VERIFIKASI (default)
+      statusIcon.classList.add("menunggu");
+      statusPill.classList.add("sp-amber");
+      icoMenunggu.style.display = "block";
+      pillText.textContent = "Menunggu Verifikasi Admin";
+      judulUtama.innerHTML = 'Pendaftaran <span>Berhasil Dikirim!</span>';
+      descUtama.innerHTML = "Selamat! Semua data dan dokumen kamu sudah kami terima lengkap.";
+      cardJudul.textContent = "Dokumen Sedang Ditinjau";
+      cardSub.innerHTML = "Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini biasanya memakan waktu <b>1×24 jam</b> pada hari kerja. Kamu akan dihubungi melalui nomor telepon yang terdaftar.";
+    }
+  }
+
+  // ================= PANTAU STATUS REALTIME =================
+  function pantauStatus() {
+    if (!telepon) {
+      setStatusError();
+      return;
+    }
+
+    db.ref("pendaftaran")
+      .orderByChild("telepon")
+      .equalTo(telepon)
+      .on("value",
+        snapshot => {
+          if (!snapshot.exists()) {
+            console.warn("Record tidak ditemukan — tampilkan status default (menunggu)");
+            tampilkanStatus("menunggu");
+            return;
+          }
+          snapshot.forEach(child => {
+            const d = child.val();
+            console.log("🔄 Status terkini:", d.status);
+            tampilkanStatus(d.status || "menunggu");
+          });
+        },
+        error => {
+          console.error("Firebase error:", error);
+          tampilkanStatus("menunggu");
+        }
+      );
+  }
+
+  function setStatusError() {
+    pillText.textContent = "Menunggu Verifikasi Admin";
+  }
+
+  // Tombol periksa manual (feedback kecil)
+  function periksaSekarang() {
+    const btn = document.querySelector(".refresh-btn");
+    const ikon = btn.querySelector("svg");
+    ikon.style.animation = "spin 0.7s linear";
+    setTimeout(() => { ikon.style.animation = ""; }, 750);
+    // Status sudah realtime — cukup kasih feedback
+    const asli = pillText.textContent;
+    pillText.textContent = "Status terbaru dimuat ✓";
+    setTimeout(() => { pillText.textContent = asli; }, 1200);
+  }
+
+  // ================= MULAI =================
+  tampilkanStatus("menunggu"); // tampilkan dulu sebelum data datang
+  pantauStatus();
+</script>
+
+</body>
+</html>

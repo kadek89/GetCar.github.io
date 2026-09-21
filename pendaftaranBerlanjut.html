@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Mulai Pendaftaran</title>
+
+<!-- 🔤 Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 📷 Cek foto latar — jika gagal dimuat, tetap pakai gradasi navy -->
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* 🔹 Ukuran handphone, di komputer tetap di tengah */
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ✨ Cahaya aksen biru */
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  /* 🔹 Navbar */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .back-btn:hover  { background: rgba(255,255,255,0.18); }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    color: var(--white);
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* 🔹 Konten */
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 26px 0;
+    overflow-y: auto;
+  }
+
+  .logo-small {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
+    animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 14px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    max-width: 320px;
+    margin-bottom: 22px;
+  }
+
+  /* 🔹 Kartu foto — kaca buram */
+  .photo-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .photo-card img {
+    display: block;
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .photo-card img.loaded { opacity: 1; }
+  .photo-card:hover img  { transform: scale(1.04); }
+
+  /* Fallback jika foto gagal dimuat */
+  .photo-fallback {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.55);
+  }
+  .photo-fallback svg { width: 64px; height: 64px; }
+  .photo-card.no-photo img { display: none; }
+  .photo-card.no-photo .photo-fallback { display: flex; }
+  .photo-card.no-photo { height: 210px; }
+
+  /* 🔹 Chip kecil di atas foto */
+  .photo-chip {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--white);
+    background: rgba(10, 22, 40, 0.55);
+    border: 1px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+  .photo-chip svg { width: 13px; height: 13px; color: #6db3ff; }
+
+  /* 🔹 Panel aksi bawah — kaca buram, menempel ke bawah */
+  .actions {
+    margin-top: auto;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 24px 24px 0 0;
+    padding: 22px 20px calc(18px + env(safe-area-inset-bottom));
+    margin-left: -26px;
+    margin-right: -26px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.25);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--white);
+    margin-top: 12px;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+
+  .copyright {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 16px;
+    user-select: none;
+  }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  .navbar      { animation: fadeUp 0.6s ease both; }
+  .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
+  h1           { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc        { animation: fadeUp 0.7s 0.4s ease both; }
+  .btn-primary { animation: fadeUp 0.7s 0.65s ease both; }
+  .btn-ghost   { animation: fadeUp 0.7s 0.75s ease both; }
+  .copyright   { animation: fadeUp 0.7s 0.85s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 22px; padding-right: 22px; }
+    .actions { margin-left: -22px; margin-right: -22px; }
+    .btn { font-size: 14px; padding: 15px; }
+    .photo-card img,
+    .photo-card.no-photo { height: 180px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <!-- 🔹 Navbar -->
+      <nav class="navbar">
+        <button class="back-btn" onclick="history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <!-- 🔹 Konten -->
+      <div class="content">
+        <img src="get.png" alt="Logo Get Car" class="logo-small" onerror="this.style.display='none'" />
+
+        <div class="eyebrow">Pendaftaran Mitra Driver</div>
+        <h1>Siap Melanjutkan <span>Pendaftaran?</span></h1>
+        <p class="desc">Pastikan data diri Anda sudah lengkap. Proses selanjutnya hanya butuh beberapa menit.</p>
+
+        <!-- 🔹 Kartu Foto -->
+        <div class="photo-card" id="photoCard">
+          <img id="fotoUtama"
+               src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80"
+               alt="Persiapan dokumen pendaftaran" />
+          <div class="photo-fallback">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 10 8 9"/></svg>
+          </div>
+          <div class="photo-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Proses ± 5 menit
+          </div>
+        </div>
+
+        <!-- 🔹 Panel Tombol -->
+        <div class="actions">
+          <button id="btnMulai" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Mulai Sekarang
+          </button>
+          <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  // ================= ELEMEN =================
+  const btnMulai  = document.getElementById("btnMulai");
+  const fotoUtama = document.getElementById("fotoUtama");
+  const photoCard = document.getElementById("photoCard");
+
+  // ================= FOTO UTAMA =================
+  // Foto berhasil dimuat → tampilkan dengan efek fade-in
+  fotoUtama.addEventListener("load", () => fotoUtama.classList.add("loaded"));
+  // Foto gagal dimuat → tampilkan ikon fallback (tanpa kartun)
+  fotoUtama.addEventListener("error", () => photoCard.classList.add("no-photo"));
+
+  // ================= BAWA NOMOR TELEPON KE HALAMAN BERIKUTNYA =================
+  const params = new URLSearchParams(window.location.search);
+  const telepon = params.get("telepon");
+
+  btnMulai.addEventListener("click", () => {
+    const tujuan = "isi-data.html" +
+      (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
+    window.location.href = tujuan;
+  });
+</script>
+
+</body>
+</html>

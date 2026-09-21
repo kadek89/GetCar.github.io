@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Review & Kirim Foto</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase — hanya Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --orange: #ff8a1e;
+    --green: #2ecc71;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  /* ============ HALAMAN UTAMA ============ */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 26px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 14px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px; height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    max-width: 320px;
+    margin-bottom: 20px;
+  }
+
+  .info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(47,123,255,0.12);
+    border: 1px solid rgba(47,123,255,0.30);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .info-box svg { width: 20px; height: 20px; flex-shrink: 0; color: #6db3ff; margin-top: 1px; }
+  .info-box p { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.85); }
+  .info-box b { color: var(--white); }
+
+  .upload-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .upload-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.30);
+  }
+
+  .upload-title { font-size: 16px; font-weight: 800; }
+  .upload-sub   { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  .upload-body { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+
+  .preview {
+    width: 92px; height: 92px;
+    flex-shrink: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px dashed rgba(255,255,255,0.30);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .preview.terisi { border-style: solid; border-color: var(--accent); box-shadow: 0 0 18px rgba(47,123,255,0.35); }
+  .preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .preview.terisi img { display: block; }
+  .preview svg { width: 30px; height: 30px; color: rgba(255,255,255,0.35); }
+  .preview.terisi svg { display: none; }
+
+  .mini-btns { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+
+  .mini-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 12px;
+    border: none;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease;
+  }
+  .mini-btn:active { transform: scale(0.96); }
+  .mini-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .mini-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 6px 18px rgba(47,123,255,0.35);
+  }
+  .mini-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--white);
+  }
+  .mini-ghost:hover { background: rgba(255,255,255,0.15); }
+
+  .hidden { display: none !important; }
+
+  .privacy-box {
+    margin-top: 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 18px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .privacy-box svg { width: 18px; height: 18px; flex-shrink: 0; color: #7ee2a8; margin-top: 2px; }
+  .privacy-box p { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,0.7); }
+  .privacy-box b { color: #7ee2a8; }
+
+  .status {
+    min-height: 20px;
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+  }
+  .status.sukses { color: #7ee2a8; }
+  .status.error  { color: #ff9b9b; }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:disabled {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.4);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ============================================================
+     📷 KAMERA LAYAR PENUH — gaya Gojek (KTP & Selfie)
+     ============================================================ */
+  .cam-full {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: #000;
+    display: none;
+    overflow: hidden;
+  }
+  .cam-full.active { display: block; }
+
+  .cam-full video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cam-full video.mirror { transform: scaleX(-1); }
+
+  /* Top bar */
+  .cam-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 5;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 0;
+  }
+  .cam-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cam-back {
+    width: 42px; height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .cam-back svg { width: 22px; height: 22px; }
+  .cam-tutorial {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  }
+
+  /* Progress bar hijau */
+  .cam-progress {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .cam-progress > div {
+    flex: 1;
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.35);
+    transition: background 0.4s ease;
+  }
+  .cam-progress > div.isi { background: var(--green); }
+
+  /* Judul */
+  .cam-title {
+    position: absolute;
+    top: calc(120px + env(safe-area-inset-top));
+    left: 0; right: 0;
+    z-index: 5;
+    text-align: center;
+    font-size: clamp(18px, 5.5vw, 24px);
+    font-weight: 700;
+    color: var(--white);
+    text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+    padding: 0 24px;
+  }
+
+  /* ── Bingkai KTP: persegi panjang + sudut oranye ── */
+  .ktp-guide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -56%);
+    width: min(82vw, 350px);
+    aspect-ratio: 1.585; /* rasio kartu KTP */
+    border-radius: 12px;
+    /* gelapkan area di luar bingkai */
+    box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.75);
+  }
+
+  .kf-corner {
+    position: absolute;
+    width: 44px; height: 44px;
+    border: 5px solid var(--orange);
+  }
+  .kf-tl { top: -4px; left: -4px;   border-right: none;  border-bottom: none; border-radius: 16px 0 0 0; }
+  .kf-tr { top: -4px; right: -4px;  border-left: none;   border-bottom: none; border-radius: 0 16px 0 0; }
+  .kf-bl { bottom: -4px; left: -4px;  border-right: none; border-top: none;    border-radius: 0 0 0 16px; }
+  .kf-br { bottom: -4px; right: -4px; border-left: none;  border-top: none;    border-radius: 0 0 16px 0; }
+
+  /* Slot foto putus-putus di dalam KTP */
+  .ktp-slot {
+    position: absolute;
+    right: 7%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 25%;
+    aspect-ratio: 0.78;
+    border: 3px dashed rgba(255,255,255,0.8);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ktp-slot svg {
+    width: 42%; height: 42%;
+    color: rgba(255,255,255,0.85);
+  }
+
+  /* ── Bingkai Selfie: oval ── */
+  .selfie-guide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -56%);
+    width: min(68vw, 290px);
+    aspect-ratio: 0.76;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.65);
+    box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.75);
+  }
+
+  /* ── Pill status (oranye / hijau) ── */
+  .cam-pill {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(170px + env(safe-area-inset-bottom));
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 88vw;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 40px;
+    padding: 14px 22px;
+    transition: background 0.3s ease;
+  }
+  .cam-pill .pi {
+    width: 26px; height: 26px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    font-style: italic;
+  }
+  .cam-pill.oranye .pi { background: var(--orange); color: #1a1a1a; }
+  .cam-pill.oranye span.teks { color: var(--orange); }
+  .cam-pill.hijau .pi { background: var(--green); color: #06240f; }
+  .cam-pill.hijau span.teks { color: var(--green); }
+  .cam-pill span.teks {
+    font-size: 15.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Tombol jepret */
+  .cam-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    padding-bottom: calc(34px + env(safe-area-inset-bottom));
+  }
+  .cam-shutter {
+    width: 74px; height: 74px;
+    border-radius: 50%;
+    border: 5px solid var(--white);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.25), 0 10px 30px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.2s ease;
+  }
+  .cam-shutter:active { transform: scale(0.86); background: var(--orange); }
+
+  /* Kilatan putih saat jepret */
+  .cam-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: var(--white);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cam-flash.kilat { animation: kilat 0.45s ease; }
+  @keyframes kilat {
+    0%   { opacity: 0; }
+    30%  { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+
+  /* 🔹 Animasi halaman utama */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .navbar   { animation: fadeUp 0.6s ease both; }
+  .eyebrow  { animation: fadeUp 0.7s 0.2s ease both; }
+  h1        { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc     { animation: fadeUp 0.7s 0.4s ease both; }
+  .info-box { animation: fadeUp 0.7s 0.45s ease both; }
+  .upload-card:nth-child(1) { animation: fadeUp 0.7s 0.55s ease both; }
+  .upload-card:nth-child(2) { animation: fadeUp 0.7s 0.65s ease both; }
+  .privacy-box { animation: fadeUp 0.7s 0.75s ease both; }
+  .preview.terisi img { animation: popIn 0.35s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .preview { width: 80px; height: 80px; }
+    .cam-pill span.teks { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <nav class="navbar">
+        <button class="back-btn" onclick="history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <div class="content">
+        <div class="eyebrow">Verifikasi Identitas</div>
+        <h1>Review & Kirim <span>Fotomu</span></h1>
+        <p class="desc">Ambil foto dokumen dan selfie dengan jelas agar verifikasi lebih cepat.</p>
+
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>Pastikan foto terlihat <b>jelas, tidak blur, dan tidak terpotong</b> agar bisa kami proses secepatnya.</p>
+        </div>
+
+        <div class="upload-list">
+
+          <!-- 🔹 KTP -->
+          <div class="upload-card">
+            <div class="upload-title">Foto e-KTP</div>
+            <div class="upload-sub">Pastikan tulisan terbaca jelas</div>
+            <div class="upload-body">
+              <div class="preview" id="previewKTP">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M4.5 17c.8-2 2-3 3.5-3s2.7 1 3.5 3"/><line x1="14" y1="9" x2="20" y2="9"/><line x1="14" y1="13" x2="20" y2="13"/></svg>
+                <img alt="Preview KTP" />
+              </div>
+              <div class="mini-btns">
+                <button type="button" class="mini-btn mini-primary" onclick="bukaKamera('ktp')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  Ambil Foto
+                </button>
+                <button type="button" class="mini-btn mini-ghost" onclick="document.getElementById('fileKTP').click()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  Pilih dari Galeri
+                </button>
+                <input type="file" id="fileKTP" accept="image/*" class="hidden" onchange="dariGaleri(event, 'ktp')" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 🔹 Selfie -->
+          <div class="upload-card">
+            <div class="upload-title">Selfie</div>
+            <div class="upload-sub">Wajah terlihat jelas tanpa topeng</div>
+            <div class="upload-body">
+              <div class="preview" id="previewSelfie">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <img alt="Preview Selfie" />
+              </div>
+              <div class="mini-btns">
+                <button type="button" class="mini-btn mini-primary" onclick="bukaKamera('selfie')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  Ambil Foto
+                </button>
+                <button type="button" class="mini-btn mini-ghost" onclick="document.getElementById('fileSelfie').click()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  Pilih dari Galeri
+                </button>
+                <input type="file" id="fileSelfie" accept="image/*" class="hidden" onchange="dariGaleri(event, 'selfie')" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="privacy-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <p>Informasimu dijaga kerahasiaannya dan hanya digunakan untuk verifikasi.<br><b>Get Car menjamin keamanan data pribadimu.</b></p>
+        </div>
+
+        <p id="status" class="status"></p>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+      <div style="position:relative; z-index:10; padding: 0 26px calc(18px + env(safe-area-inset-bottom));">
+        <button id="btnKirim" class="btn btn-primary" disabled>
+          <svg id="btnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span id="btnSpinner" class="spinner" style="display:none"></span>
+          <span id="btnText">Kirim Foto</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       📷 KAMERA LAYAR PENUH
+       ============================================================ -->
+  <div id="camFull" class="cam-full">
+    <video id="camVideo" autoplay playsinline muted></video>
+
+    <!-- Bingkai KTP -->
+    <div class="ktp-guide" id="guideKTP" style="display:none">
+      <span class="kf-corner kf-tl"></span>
+      <span class="kf-corner kf-tr"></span>
+      <span class="kf-corner kf-bl"></span>
+      <span class="kf-corner kf-br"></span>
+      <div class="ktp-slot">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8.5" r="4"/><path d="M4 20c.9-3.8 4.1-6 8-6s7.1 2.2 8 6H4z"/></svg>
+      </div>
+    </div>
+
+    <!-- Bingkai Selfie -->
+    <div class="selfie-guide" id="guideSelfie" style="display:none"></div>
+
+    <!-- Top bar -->
+    <div class="cam-top">
+      <div class="cam-top-row">
+        <button class="cam-back" onclick="tutupKamera()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <button class="cam-tutorial" onclick="lihatTutorial()">Lihat tutorial</button>
+      </div>
+      <div class="cam-progress">
+        <div id="camSeg0"></div>
+        <div id="camSeg1"></div>
+      </div>
+    </div>
+
+    <h2 class="cam-title" id="camTitle">e-KTP-mu harus muat di kotak</h2>
+
+    <!-- Pill status -->
+    <div class="cam-pill oranye" id="camPill">
+      <span class="pi" id="pillIcon">i</span>
+      <span class="teks" id="pillText">e-KTP-mu belum pas di kotak</span>
+    </div>
+
+    <!-- Shutter -->
+    <div class="cam-bottom">
+      <button class="cam-shutter" onclick="jepretManual()" aria-label="Jepret"></button>
+    </div>
+
+    <div class="cam-flash" id="camFlash"></div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE — TANPA STORAGE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= ELEMEN =================
+  const previewEls = {
+    ktp:    document.getElementById("previewKTP"),
+    selfie: document.getElementById("previewSelfie")
+  };
+  const btnKirim    = document.getElementById("btnKirim");
+  const btnText     = document.getElementById("btnText");
+  const btnIcon     = document.getElementById("btnIcon");
+  const btnSpinner  = document.getElementById("btnSpinner");
+  const statusEl    = document.getElementById("status");
+
+  const camFull     = document.getElementById("camFull");
+  const camVideo    = document.getElementById("camVideo");
+  const camTitle    = document.getElementById("camTitle");
+  const camPill     = document.getElementById("camPill");
+  const pillText    = document.getElementById("pillText");
+  const pillIcon    = document.getElementById("pillIcon");
+  const guideKTP    = document.getElementById("guideKTP");
+  const guideSelfie = document.getElementById("guideSelfie");
+  const camSeg0     = document.getElementById("camSeg0");
+  const camSeg1     = document.getElementById("camSeg1");
+  const camFlash    = document.getElementById("camFlash");
+
+  // ================= STATE =================
+  let fotoKTP      = null;
+  let fotoSelfie   = null;
+  let kameraStream = null;
+  let kameraMode   = null;   // "ktp" | "selfie"
+  let detektorTimer = null;
+  let pasSejak     = null;   // timestamp saat KTP terdeteksi "pas"
+  let sedangJepret = false;
+
+  const params  = new URLSearchParams(window.location.search);
+  const telepon = params.get("telepon");
+
+  console.log("📱 Telepon dari URL:", telepon);
+
+  function setStatus(pesan, tipe) {
+    statusEl.textContent = pesan;
+    statusEl.className = "status" + (tipe ? " " + tipe : "");
+  }
+
+  function cekSiapKirim() {
+    btnKirim.disabled = !(fotoKTP && fotoSelfie);
+  }
+
+  // ================= KOMPRES → BASE64 =================
+  function kompresJadiBase64(source) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(source);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 900;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.55));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Foto tidak bisa dibaca")); };
+      img.src = url;
+    });
+  }
+
+  // ================= PREVIEW =================
+  function tampilkanPreview(tipe, blob) {
+    const box = previewEls[tipe];
+    const img = box.querySelector("img");
+    if (img.dataset.objUrl) URL.revokeObjectURL(img.dataset.objUrl);
+    img.dataset.objUrl = URL.createObjectURL(blob);
+    img.src = img.dataset.objUrl;
+    box.classList.add("terisi");
+  }
+
+  // ================= DARI GALERI =================
+  function dariGaleri(event, tipe) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (tipe === "ktp")    fotoKTP    = file;
+    if (tipe === "selfie") fotoSelfie = file;
+    tampilkanPreview(tipe, file);
+    cekSiapKirim();
+    setStatus("Foto " + (tipe === "ktp" ? "e-KTP" : "selfie") + " siap." +
+              (fotoKTP && fotoSelfie ? " Semua lengkap — silakan kirim!" : ""));
+  }
+
+  // ============================================================
+  // 📷 KAMERA LAYAR PENUH
+  // ============================================================
+  async function bukaKamera(mode) {
+    kameraMode = mode;
+    pasSejak   = null;
+    sedangJepret = false;
+
+    // Set tampilan sesuai mode
+    if (mode === "ktp") {
+      guideKTP.style.display    = "block";
+      guideSelfie.style.display = "none";
+      camVideo.classList.remove("mirror");
+      camTitle.textContent = "e-KTP-mu harus muat di kotak";
+      camSeg0.classList.add("isi");
+      camSeg1.classList.remove("isi");
+      setPill("oranye", "e-KTP-mu belum pas di kotak");
+    } else {
+      guideKTP.style.display    = "none";
+      guideSelfie.style.display = "block";
+      camVideo.classList.add("mirror"); // kamera depan cermin
+      camTitle.textContent = "Wajahmu di dalam lingkaran";
+      camSeg0.classList.add("isi");
+      camSeg1.classList.add("isi");
+      setPill("oranye", "Pastikan wajah terlihat jelas");
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus("Kamera tidak tersedia. Gunakan galeri.", "error");
+      return;
+    }
+
+    try {
+      kameraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: mode === "selfie" ? "user" : "environment",
+          width:  { ideal: 1280 },
+          height: { ideal: 1280 }
+        }
+      });
+      camVideo.srcObject = kameraStream;
+      camFull.classList.add("active");
+
+      // Mulai deteksi KTP otomatis
+      if (mode === "ktp") mulaiDeteksiKTP();
+
+    } catch (err) {
+      console.error("Gagal akses kamera:", err);
+      setStatus("Tidak bisa membuka kamera: " + err.message + ". Gunakan galeri.", "error");
+    }
+  }
+
+  function tutupKamera() {
+    camFull.classList.remove("active");
+    hentikanDeteksi();
+    if (kameraStream) {
+      kameraStream.getTracks().forEach(track => track.stop());
+      kameraStream = null;
+    }
+    camVideo.srcObject = null;
+  }
+
+  function lihatTutorial() {
+    alert(kameraMode === "selfie"
+      ? "Tips selfie:\n• Hadap sumber cahaya\n• Wajah mengisi lingkaran\n• Tanpa topeng & kacamata gelap"
+      : "Tips foto e-KTP:\n• Letakkan KTP di tempat terang\n• Hindari pantulan cahaya\n• Semua sudut KTP harus masuk kotak oranye");
+  }
+
+  // ================= PILL STATUS =================
+  function setPill(warna, teks) {
+    camPill.classList.remove("oranye", "hijau");
+    camPill.classList.add(warna);
+    pillIcon.textContent = warna === "hijau" ? "✓" : "i";
+    pillText.textContent = teks;
+  }
+
+  // ============================================================
+  // 🤖 DETEKSI OTOMATIS: KTP "pas di kotak" = area tengah terang
+  // ============================================================
+  function mulaiDeteksiKTP() {
+    hentikanDeteksi();
+
+    const sampel = document.createElement("canvas");
+    sampel.width = 80; sampel.height = 50;
+    const ctx = sampel.getContext("2d", { willReadFrequently: true });
+
+    detektorTimer = setInterval(() => {
+      if (!camFull.classList.contains("active") || kameraMode !== "ktp") return;
+      if (sedangJepret || !camVideo.videoWidth) return;
+
+      // Ambil area tengah video (kira-kira wilayah bingkai)
+      ctx.drawImage(camVideo, 0, 0, 80, 50);
+      const data = ctx.getImageData(18, 10, 44, 30).data;
+
+      let total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        total += (data[i] + data[i+1] + data[i+2]) / 3;
+      }
+      const rataTerang = total / (data.length / 4);
+
+      // ⚙️ Threshold — naikkan (mis. 100) jika terlalu sensitif
+      const KTP_TERDETEKSI = rataTerang > 80;
+
+      if (KTP_TERDETEKSI) {
+        if (!pasSejak) {
+          pasSejak = Date.now();
+          setPill("hijau", "Posisi pas! Tetap tahan...");
+        } else if (Date.now() - pasSejak > 1200) {
+          // Pas stabil 1.2 detik → jepret otomatis!
+          sedangJepret = true;
+          setPill("hijau", "Bagus! Mengambil foto...");
+          hentikanDeteksi();
+          setTimeout(jepret, 400);
+        }
+      } else {
+        pasSejak = null;
+        setPill("oranye", "e-KTP-mu belum pas di kotak");
+      }
+    }, 250);
+  }
+
+  function hentikanDeteksi() {
+    if (detektorTimer) {
+      clearInterval(detektorTimer);
+      detektorTimer = null;
+    }
+  }
+
+  // ================= JEPRET =================
+  function jepretManual() {
+    if (kameraMode === "ktp") {
+      hentikanDeteksi();
+      sedangJepret = true;
+    }
+    jepret();
+  }
+
+  function jepret() {
+    const canvas = document.createElement("canvas");
+    canvas.width  = camVideo.videoWidth  || 1080;
+    canvas.height = camVideo.videoHeight || 1440;
+    const ctx = canvas.getContext("2d");
+
+    // Kamera depan → balik cermin agar hasil natural
+    if (kameraMode === "selfie") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(camVideo, 0, 0, canvas.width, canvas.height);
+
+    // Kilatan putih
+    camFlash.classList.remove("kilat");
+    void camFlash.offsetWidth;
+    camFlash.classList.add("kilat");
+
+    canvas.toBlob(blob => {
+      if (!blob) {
+        sedangJepret = false;
+        setPill("oranye", "Gagal mengambil foto. Coba lagi");
+        return;
+      }
+
+      const tipe = kameraMode;
+      if (tipe === "ktp")    fotoKTP    = blob;
+      if (tipe === "selfie") fotoSelfie = blob;
+
+      tampilkanPreview(tipe, blob);
+      tutupKamera();
+      cekSiapKirim();
+
+      if (tipe === "ktp") {
+        setStatus("e-KTP berhasil diambil! ✅ Lanjut ke selfie...", "sukses");
+        // 🔗 Otomatis buka selfie setelah 0.8 detik jika belum ada
+        if (!fotoSelfie) setTimeout(() => bukaKamera("selfie"), 800);
+      } else {
+        setStatus(fotoKTP
+          ? "Semua foto lengkap — silakan kirim! ✅"
+          : "Selfie berhasil diambil!", "sukses");
+      }
+    }, "image/jpeg", 0.9);
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && camFull.classList.contains("active")) tutupKamera();
+  });
+
+  // ================= KIRIM → REALTIME DATABASE =================
+  function setLoading(aktif) {
+    btnKirim.disabled = aktif;
+    btnText.textContent = aktif ? "Mengirim..." : "Kirim Foto";
+    btnIcon.style.display = aktif ? "none" : "block";
+    btnSpinner.style.display = aktif ? "block" : "none";
+  }
+
+  btnKirim.addEventListener("click", async () => {
+    if (!fotoKTP || !fotoSelfie || btnKirim.disabled) return;
+
+    setLoading(true);
+    setStatus("Menyiapkan foto (kompres otomatis)...");
+
+    try {
+      const ktpB64    = await kompresJadiBase64(fotoKTP);
+      const selfieB64 = await kompresJadiBase64(fotoSelfie);
+
+      console.log("Ukuran KTP:", Math.round(ktpB64.length / 1024), "KB | Selfie:", Math.round(selfieB64.length / 1024), "KB");
+
+      setStatus("Mengirim ke server...");
+
+      let recordKey = null;
+      if (telepon) {
+        const snap = await db.ref("pendaftaran")
+          .orderByChild("telepon")
+          .equalTo(telepon)
+          .once("value");
+        snap.forEach(child => { recordKey = child.key; });
+      }
+
+      const dataFoto = {
+        ktp: ktpB64,
+        selfie: selfieB64,
+        status: "foto_terkirim",
+        waktuFoto: new Date().toLocaleString("id-ID")
+      };
+
+      if (recordKey) {
+        await db.ref("pendaftaran/" + recordKey).update(dataFoto);
+        console.log("✅ Foto tersimpan di pendaftaran/" + recordKey);
+      } else {
+        const teleponSafe = (telepon || "tanpa-nomor").replace(/[^0-9]/g, "");
+        await db.ref("verifikasi/" + teleponSafe).set({
+          telepon: telepon || "-",
+          ...dataFoto
+        });
+        console.log("⚠️ Record tidak ditemukan — disimpan di verifikasi/" + teleponSafe);
+      }
+
+      setStatus("Foto berhasil dikirim! Melanjutkan ke dokumen kendaraan...", "sukses");
+      btnText.textContent = "Terkirim ✅";
+
+      // 🔗 Lanjut otomatis ke halaman SIM / STNK / Foto Mobil
+      setTimeout(() => {
+        window.location.href = "dokumen.html" +
+          (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
+      }, 1500);
+
+    } catch (err) {
+      console.error("Gagal mengirim:", err);
+      setStatus("Gagal mengirim: " + err.message + ". Coba lagi.", "error");
+      setLoading(false);
+      cekSiapKirim();
+    }
+  });
+</script>
+
+</body>
+</html>

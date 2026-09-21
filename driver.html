@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car Mitra — Dashboard Driver</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+  const bg = new Image();
+  bg.onload = () => document.body.classList.add("has-photo");
+  bg.src = BG_URL;
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0a1628;
+    --accent: #2f7bff;
+    --accent-deep: #0f5ae0;
+    --green: #2ecc71;
+    --amber: #ffb84d;
+    --merah: #ff6b6b;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.10);
+    --glass-border: rgba(255, 255, 255, 0.22);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+  .hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    overflow: hidden;
+  }
+
+  body.has-photo .hero {
+    background-image:
+      linear-gradient(180deg, rgba(6,13,26,0.85) 0%, rgba(6,13,26,0.88) 50%, rgba(6,13,26,0.96) 100%),
+      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+  .glow-2 { width: 280px; height: 280px; background: rgba(46,204,113,0.14); bottom: 60px; left: -120px; }
+
+  /* 🔹 Navbar */
+  .navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    z-index: 10;
+  }
+
+  .brand { font-size: 15px; font-weight: 800; white-space: nowrap; }
+  .brand span { color: var(--accent); }
+
+  .driver-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px 14px;
+    border-radius: 20px;
+    max-width: 55vw;
+  }
+  .driver-chip svg { width: 14px; height: 14px; flex-shrink: 0; color: #6db3ff; }
+  .driver-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 22px calc(20px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  /* ============================================================
+     🟢 KARTU ONLINE / OFFLINE
+     ============================================================ */
+  .online-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 22px;
+    padding: 20px;
+    margin: 8px 0 16px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.30);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .online-info { min-width: 0; }
+
+  .online-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .online-title .dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .online-card.on .online-title .dot {
+    background: var(--green);
+    box-shadow: 0 0 12px rgba(46,204,113,0.8);
+    animation: denyutDot 1.6s ease-in-out infinite;
+  }
+  .online-card.off .online-title .dot { background: rgba(255,255,255,0.35); }
+
+  .online-sub {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 3px;
+    line-height: 1.45;
+  }
+
+  /* Toggle switch */
+  .switch {
+    position: relative;
+    width: 62px; height: 34px;
+    flex-shrink: 0;
+  }
+  .switch input { display: none; }
+  .slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 40px;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .slider::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 4px;
+    width: 25px; height: 25px;
+    border-radius: 50%;
+    background: var(--white);
+    transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .switch input:checked + .slider {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 18px rgba(46,204,113,0.5);
+  }
+  .switch input:checked + .slider::after { transform: translateX(27px); }
+
+  @keyframes denyutDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ============================================================
+     📊 STATISTIK
+     ============================================================ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s 0.25s ease both;
+  }
+  .stat-box {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat-val { font-size: 19px; font-weight: 800; }
+  .stat-lbl {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-top: 3px;
+  }
+  .s-biru .stat-val  { color: #6db3ff; }
+  .s-hijau .stat-val { color: #7ee2a8; }
+  .s-amber .stat-val { color: var(--amber); }
+
+  /* ============================================================
+     🚗 AREA ORDER
+     ============================================================ */
+  .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    margin-bottom: 12px;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+  .section-title small {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .order-area { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Kosong */
+  .empty-state {
+    text-align: center;
+    padding: 40px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px dashed rgba(255,255,255,0.18);
+    border-radius: 20px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .empty-state svg { width: 42px; height: 42px; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+  .empty-state p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.55);
+  }
+  .empty-state b { color: rgba(255,255,255,0.8); }
+
+  /* 🔔 Kartu order masuk */
+  .order-card {
+    background: var(--glass);
+    border: 1.5px solid var(--amber);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 0 26px rgba(255, 184, 77, 0.25);
+    animation: slideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .order-card.aktif { border-color: var(--accent); box-shadow: 0 0 22px rgba(47,123,255,0.3); }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .order-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .order-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 20px;
+  }
+  .order-card .order-tag  { background: rgba(255,184,77,0.15); color: var(--amber); border: 1px solid rgba(255,184,77,0.35); }
+  .order-card.aktif .order-tag { background: rgba(47,123,255,0.15); color: #6db3ff; border-color: rgba(47,123,255,0.35); }
+  .order-waktu { font-size: 11px; color: rgba(255,255,255,0.45); font-weight: 600; }
+
+  .rute { display: flex; flex-direction: column; gap: 0; margin-bottom: 12px; }
+
+  .rute-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+    padding: 3px 0;
+  }
+  .rute-row:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 5.5px;
+    top: 22px;
+    bottom: -14px;
+    width: 2px;
+    background: rgba(255,255,255,0.15);
+  }
+  .rute-dot {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    flex-shrink: 0;
+    margin-top: 3px;
+    background: var(--white);
+  }
+  .rute-row.tujuan .rute-dot { border-color: var(--green); background: var(--green); }
+
+  .rute-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  .rute-teks {
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .order-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .order-harga {
+    font-size: 19px;
+    font-weight: 800;
+    color: #7ee2a8;
+  }
+  .order-harga small {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .order-btns { display: flex; gap: 8px; }
+
+  .obtn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .obtn:active { transform: scale(0.94); }
+
+  .obtn-terima {
+    background: linear-gradient(135deg, var(--green), #1fa06a);
+    color: var(--white);
+    box-shadow: 0 6px 16px rgba(46,204,113,0.35);
+  }
+  .obtn-tolak {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: rgba(255,255,255,0.7);
+  }
+
+  .copyright {
+    margin-top: auto;
+    padding-top: 18px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    user-select: none;
+  }
+
+  /* 🔹 Toast */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(90px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(20px);
+    z-index: 400;
+    background: rgba(13, 27, 50, 0.95);
+    border: 1px solid var(--glass-border);
+    border-radius: 40px;
+    padding: 12px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.sukses { border-color: rgba(46,204,113,0.5); color: #7ee2a8; }
+  .toast.info   { border-color: rgba(47,123,255,0.5); color: #6db3ff; }
+
+  /* 🔹 Gate — layar blokir jika belum disetujui */
+  .gate {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+  }
+  .gate.hide { display: none; }
+  .gate svg { width: 52px; height: 52px; color: var(--amber); margin-bottom: 16px; animation: pop 0.5s ease both; }
+  .gate h2 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+  .gate p { font-size: 13.5px; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 280px; }
+  .gate a {
+    margin-top: 22px;
+    padding: 12px 26px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    border-radius: 14px;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* 🔹 Animasi */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 360px) {
+    .content { padding-left: 18px; padding-right: 18px; }
+    .stat-val { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 🔒 GERBANG: tampil jika belum disetujui admin -->
+  <div class="gate" id="gate">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <h2>Akun Belum Aktif</h2>
+    <p id="gateText">Dashboard driver hanya dapat diakses setelah pendaftaranmu <b>disetujui admin</b>. Pantau statusmu di halaman status pendaftaran.</p>
+    <a href="status.html" id="gateLink">Lihat Status Pendaftaran</a>
+  </div>
+
+  <div class="phone">
+    <div class="hero">
+
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+
+      <nav class="navbar">
+        <div class="brand">Get <span>Car</span> Mitra</div>
+        <div class="driver-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="namaDriver">Driver</span>
+        </div>
+      </nav>
+
+      <div class="content">
+
+        <!-- 🔹 Toggle Online/Offline -->
+        <div class="online-card off" id="onlineCard">
+          <div class="online-info">
+            <div class="online-title">
+              <span class="dot"></span>
+              <span id="onlineTeks">Anda OFFLINE</span>
+            </div>
+            <div class="online-sub" id="onlineSub">Aktifkan untuk mulai menerima order penumpang.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleOnline" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- 🔹 Statistik hari ini -->
+        <div class="stats-row">
+          <div class="stat-box s-hijau">
+            <div class="stat-val" id="statTrip">0</div>
+            <div class="stat-lbl">Trip Selesai</div>
+          </div>
+          <div class="stat-box s-amber">
+            <div class="stat-val" id="statBaru">0</div>
+            <div class="stat-lbl">Order Baru</div>
+          </div>
+          <div class="stat-box s-biru">
+            <div class="stat-val" id="statPendapatan">Rp0</div>
+            <div class="stat-lbl">Pendapatan</div>
+          </div>
+        </div>
+
+        <!-- 🔹 Daftar order -->
+        <div class="section-title">
+          <span>Order Masuk</span>
+          <small id="wilayahLabel">—</small>
+        </div>
+
+        <div class="order-area" id="orderArea">
+          <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5h11L19 11"/><path d="M3 16v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3"/><circle cx="7" cy="16.5" r="1.8"/><circle cx="17" cy="16.5" r="1.8"/></svg>
+            <p><b>Belum ada order masuk.</b><br>Order penumpang akan muncul di sini secara otomatis saat kamu ONLINE.</p>
+          </div>
+        </div>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // ================= KONFIGURASI FIREBASE =================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ================= NOMOR DARI URL =================
+  const params  = new URLSearchParams(window.location.search);
+  let telepon = (params.get("telepon") || "").trim();
+
+  // Normalisasi ke +62...
+  if (telepon.startsWith("0"))       telepon = "+62" + telepon.slice(1);
+  else if (telepon.startsWith("62")) telepon = "+" + telepon;
+  else if (telepon.startsWith("8"))  telepon = "+62" + telepon;
+
+  console.log("📱 Dashboard driver untuk:", telepon);
+
+  // ================= ELEMEN =================
+  const gate           = document.getElementById("gate");
+  const gateLink       = document.getElementById("gateLink");
+  const namaDriverEl   = document.getElementById("namaDriver");
+  const onlineCard     = document.getElementById("onlineCard");
+  const onlineTeks     = document.getElementById("onlineTeks");
+  const onlineSub      = document.getElementById("onlineSub");
+  const toggleOnline   = document.getElementById("toggleOnline");
+  const statTripEl     = document.getElementById("statTrip");
+  const statBaruEl     = document.getElementById("statBaru");
+  const statDuitEl     = document.getElementById("statPendapatan");
+  const orderArea      = document.getElementById("orderArea");
+  const emptyState     = document.getElementById("emptyState");
+  const wilayahLabel   = document.getElementById("wilayahLabel");
+  const toastEl        = document.getElementById("toast");
+
+  let recordKey   = null;
+  let dataDriver  = null;
+  let onlineMode  = false;
+  let semuaOrder  = {};
+  let sudahToast  = {}; // anti toast dobel untuk order yang sama
+
+  // ================= TOAST =================
+  function toast(pesan, tipe = "info", durasi = 2600) {
+    toastEl.innerHTML = pesan;
+    toastEl.className = "toast show " + tipe;
+    clearTimeout(toastEl._timer);
+    toastEl._timer = setTimeout(() => toastEl.classList.remove("show"), durasi);
+  }
+
+  // ================= FORMAT RUPIAH =================
+  function rupiah(n) {
+    return "Rp" + Number(n || 0).toLocaleString("id-ID");
+  }
+
+  // ============================================================
+  // 🔒 GERBANG — pantau status pendaftaran
+  // ============================================================
+  db.ref("pendaftaran")
+    .orderByChild("telepon")
+    .equalTo(telepon)
+    .on("value", snapshot => {
+      if (!snapshot.exists()) {
+        console.warn("Record pendaftaran tidak ditemukan");
+        return;
+      }
+
+      snapshot.forEach(child => {
+        recordKey  = child.key;
+        dataDriver = child.val();
+      });
+
+      const status = dataDriver.status;
+
+      // ✅ Hanya disetujui/aktif yang boleh masuk
+      if (status === "disetujui" || status === "aktif") {
+        gate.classList.add("hide");
+        masukDashboard();
+      } else {
+        gate.classList.remove("hide");
+        gateLink.href = "status.html?telepon=" + encodeURIComponent(telepon);
+        if (status === "suspend") {
+          document.getElementById("gateText").innerHTML =
+            "Akunmu sedang <b>di-suspend</b>. Hubungi admin untuk informasi lebih lanjut.";
+        }
+      }
+    });
+
+  // ============================================================
+  // 🚗 DASHBOARD — setelah lolos gerbang
+  // ============================================================
+  function masukDashboard() {
+    // Nama & wilayah driver
+    const nama = dataDriver.nama || dataDriver.name || "Driver";
+    namaDriverEl.textContent = nama.split(" ")[0] + " ⭐";
+    wilayahLabel.textContent = "Wilayah: " + (dataDriver.wilayah || "-");
+
+    // Pulihkan mode online dari database
+    onlineMode = !!dataDriver.online;
+    toggleOnline.checked = onlineMode;
+    perbaruiTampilanOnline();
+
+    // Pantau status online (sinkron antar perangkat)
+    db.ref("pendaftaran/" + recordKey + "/online").on("value", snap => {
+      onlineMode = !!snap.val();
+      toggleOnline.checked = onlineMode;
+      perbaruiTampilanOnline();
+    });
+
+    // 🔔 Pantau order milik driver ini
+    db.ref("order")
+      .orderByChild("teleponDriver")
+      .equalTo(telepon)
+      .on("value", snap => {
+        semuaOrder = snap.val() || {};
+        renderOrder();
+      });
+
+    // Suara saat order baru masuk (butuh interaksi user dulu di sebagian browser)
+    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/medium_bell_ring.ogg");
+    let orderSebelumnya = null;
+    db.ref("order").orderByChild("teleponDriver").equalTo(telepon).on("value", snap => {
+      const keys = Object.keys(snap.val() || {}).filter(k => {
+        const o = snap.val()[k];
+        return o.status === "baru";
+      });
+      if (orderSebelumnya !== null && keys.length > orderSebelumnya && onlineMode) {
+        audio.play().catch(() => {});
+        toast("🔔 <b>Order baru masuk!</b>", "sukses");
+      }
+      orderSebelumnya = keys.length;
+    });
+  }
+
+  // ================= ONLINE / OFFLINE =================
+  toggleOnline.addEventListener("change", () => {
+    if (!recordKey) return;
+    onlineMode = toggleOnline.checked;
+
+    db.ref("pendaftaran/" + recordKey).update({
+      online: onlineMode,
+      onlineWaktu: new Date().toLocaleString("id-ID")
+    });
+
+    perbaruiTampilanOnline();
+
+    if (onlineMode) toast("🟢 Anda <b>ONLINE</b> — siap menerima order!", "sukses");
+    else            toast("⚪ Anda <b>OFFLINE</b>", "info");
+  });
+
+  function perbaruiTampilanOnline() {
+    onlineCard.classList.toggle("on", onlineMode);
+    onlineCard.classList.toggle("off", !onlineMode);
+    if (onlineMode) {
+      onlineTeks.textContent = "Anda ONLINE";
+      onlineSub.textContent  = "Menunggu order penumpang masuk...";
+    } else {
+      onlineTeks.textContent = "Anda OFFLINE";
+      onlineSub.textContent  = "Aktifkan untuk mulai menerima order penumpang.";
+    }
+    renderOrder();
+  }
+
+  // ================= RENDER ORDER =================
+  function renderOrder() {
+    const daftar = Object.entries(semuaOrder)
+      .map(([key, o]) => ({ key, ...o }))
+      .filter(o => o.status === "baru" || o.status === "diterima")
+      .sort((a, b) => (a.status === "diterima" ? -1 : 1)); // trip aktif di atas
+
+    // Statistik
+    const selesai = Object.values(semuaOrder).filter(o => o.status === "selesai");
+    const baru    = Object.values(semuaOrder).filter(o => o.status === "baru");
+    const totalDuit = selesai.reduce((s, o) => s + Number(o.harga || 0), 0);
+    statTripEl.textContent = selesai.length;
+    statBaruEl.textContent = baru.length;
+    statDuitEl.textContent = rupiah(totalDuit);
+
+    // Kosong
+    const orderNode = orderArea.querySelectorAll(".order-card");
+    orderNode.forEach(n => n.remove());
+
+    if (!daftar.length) {
+      emptyState.style.display = "block";
+      if (!onlineMode) {
+        emptyState.querySelector("p").innerHTML =
+          "<b>Anda sedang OFFLINE.</b><br>Aktifkan toggle di atas untuk mulai menerima order.";
+      } else {
+        emptyState.querySelector("p").innerHTML =
+          "<b>Belum ada order masuk.</b><br>Order penumpang akan muncul di sini secara otomatis.";
+      }
+      return;
+    }
+    emptyState.style.display = "none";
+
+    daftar.forEach(o => {
+      const card = document.createElement("div");
+      card.className = "order-card" + (o.status === "diterima" ? " aktif" : "");
+      card.innerHTML = `
+        <div class="order-head">
+          <span class="order-tag">${o.status === "diterima" ? "🚗 Trip Aktif" : "🔔 Order Baru"}</span>
+          <span class="order-waktu">${o.waktu || ""}</span>
+        </div>
+        <div class="rute">
+          <div class="rute-row">
+            <span class="rute-dot"></span>
+            <div>
+              <div class="rute-label">Penumpang — Jemput</div>
+              <div class="rute-teks">${o.penumpang || "Penumpang"} · ${o.jemput || "-"}</div>
+            </div>
+          </div>
+          <div class="rute-row tujuan">
+            <span class="rute-dot"></span>
+            <div>
+              <div class="rute-label">Tujuan</div>
+              <div class="rute-teks">${o.tujuan || "-"}</div>
+            </div>
+          </div>
+        </div>
+        <div class="order-foot">
+          <div class="order-harga">${rupiah(o.harga)}<small>Estimasi tarif</small></div>
+          ${o.status === "baru" ? `
+          <div class="order-btns">
+            <button class="obtn obtn-tolak" onclick="tolakOrder('${o.key}')">Tolak</button>
+            <button class="obtn obtn-terima" onclick="terimaOrder('${o.key}')">Terima</button>
+          </div>` : `
+          <button class="obtn obtn-terima" onclick="selesaikanOrder('${o.key}')">Selesai ✓</button>`}
+        </div>
+      `;
+      orderArea.appendChild(card);
+    });
+  }
+
+  // ================= AKSI ORDER =================
+  function terimaOrder(key) {
+    db.ref("order/" + key).update({
+      status: "diterima",
+      diterimaWaktu: new Date().toLocaleString("id-ID")
+    }).then(() => toast("✅ Order <b>diterima!</b> Jemput penumpang sekarang.", "sukses"))
+      .catch(err => toast("Gagal: " + err.message, "info"));
+  }
+
+  function tolakOrder(key) {
+    db.ref("order/" + key).update({
+      status: "ditolak",
+      ditolakWaktu: new Date().toLocaleString("id-ID")
+    }).then(() => toast("Order ditolak.", "info"));
+  }
+
+  function selesaikanOrder(key) {
+    db.ref("order/" + key).update({
+      status: "selesai",
+      selesaiWaktu: new Date().toLocaleString("id-ID")
+    }).then(() => {
+      const o = semuaOrder[key] || {};
+      toast("🎉 Trip selesai! +" + rupiah(o.harga), "sukses", 3200);
+    });
+  }
+
+  // Escape — tutup apa pun tidak perlu di sini
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    const layar = document.fullscreenElement || window.innerHeight === screen.height;
+    if (layar) document.exitFullscreen?.();
+  });
+</script>
+
+</body>
+</html>
