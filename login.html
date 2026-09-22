@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1628" />
+<title>Get Car — Masuk Driver</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --accent:#2f7bff; --green:#2ecc71; --merah:#ff6b6b; }
+  body {
+    font-family:'Plus Jakarta Sans',sans-serif;
+    background:linear-gradient(160deg,#0d1f3c,#0a1628 55%,#060d1a);
+    color:#fff; min-height:100dvh; display:flex; justify-content:center; align-items:center;
+    padding:20px;
+  }
+  .box { width:100%; max-width:400px; }
+  .card {
+    background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22);
+    backdrop-filter:blur(20px); border-radius:24px; padding:28px 24px;
+  }
+  .logo { text-align:center; font-size:22px; font-weight:800; margin-bottom:4px; }
+  .logo span { color:var(--accent); }
+  .sub { text-align:center; font-size:12.5px; color:rgba(255,255,255,0.6); margin-bottom:22px; }
+  label { display:block; font-size:10.5px; font-weight:700; letter-spacing:1.2px;
+    text-transform:uppercase; color:rgba(255,255,255,0.55); margin:14px 0 6px; }
+  input {
+    width:100%; background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.22);
+    border-radius:13px; padding:13px 15px; color:#fff;
+    font-family:inherit; font-size:15px; font-weight:600; outline:none;
+  }
+  input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(47,123,255,0.2); }
+  input.salah { border-color:var(--merah); }
+  .err { font-size:12px; color:#ff9b9b; font-weight:700; margin-top:8px; display:none; text-align:center; line-height:1.5; }
+  .btn {
+    width:100%; border:none; border-radius:15px; padding:15px; margin-top:22px;
+    font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),#0f5ae0); color:#fff;
+    box-shadow:0 10px 26px rgba(47,123,255,0.4); transition:transform .15s ease;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+  }
+  .btn:active { transform:scale(.97); }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .btn svg { width:17px; height:17px; }
+  .link { text-align:center; margin-top:16px; font-size:12px; color:rgba(255,255,255,0.5); }
+  .link a { color:#6db3ff; font-weight:700; text-decoration:none; }
+  .sukses { text-align:center; display:none; }
+  .sukses .ikon {
+    width:86px; height:86px; margin:0 auto 16px; border-radius:50%;
+    background:rgba(46,204,113,0.14); border:2.5px solid var(--green);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 34px rgba(46,204,113,0.45);
+  }
+  .sukses .ikon svg { width:40px; height:40px; color:var(--green); }
+  .sukses h2 { font-size:19px; font-weight:800; margin-bottom:8px; }
+  .sukses p { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6; }
+  .sukses p b { color:#fff; }
+  .muat { font-size:12px; color:rgba(255,255,255,0.5); margin-top:12px; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="card">
+
+    <div id="formLogin">
+      <div class="logo">Get <span>Car</span> Driver</div>
+      <p class="sub">Masuk dengan akun yang telah disetujui admin</p>
+
+      <label>Nomor Telepon</label>
+      <input type="tel" id="inTel" placeholder="08xxxxxxxxxx" autocomplete="tel" />
+
+      <label>Password</label>
+      <input type="password" id="inPass" placeholder="Password dari admin" autocomplete="current-password" />
+
+      <p class="err" id="errMsg"></p>
+
+      <button class="btn" id="btnLogin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span id="btnLoginTeks">Masuk</span>
+      </button>
+
+      <p class="link">Belum disetujui? <a href="status.html">Periksa status pendaftaran</a></p>
+    </div>
+
+    <div class="sukses" id="layarSukses">
+      <div class="ikon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2>Login Berhasil</h2>
+      <p>Selamat datang, <b id="sNama">Driver</b>.<br>Mengalihkan ke aplikasi...</p>
+      <p class="muat" id="muatTeks"></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
+    authDomain: "kadek-ed34e.firebaseapp.com",
+    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
+    projectId: "kadek-ed34e",
+    messagingSenderId: "65756136303",
+    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
+  });
+  const db = firebase.database();
+
+  const IKON_MASUK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+
+  // Nomor dari URL (dikirim halaman status) → isi otomatis
+  const params = new URLSearchParams(location.search);
+  const telDariUrl = (params.get("telepon") || "").trim();
+  if (telDariUrl) document.getElementById("inTel").value = telDariUrl;
+
+  // Sudah pernah login & sesi masih ada → langsung ke driver.html
+  const sesiLama = localStorage.getItem("gc_driver_login");
+  if (sesiLama) {
+    try {
+      const s = JSON.parse(sesiLama);
+      // Sesi berlaku 30 hari
+      if (s.telepon && (Date.now() - (s.waktu || 0)) < 30 * 86400000) {
+        location.replace("driver.html?telepon=" + encodeURIComponent(s.telepon));
+      }
+    } catch (e) { localStorage.removeItem("gc_driver_login"); }
+  }
+
+  function normalisasi(t) {
+    t = t.trim();
+    if (t.startsWith("0"))  return "+62" + t.slice(1);
+    if (t.startsWith("62")) return "+" + t;
+    if (t.startsWith("8"))  return "+62" + t;
+    return t;
+  }
+
+  // ⭐ Kunci dibuat dalam beberapa format — nomor di database bisa
+  // tersimpan sebagai 0812... / 62812... / +62812...
+  function kandidatKunci(tel) {
+    const bersih = s => String(s).replace(/[^a-zA-Z0-9_-]/g, "");
+    const lokal  = tel.replace("+62", "0");   // 081234567890
+    const intl   = tel.replace("+", "");      // 6281234567890
+    return [...new Set([bersih(tel), bersih(lokal), bersih(intl)])].filter(Boolean);
+  }
+
+  // Cari driver dengan mencoba semua format kunci
+  async function cariDriver(tel) {
+    for (const k of kandidatKunci(tel)) {
+      const snap = await db.ref("drivers/" + k).once("value");
+      if (snap.exists()) return snap.val();
+    }
+    return null;
+  }
+
+  document.getElementById("btnLogin").onclick = async () => {
+    const tel  = normalisasi(document.getElementById("inTel").value);
+    const pass = document.getElementById("inPass").value;
+    const err  = document.getElementById("errMsg");
+
+    if (tel.length < 10 || !pass) {
+      err.textContent = "Isi nomor telepon dan password dengan benar.";
+      err.style.display = "block";
+      return;
+    }
+
+    const btn  = document.getElementById("btnLogin");
+    const teks = document.getElementById("btnLoginTeks");
+    btn.disabled = true;
+    teks.textContent = "Memeriksa...";
+    err.style.display = "none";
+
+    try {
+      const d = await cariDriver(tel);
+
+      if (!d) throw new Error("Akun tidak ditemukan. Pastikan pendaftaran Anda telah disetujui admin.");
+
+      // ⭐ Hanya driver berstatus aktif yang boleh masuk
+      if (d.status && d.status !== "aktif") {
+        throw new Error("Akun Anda sedang tidak aktif. Silakan hubungi admin.");
+      }
+
+      // ⭐ Password diberikan admin → tersimpan di node drivers/
+      if ((d.password || "") !== pass) {
+        throw new Error("Password salah. Silakan coba lagi.");
+      }
+
+      // ===== SUKSES: simpan sesi + alihkan ke driver.html =====
+      localStorage.setItem("gc_driver_login", JSON.stringify({
+        telepon: d.telepon || tel,
+        nama: d.nama || "",
+        kunci_pendaftaran: d.kunci_pendaftaran || "",
+        waktu: Date.now()
+      }));
+
+      document.getElementById("sNama").textContent = d.nama || "Driver";
+      document.getElementById("formLogin").style.display = "none";
+      document.getElementById("layarSukses").style.display = "block";
+
+      // Kirim nomor ke driver.html supaya langsung tahu siapa yang login
+      setTimeout(() => {
+        location.href = "driver.html?telepon=" + encodeURIComponent(d.telepon || tel);
+      }, 1200);
+
+    } catch (e) {
+      err.textContent = e.message;
+      err.style.display = "block";
+      btn.disabled = false;
+      teks.textContent = "Masuk";
+    }
+  };
+
+  // Enter = login
+  document.getElementById("inPass").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("btnLogin").click();
+  });
+</script>
+</body>
+</html>
