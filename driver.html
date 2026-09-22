@@ -1,822 +1,1121 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0a1628" />
-<title>Get Car Mitra — Dashboard Driver</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-<!-- 🔥 Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-<script>
-  const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
-  const bg = new Image();
-  bg.onload = () => document.body.classList.add("has-photo");
-  bg.src = BG_URL;
-</script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Get Car Driver","short_name":"GetCar","display":"standalone","orientation":"portrait","background_color":"%23ffffff","theme_color":"%23ffffff","start_url":"."}'>
+<title>Get Car — Driver</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;user-select:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#e8eaed}
+#splash{position:fixed;inset:0;z-index:200;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s,visibility .5s}
+#splash.hilang{opacity:0;visibility:hidden}
+.s-logo{width:92px;height:92px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.15);animation:pop .6s cubic-bezier(.2,1.4,.4,1)}
+.s-logo b{font-size:44px;color:#00913f}
+.s-logo-img{width:92px;height:92px;border-radius:26px;background:#fff;object-fit:contain;padding:10px;box-shadow:0 4px 24px rgba(0,0,0,.15);animation:pop .6s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+.s-nama{color:#202124;font-size:26px;font-weight:800;letter-spacing:1px}
+.s-sub{color:#5f6368;font-size:13px;font-weight:600}
 
-  :root {
-    --navy: #0a1628;
-    --accent: #2f7bff;
-    --accent-deep: #0f5ae0;
-    --green: #2ecc71;
-    --amber: #ffb84d;
-    --merah: #ff6b6b;
-    --white: #ffffff;
-    --glass: rgba(255, 255, 255, 0.10);
-    --glass-border: rgba(255, 255, 255, 0.22);
-  }
+#map{position:fixed;inset:0;z-index:0;background:#dde3ea}
+.leaflet-container{background:#dde3ea}
+#map.offline .leaflet-tile{filter:grayscale(.85) brightness(1.04) contrast(.85)}
+#map.dark .leaflet-tile{filter:invert(1) hue-rotate(185deg) saturate(.55) brightness(.92) contrast(.95)}
+.leaflet-control-attribution{display:none!important}
 
-  html, body { height: 100%; }
+.atribusi{position:fixed;left:16px;bottom:320px;z-index:4;display:none;align-items:center;gap:6px;color:#202124;font-size:15px;font-weight:800;text-shadow:0 0 4px #fff,0 0 4px #fff;transition:bottom .35s}
+body.di-beranda .atribusi{display:flex}
+body.online .atribusi{bottom:400px}
+body.online.kolom-ciut .atribusi{bottom:250px}
+.atribusi i{width:17px;height:17px;border:1.6px solid #202124;border-radius:50%;font-size:10px;font-style:normal;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--navy);
-    color: var(--white);
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
-  }
+.driver-bubble{width:46px;height:46px;background:#fff;border-radius:50%;border:2px solid #d2e3fc;box-shadow:0 2px 10px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+.driver-bubble.online{animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,177,79,.5),0 2px 10px rgba(0,0,0,.3)}100%{box-shadow:0 0 0 22px rgba(0,177,79,0),0 2px 10px rgba(0,0,0,.3)}}
+.driver-bubble.nav{border:3px solid #4285f4}
+.panah{transition:transform .5s ease-out}
 
-  .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+.fabs{position:fixed;right:14px;bottom:220px;z-index:5;display:flex;flex-direction:column;gap:12px;transition:bottom .35s}
+body.online .fabs{bottom:300px}
+body.online.kolom-ciut .fabs{bottom:148px}
+.fab{width:52px;height:52px;border-radius:50%;background:#fff;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.fab:active{transform:scale(.9)}
+.fab.ring{border:3px solid #00b14f}
 
-  .hero {
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
-    overflow: hidden;
-  }
+.btn-utama{position:fixed;bottom:220px;left:50%;transform:translateX(-50%);width:210px;height:54px;z-index:5;display:flex;align-items:center;justify-content:center;gap:10px;background:#202124;color:#fff;border:none;border-radius:999px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.3);transition:left .4s cubic-bezier(.4,0,.2,1),width .4s,height .4s,border-radius .4s,background .3s,bottom .35s}
+.btn-utama.online{left:16px;transform:none;width:56px;height:56px;background:#00b14f;bottom:300px}
+body.online.kolom-ciut .btn-utama{bottom:148px}
+.btn-utama.online span{display:none}
 
-  body.has-photo .hero {
-    background-image:
-      linear-gradient(180deg, rgba(6,13,26,0.85) 0%, rgba(6,13,26,0.88) 50%, rgba(6,13,26,0.96) 100%),
-      url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
-    background-size: cover;
-    background-position: center;
-  }
+.kartu{position:fixed;left:10px;right:10px;bottom:74px;z-index:5;background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden}
+.kartuIsi{padding:14px 16px 6px}
+.baris{display:flex;gap:12px;align-items:flex-start}
+.teks{font-size:16px;font-weight:700;color:#202124;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kartu.terbuka .teks{-webkit-line-clamp:unset;line-clamp:unset}
+.btn-baca{display:none;width:100%;background:none;border:none;color:#1a73e8;font-size:15px;font-weight:700;text-align:left;padding:10px 16px 14px 54px;cursor:pointer}
 
-  .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
-  .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
-  .glow-2 { width: 280px; height: 280px; background: rgba(46,204,113,0.14); bottom: 60px; left: -120px; }
+.kolom{position:fixed;left:10px;right:10px;bottom:74px;z-index:5;display:none;flex-direction:column;gap:10px}
+.kolom.tampil{display:flex}
+.kcari{position:relative;background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);padding:16px 12px;display:flex;align-items:center;gap:14px;font-size:19px;font-weight:800;color:#202124;padding-right:104px;cursor:pointer}
+.kcari-judul{flex:1;min-width:0;display:flex;align-items:center;gap:12px}
+.dot-hijau{width:16px;height:16px;border-radius:50%;background:#00b14f;flex-shrink:0;animation:pulse-dot 1.4s infinite}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(0,177,79,.55)}100%{box-shadow:0 0 0 11px rgba(0,177,79,0)}}
+.kcari-chv{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:none;background:#f1f3f4;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kcari-chv svg{transition:transform .25s}
+.kolom.ciut .kcari-chv svg{transform:rotate(180deg)}
+.kolom .kcari-lain{display:flex;flex-direction:column;gap:10px;transition:.25s}
+.kolom.ciut .kcari-lain{display:none}
+.kaksi{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);padding:16px 4px 10px;display:flex}
+.aksi{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:none;cursor:pointer;color:#202124;font-size:12.5px;font-weight:600;padding:0}
+.aksi:active{opacity:.7}
+.aksi .lingkar{width:54px;height:54px;border-radius:50%;background:#dcefe9;display:flex;align-items:center;justify-content:center;transition:.2s}
+.aksi.on .lingkar{background:#00b14f}
+.aksi.on .lingkar svg path,.aksi.on .lingkar svg circle{fill:#fff}
+.aksi .lbl{line-height:1.15;text-align:center;max-width:68px}
 
-  /* 🔹 Navbar */
-  .navbar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
-    z-index: 10;
-  }
+.popup{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;color:#fff;transform:translateY(100%);transition:transform .3s cubic-bezier(.3,0,.2,1);visibility:hidden}
+.popup.tampil{transform:none;visibility:visible}
+.po-top{background:#171c26;padding:18px 20px 24px;position:relative}
+.po-close{position:absolute;top:16px;right:16px;width:42px;height:42px;border-radius:50%;background:#3a4356;border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.po-close:active{transform:scale(.92)}
+.po-rp{font-size:16px;color:#c3c9d4;margin-top:22px}
+.po-nominal{font-size:48px;font-weight:800;line-height:1.05;letter-spacing:-1px}
+.po-bersih{font-size:17px;font-weight:700;color:#e8ebf0;margin-top:2px}
+.po-badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{padding:5px 12px;border-radius:8px;font-size:14px;font-weight:700}
+.b-non{background:#2f6fed;color:#fff}
+.b-tunai{background:#ff8f00;color:#1b2130}
+.po-mid{flex:1;background:#232b3b;padding:16px 20px 0;overflow:auto;display:flex;flex-direction:column}
+.po-layanan{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:700;padding-bottom:12px}
+.po-route{padding-top:6px}
+.stop{display:flex;gap:12px}
+.rail{display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0}
+.rail .rdot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:8px}
+.rdot-g{background:#00b14f;box-shadow:0 0 0 4px rgba(0,177,79,.25)}
+.rdot-r{background:#e94235;box-shadow:0 0 0 4px rgba(233,66,53,.25)}
+.rail .rgaris{width:2px;flex:1;background:#4a5468;min-height:24px;margin:4px 0}
+.stop-body{flex:1;min-width:0;padding:2px 0 12px}
+.stop-judul{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.stop-nama{font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stop-jarak{font-size:13.5px;color:#9aa3b2;flex-shrink:0}
+.stop-alamat{font-size:13.5px;color:#aab2c0;line-height:1.45;margin-top:3px}
+.po-bottom{background:#232b3b;padding:12px 18px 20px}
+.po-terima{width:100%;height:58px;border:none;border-radius:14px;background:#00b14f;color:#fff;font-size:19px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:14px;position:relative}
+.po-terima:active{transform:scale(.98)}
+.po-count{position:absolute;right:10px;width:40px;height:40px;border-radius:50%;background:#00913f;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800}
+.po-count.menipis{background:#d93025;animation:kedip .6s infinite}
+@keyframes kedip{50%{opacity:.55}}
 
-  .brand { font-size: 15px; font-weight: 800; white-space: nowrap; }
-  .brand span { color: var(--accent); }
+body.di-nav .fabs,body.di-nav .btn-utama,body.di-nav .kartu,body.di-nav .kolom,
+body.di-nav .nav,body.di-nav .atribusi{display:none!important}
 
-  .driver-chip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.18);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 6px 14px;
-    border-radius: 20px;
-    max-width: 55vw;
-  }
-  .driver-chip svg { width: 14px; height: 14px; flex-shrink: 0; color: #6db3ff; }
-  .driver-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nv-banner{position:fixed;top:12px;left:10px;min-width:200px;max-width:66%;z-index:9;background:rgba(24,25,29,.97);border-radius:14px;padding:12px 14px;color:#fff;display:none;gap:12px;align-items:flex-start;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+body.di-nav .nv-banner{display:flex}
+.nv-arr{flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.nv-kolom{flex:1;min-width:0}
+.nv-dist{font-size:23px;font-weight:800;line-height:1.1}
+.nv-jalan{font-size:13px;font-weight:600;color:#c3c9d4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.nv-shield{position:fixed;top:12px;right:12px;z-index:9;display:none;width:52px;height:52px;border-radius:50%;background:#0f2a2e;border:2px solid #1d5158;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+body.di-nav .nv-shield{display:flex}
+.nv-shield.aman{background:#1d3b1f;border-color:#00b14f}
+.nv-speed{position:fixed;left:14px;bottom:80px;z-index:9;display:none;background:rgba(24,26,31,.95);color:#fff;font-size:14px;font-weight:800;padding:7px 12px;border-radius:12px}
+body.di-nav .nv-speed{display:block}
+.nv-speed b{font-size:18px}
+.nv-gear{position:fixed;left:14px;bottom:132px;z-index:9;display:none;width:50px;height:50px;border-radius:50%;background:#fff;border:none;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+body.di-nav .nv-gear{display:flex}
 
-  .content {
-    position: relative;
-    z-index: 10;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 0 22px calc(20px + env(safe-area-inset-bottom));
-    overflow-y: auto;
-  }
+.nv-sheet{position:fixed;left:0;right:0;bottom:0;z-index:9;display:none;background:#17181b;color:#fff;border-radius:16px 16px 0 0;overflow:hidden;box-shadow:0 -8px 24px rgba(0,0,0,.55);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+body.di-nav .nv-sheet{display:block}
+.nv-sheet.ciut{transform:translateY(calc(100% - 54px))}
+.sh-top{background:#22252a;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;position:relative}
+.sh-top::before{content:'';position:absolute;left:50%;top:4px;transform:translateX(-50%);width:44px;height:4px;border-radius:99px;background:#4a5058}
+.sh-lokasi{background:none;border:none;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 4px 0;position:relative;z-index:1}
+.sh-lok-num{width:44px;height:44px;border-radius:50%;background:#3a3f46;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sh-lok-lbl{font-size:12.5px;font-weight:700}
+.sh-mid{flex:1;min-width:0;text-align:center;position:relative;z-index:1}
+.sh-step{color:#00d066;font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-gam{background:none;border:none;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 4px 0;flex-shrink:0;position:relative;z-index:1}
+.sh-gam svg.ic{width:34px;height:34px;border-radius:50%;background:#fff;padding:6px;box-sizing:border-box}
+.sh-gam span{font-size:12.5px;font-weight:700}
+.sh-body{padding:14px 16px 16px}
+.sh-row{display:flex;gap:12px;align-items:flex-start}
+.sh-cust{flex:1;min-width:0}
+.sh-nama{font-size:18px;font-weight:600;color:#cfd4da}
+.sh-alamat{font-size:20px;font-weight:800;line-height:1.3;margin-top:2px}
+.sh-harga{display:flex;align-items:center;gap:12px;margin-top:10px}
+.sh-rp{font-size:19px;font-weight:700}
+.sh-bayar{font-size:14.5px;font-weight:800;padding:5px 12px;border-radius:8px}
+.sh-bayar.tunai{background:#ff8f00;color:#1b2130}
+.sh-bayar.non{background:#1a73e8;color:#fff}
+.sh-chat{width:52px;height:52px;border-radius:50%;border:2px solid #2e7d5b;background:#123527;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sh-jaminan{background:#26292d;border-radius:10px;padding:11px 14px;font-size:14.5px;font-weight:700;color:#e8eaed;margin-top:12px;display:flex;align-items:center;gap:10px}
+.sh-aksi{display:flex;gap:12px;margin-top:14px}
+.sh-utama{flex:1;height:56px;border:none;border-radius:999px;background:#00b14f;color:#fff;font-size:19px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center}
+.sh-utama:active{transform:scale(.985)}
+.sh-utama.tunggu{background:#5f6368}
+.sh-utama.jalan{background:#1a73e8}
+.sh-utama.turun{background:#ff8f00;color:#1b2130}
+.sh-utama.bayar{background:#f7a600;color:#1b2130}
+.sh-grid{width:56px;height:56px;border-radius:50%;border:none;background:#14683f;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sh-float{position:fixed;left:12px;right:12px;bottom:64px;z-index:10;display:none;height:54px;border:none;border-radius:999px;background:#00b14f;color:#fff;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.5);font-family:inherit}
+body.di-nav .nv-sheet.ciut ~ .sh-float{display:flex}
+.sh-float.tunggu{background:#5f6368}
+.sh-float.jalan{background:#1a73e8}
+.sh-float.turun{background:#ff8f00;color:#1b2130}
+.sh-float.bayar{background:#f7a600;color:#1b2130}
 
-  /* ============================================================
-     🟢 KARTU ONLINE / OFFLINE
-     ============================================================ */
-  .online-card {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border-radius: 22px;
-    padding: 20px;
-    margin: 8px 0 16px;
-    box-shadow: 0 14px 40px rgba(0,0,0,0.30);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    animation: fadeUp 0.6s 0.15s ease both;
-  }
+.pin-cust{width:46px;height:46px;border-radius:50%;background:#1a73e8;border:3px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 9px rgba(0,0,0,.45);box-sizing:border-box}
+.pin-cust-ekor{width:0;height:0;margin:-2px auto 0;border:7px solid transparent;border-top:10px solid #1a73e8}
+.callout{background:#1a73e8;color:#fff;font-weight:700;font-size:14px;padding:6px 13px;border-radius:22px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;gap:7px;transform:translate(-50%,-100%);position:relative}
+.callout::after{content:'';position:absolute;left:50%;bottom:-8px;margin-left:-8px;border:8px solid transparent;border-top-color:#1a73e8;border-bottom:none}
 
-  .online-info { min-width: 0; }
+.pay{position:fixed;inset:0;z-index:70;background:#0d9f4c;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.3,0,.2,1);visibility:hidden}
+.pay.tampil{transform:none;visibility:visible}
+.pay-head{display:flex;align-items:center;gap:12px;padding:14px 12px;color:#fff;flex-shrink:0}
+.pay-back{width:44px;height:44px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pay-title{flex:1;font-size:20px;font-weight:800}
+.pay-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;padding-bottom:14px}
+.pay-ico{width:92px;height:62px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center}
+.pay-rp{margin-top:12px;font-size:24px;font-weight:700}
+.pay-rp b{font-size:50px;font-weight:800;letter-spacing:-1px;margin-left:6px}
+.pay-sub{font-size:21px;font-weight:700;margin-top:2px}
+.pay-sheet{background:#fff;border-radius:20px 20px 0 0;display:flex;flex-direction:column;max-height:58%;flex-shrink:0;box-shadow:0 -6px 20px rgba(0,0,0,.25)}
+.pay-handle{width:44px;height:5px;border-radius:99px;background:#dadce0;margin:10px auto 2px;flex-shrink:0}
+.pay-chips{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.chip{display:inline-flex;border:1.6px solid #dadce0;background:#fff;border-radius:999px;padding:11px 16px;font-size:15px;font-weight:700;color:#202124;cursor:pointer;font-family:inherit}
+.chip:active{transform:scale(.96)}
+.pay-rows{flex:1;overflow:auto;padding:4px 16px 10px}
+.pay-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:15px;color:#5f6368;border-bottom:1px solid #f6f6f6}
+.pay-row b{color:#202124;font-size:15.5px;font-weight:700}
+.pay-row.total{border-bottom:none;padding:13px 0 6px}
+.pay-row.total span{font-size:18px;font-weight:800;color:#202124}
+.pay-row.total b{font-size:24px;font-weight:800;color:#00b14f}
+.pay-slide{position:relative;flex-shrink:0;display:flex;align-items:center;margin:4px 14px 14px;height:62px;background:#e7f6ee;border:2px solid #cdeeda;border-radius:999px;overflow:hidden}
+.pay-slide-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:800;color:#00913f;pointer-events:none;padding-left:48px}
+.pay-knob{position:absolute;left:5px;top:5px;width:52px;height:48px;border-radius:999px;background:#00b14f;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,145,63,.45);touch-action:none;cursor:grab;z-index:2}
 
-  .online-title {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: -0.2px;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
-  .online-title .dot {
-    width: 11px; height: 11px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.35);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-  }
-  .online-card.on .online-title .dot {
-    background: var(--green);
-    box-shadow: 0 0 12px rgba(46,204,113,0.8);
-    animation: denyutDot 1.6s ease-in-out infinite;
-  }
-  .online-card.off .online-title .dot { background: rgba(255,255,255,0.35); }
+.dr{position:fixed;inset:0;z-index:70;background:#fff;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.3,0,.2,1);visibility:hidden}
+.dr.tampil{transform:none;visibility:visible}
+.dr-head{display:flex;align-items:center;gap:12px;padding:14px 12px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.dr-back{width:44px;height:44px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dr-title{flex:1;font-size:23px;font-weight:800;color:#202124}
+.dr-body{flex:1;overflow:auto;padding:4px 18px 30px}
+.dr-sec{padding:18px 0 14px}
+.dr-sec.garis{border-bottom:8px solid #f5f5f5;margin-bottom:4px}
+.dr-label{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:800}
+.dr-label.hijau{color:#00b14f}
+.dr-label.oranye{color:#e2591e}
+.dr-nama{font-size:21px;font-weight:800;color:#202124;line-height:1.35;margin:12px 0 5px 38px}
+.dr-alamat{font-size:16px;color:#5f6368;line-height:1.55;margin-left:38px}
+.dr-pax{display:flex;align-items:center;gap:12px;margin:18px 0 4px 4px}
+.dr-ava{width:40px;height:40px;border-radius:50%;background:#5f6368;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dr-pax b{flex:1;font-size:18px;color:#202124;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dr-aksi{display:flex;gap:12px;flex-shrink:0}
+.dr-btn{width:52px;height:52px;border-radius:50%;border:1.5px solid #e0e0e0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dr-btn:active{transform:scale(.92)}
+.dr-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0 3px;font-size:16px;color:#5f6368}
+.dr-row b{color:#202124;font-size:17px;text-align:right}
+.db{display:inline-block;padding:6px 14px;border-radius:8px;font-size:14.5px;font-weight:700;border:1.5px solid #dadce0;color:#202124;background:#fff}
 
-  .online-sub {
-    font-size: 12.5px;
-    color: rgba(255,255,255,0.6);
-    margin-top: 3px;
-    line-height: 1.45;
-  }
+.jl{position:fixed;inset:0;z-index:70;background:#fff;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.3,0,.2,1);visibility:hidden}
+.jl.tampil{transform:none;visibility:visible}
+.jl-head{display:flex;align-items:center;gap:12px;padding:14px 12px;flex-shrink:0}
+.jl-back,.jl-help{width:44px;height:44px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.jl-title{flex:1;text-align:center;font-size:20px;font-weight:800;color:#202124}
+.jl-body{flex:1;overflow:auto;padding:18px 18px 36px}
+.jl-sec{font-size:20px;font-weight:800;color:#202124;margin:0 0 4px}
+.jl-sec.mt{margin-top:30px}
+.jl-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 2px;cursor:pointer}
+.jl-row+.jl-row{border-top:1px solid #e9e9e9}
+.jl-nama{font-size:19px;font-weight:500;color:#202124}
+.sw{position:relative;display:inline-block;width:60px;height:32px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw em{position:absolute;inset:0;background:#c4c7ca;border-radius:999px;transition:background .2s;cursor:pointer}
+.sw em::before{content:'';position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw input:checked+em{background:#00b14f}
+.sw input:checked+em::before{transform:translateX(28px)}
+.jl-ubah{width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;text-align:left;padding:12px 0;cursor:pointer;font-family:inherit}
+.jl-ava{width:54px;height:54px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.jl-ubah-tx{flex:1;min-width:0}
+.jl-ubah-tx b{display:block;font-size:19px;font-weight:600;color:#202124;line-height:1.3}
+.jl-ubah-tx small{display:block;font-size:15px;color:#80868b;line-height:1.4;margin-top:2px}
 
-  /* Toggle switch */
-  .switch {
-    position: relative;
-    width: 62px; height: 34px;
-    flex-shrink: 0;
-  }
-  .switch input { display: none; }
-  .slider {
-    position: absolute;
-    inset: 0;
-    border-radius: 40px;
-    background: rgba(255,255,255,0.15);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    cursor: pointer;
-    transition: background 0.3s ease, border-color 0.3s ease;
-  }
-  .slider::after {
-    content: "";
-    position: absolute;
-    top: 3px; left: 4px;
-    width: 25px; height: 25px;
-    border-radius: 50%;
-    background: var(--white);
-    transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
-  }
-  .switch input:checked + .slider {
-    background: var(--green);
-    border-color: var(--green);
-    box-shadow: 0 0 18px rgba(46,204,113,0.5);
-  }
-  .switch input:checked + .slider::after { transform: translateX(27px); }
+.modal{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.modal.tampil{opacity:1;pointer-events:auto}
+.modal-card{background:#fff;border-radius:20px;padding:22px;width:85%;max-width:330px;text-align:center;transform:scale(.95);transition:.2s;max-height:80%;overflow:auto}
+.modal.tampil .modal-card{transform:scale(1)}
+.modal-card h3{color:#202124;margin-bottom:8px}
+.c-desc{font-size:16px;font-weight:700;color:#202124;margin-top:4px}
+.c-meta{font-size:13px;color:#5f6368}
+.m-btn{margin-top:14px;width:100%;padding:12px;border:none;border-radius:12px;background:#f1f3f4;color:#202124;font-weight:700;cursor:pointer;font-family:inherit}
+.m-btn.hijau{background:#00b14f;color:#fff}
+.m-btn.merah{background:#fdecea;color:#d93025}
+.m-in{width:100%;margin-top:14px;padding:12px 14px;font-size:16px;font-weight:600;border:2px solid #dadce0;border-radius:12px;color:#202124;outline:none;font-family:inherit;text-align:left}
+.m-in:focus{border-color:#00b14f}
+.memuat{padding:24px 0;color:#5f6368}
+.menu-row{width:100%;border:none;cursor:pointer;text-align:left;font-size:15px;font-family:inherit;background:#fff;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.r{background:#fff;border:1px solid #f0f0f0;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px;color:#202124}
+.pd-link{background:none;border:none;color:#1a73e8;font-size:13px;font-weight:700;padding:0;cursor:pointer;font-family:inherit}
 
-  @keyframes denyutDot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: 0.5; transform: scale(0.8); }
-  }
+.mb-input{width:100%;margin-top:14px;padding:13px 15px;font-size:22px;font-weight:800;border:2px solid #dadce0;border-radius:14px;text-align:center;color:#202124;outline:none;font-family:inherit}
+.mb-input:focus{border-color:#00b14f}
+.rate-big{font-size:44px;letter-spacing:7px;margin:10px 0 4px;line-height:1}
+.rstar{color:#dadce0;cursor:pointer;display:inline-block}
+.rstar.on{color:#fbbc04}
+.rate-lbl{font-size:14px;font-weight:700;color:#5f6368;min-height:22px;margin-bottom:8px}
+.rtags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:4px 0 6px}
+.rtag{border:1.5px solid #dadce0;background:#fff;border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:700;cursor:pointer;color:#5f6368;font-family:inherit}
+.rtag.on{background:#fff8e1;border-color:#fbbc04;color:#8d6e00}
+.ms-ic{width:72px;height:72px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:38px}
 
-  /* ============================================================
-     📊 STATISTIK
-     ============================================================ */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-    animation: fadeUp 0.6s 0.25s ease both;
-  }
-  .stat-box {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 12px 10px;
-    text-align: center;
-  }
-  .stat-val { font-size: 19px; font-weight: 800; }
-  .stat-lbl {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-    margin-top: 3px;
-  }
-  .s-biru .stat-val  { color: #6db3ff; }
-  .s-hijau .stat-val { color: #7ee2a8; }
-  .s-amber .stat-val { color: var(--amber); }
+.chat-box{height:250px;overflow:auto;background:#f6f7f8;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pesan{max-width:78%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.4;text-align:left}
+.pesan.them{background:#fff;color:#202124;align-self:flex-start;border:1px solid #eee}
+.pesan.me{background:#00b14f;color:#fff;align-self:flex-end}
+.chat-row{display:flex;gap:8px;margin-top:10px}
+.chat-row input{flex:1;border:1.5px solid #dadce0;border-radius:999px;padding:11px 15px;font-size:14.5px;font-family:inherit;outline:none}
+.chat-row button{width:44px;height:44px;border-radius:50%;border:none;background:#00b14f;color:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 
-  /* ============================================================
-     🚗 AREA ORDER
-     ============================================================ */
-  .section-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: -0.2px;
-    margin-bottom: 12px;
-    animation: fadeUp 0.6s 0.35s ease both;
-  }
-  .section-title small {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-  }
+.nav{position:fixed;bottom:0;left:0;right:0;height:64px;background:#fff;z-index:7;display:flex;border-top:1px solid #eee}
+.nav button{flex:1;background:none;border:none;cursor:pointer;color:#5f6368;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;white-space:nowrap;overflow:hidden}
+.nav button span{max-width:70px;overflow:hidden;text-overflow:ellipsis}
+.nav button.aktif{color:#00b14f;font-weight:700}
 
-  .order-area { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.toast{position:fixed;bottom:80px;left:50%;transform:translate(-50%,20px);z-index:99;background:rgba(32,33,36,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:12.5px;opacity:0;transition:.25s;pointer-events:none;max-width:88%;text-align:center}
+.toast.tampil{opacity:1;transform:translate(-50%,0)}
 
-  /* Kosong */
-  .empty-state {
-    text-align: center;
-    padding: 40px 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1.5px dashed rgba(255,255,255,0.18);
-    border-radius: 20px;
-    animation: fadeUp 0.6s 0.4s ease both;
-  }
-  .empty-state svg { width: 42px; height: 42px; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
-  .empty-state p {
-    font-size: 13px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.55);
-  }
-  .empty-state b { color: rgba(255,255,255,0.8); }
+body:not(.di-beranda) .fabs,body:not(.di-beranda) .btn-utama,
+body:not(.di-beranda) .kartu,body:not(.di-beranda) .kolom{display:none}
 
-  /* 🔔 Kartu order masuk */
-  .order-card {
-    background: var(--glass);
-    border: 1.5px solid var(--amber);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border-radius: 20px;
-    padding: 16px;
-    box-shadow: 0 0 26px rgba(255, 184, 77, 0.25);
-    animation: slideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .order-card.aktif { border-color: var(--accent); box-shadow: 0 0 22px rgba(47,123,255,0.3); }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-16px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .order-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .order-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 4px 11px;
-    border-radius: 20px;
-  }
-  .order-card .order-tag  { background: rgba(255,184,77,0.15); color: var(--amber); border: 1px solid rgba(255,184,77,0.35); }
-  .order-card.aktif .order-tag { background: rgba(47,123,255,0.15); color: #6db3ff; border-color: rgba(47,123,255,0.35); }
-  .order-waktu { font-size: 11px; color: rgba(255,255,255,0.45); font-weight: 600; }
-
-  .rute { display: flex; flex-direction: column; gap: 0; margin-bottom: 12px; }
-
-  .rute-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    position: relative;
-    padding: 3px 0;
-  }
-  .rute-row:not(:last-child)::before {
-    content: "";
-    position: absolute;
-    left: 5.5px;
-    top: 22px;
-    bottom: -14px;
-    width: 2px;
-    background: rgba(255,255,255,0.15);
-  }
-  .rute-dot {
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    border: 3px solid var(--accent);
-    flex-shrink: 0;
-    margin-top: 3px;
-    background: var(--white);
-  }
-  .rute-row.tujuan .rute-dot { border-color: var(--green); background: var(--green); }
-
-  .rute-label {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-  }
-  .rute-teks {
-    font-size: 13.5px;
-    font-weight: 700;
-    line-height: 1.35;
-  }
-
-  .order-foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-  .order-harga {
-    font-size: 19px;
-    font-weight: 800;
-    color: #7ee2a8;
-  }
-  .order-harga small {
-    display: block;
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-  }
-
-  .order-btns { display: flex; gap: 8px; }
-
-  .obtn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-  }
-  .obtn:active { transform: scale(0.94); }
-
-  .obtn-terima {
-    background: linear-gradient(135deg, var(--green), #1fa06a);
-    color: var(--white);
-    box-shadow: 0 6px 16px rgba(46,204,113,0.35);
-  }
-  .obtn-tolak {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.22);
-    color: rgba(255,255,255,0.7);
-  }
-
-  .copyright {
-    margin-top: auto;
-    padding-top: 18px;
-    text-align: center;
-    font-size: 11px;
-    color: rgba(255,255,255,0.45);
-    user-select: none;
-  }
-
-  /* 🔹 Toast */
-  .toast {
-    position: fixed;
-    left: 50%;
-    bottom: calc(90px + env(safe-area-inset-bottom));
-    transform: translateX(-50%) translateY(20px);
-    z-index: 400;
-    background: rgba(13, 27, 50, 0.95);
-    border: 1px solid var(--glass-border);
-    border-radius: 40px;
-    padding: 12px 24px;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    white-space: nowrap;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.sukses { border-color: rgba(46,204,113,0.5); color: #7ee2a8; }
-  .toast.info   { border-color: rgba(47,123,255,0.5); color: #6db3ff; }
-
-  /* 🔹 Gate — layar blokir jika belum disetujui */
-  .gate {
-    position: fixed;
-    inset: 0;
-    z-index: 500;
-    background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    text-align: center;
-  }
-  .gate.hide { display: none; }
-  .gate svg { width: 52px; height: 52px; color: var(--amber); margin-bottom: 16px; animation: pop 0.5s ease both; }
-  .gate h2 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
-  .gate p { font-size: 13.5px; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 280px; }
-  .gate a {
-    margin-top: 22px;
-    padding: 12px 26px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-    border-radius: 14px;
-    color: var(--white);
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  /* 🔹 Animasi */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes pop {
-    from { opacity: 0; transform: scale(0.7); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 360px) {
-    .content { padding-left: 18px; padding-right: 18px; }
-    .stat-val { font-size: 16px; }
-  }
+@media (max-width:370px){.kcari{font-size:17px;padding-right:98px}.aksi .lbl{font-size:12px}.po-nominal{font-size:44px}}
+@media (min-width:600px){
+  html,body{background:#1b1d21}
+  #map,#splash{left:50%;margin-left:-175px;width:350px;right:auto;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 20px 60px rgba(0,0,0,.55)}
+  .atribusi{left:calc(50% - 159px)}
+  .fabs{right:calc(50% - 161px)}
+  .btn-utama.online{left:calc(50% - 159px)}
+  .kartu,.kolom{left:50%;margin-left:-165px;width:330px;right:auto}
+  .popup,.nv-sheet,.pay,.dr,.jl{left:50%;margin-left:-175px;width:350px;right:auto}
+  .nv-banner{left:calc(50% - 165px);max-width:230px}
+  .nv-shield{right:calc(50% - 163px)}
+  .nv-speed,.nv-gear{left:calc(50% - 161px)}
+  .sh-float{left:50%;margin-left:-163px;width:324px;right:auto}
+  .nav{left:50%;margin-left:-175px;width:350px;right:auto}
+  .modal{left:50%;margin-left:-175px;width:350px;right:auto}
+}
 </style>
 </head>
-<body>
+<body class="di-beranda">
 
-  <!-- 🔒 GERBANG: tampil jika belum disetujui admin -->
-  <div class="gate" id="gate">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <h2>Akun Belum Aktif</h2>
-    <p id="gateText">Dashboard driver hanya dapat diakses setelah pendaftaranmu <b>disetujui admin</b>. Pantau statusmu di halaman status pendaftaran.</p>
-    <a href="status.html" id="gateLink">Lihat Status Pendaftaran</a>
+<div id="splash">
+  <img src="get.png" alt="Get Car" class="s-logo-img" onerror="this.style.display='none';document.querySelector('.s-logo').style.display='flex'">
+  <div class="s-logo" style="display:none"><b>G</b></div>
+  <div class="s-nama">Get Car</div>
+  <div class="s-sub">Driver App • Realtime</div>
+</div>
+
+<div id="map" class="offline"></div>
+<div class="atribusi" id="atribBeranda"><i>i</i><span><b>Get</b>Maps</span></div>
+
+<div class="fabs" id="fabs">
+  <button class="fab" id="fabCuaca" title="Cuaca"><svg viewBox="0 0 24 24" width="25" height="25"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 6 20h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#202124"/><g stroke="#fff" stroke-width="1.6" stroke-linecap="round"><line x1="9" y1="14.2" x2="8" y2="17.6"/><line x1="12.5" y1="14.2" x2="11.5" y2="17.6"/><line x1="16" y1="14.2" x2="15" y2="17.6"/></g></svg></button>
+  <button class="fab" id="fabLokasi" title="Lokasi saya"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2 L19.5 21 L12 17.2 L4.5 21 Z" fill="#202124"/></svg></button>
+  <button class="fab" id="fabLapisan" title="Ganti peta"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3 3 9l9 6 9-6-9-6z" fill="#00b14f"/><path d="M5.5 13.6 12 17.8l6.5-4.2" fill="none" stroke="#00b14f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 17.4 12 20.3l4.5-2.9" fill="none" stroke="#00b14f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button class="fab ring" id="fabRefresh" title="Muat ulang"><svg viewBox="0 0 24 24" fill="none" stroke="#202124" stroke-width="2.2" stroke-linecap="round" width="24" height="24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+</div>
+
+<button class="btn-utama" id="btnUtama"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" width="24" height="24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg><span id="btnLabel">Aktifkan</span></button>
+
+<div class="kartu" id="kartu">
+  <div class="kartuIsi" id="kartuIsi"></div>
+  <button class="btn-baca" id="btnBaca">Baca lengkapnya</button>
+</div>
+
+<div class="kolom" id="kolomBawah">
+  <div class="kcari" id="kcariBox">
+    <div class="kcari-judul"><span class="dot-hijau"></span><span id="kcariTeks">Mencari orderan</span></div>
+    <button class="kcari-chv" id="btnCiut"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#202124" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>
   </div>
-
-  <div class="phone">
-    <div class="hero">
-
-      <div class="glow glow-1"></div>
-      <div class="glow glow-2"></div>
-
-      <nav class="navbar">
-        <div class="brand">Get <span>Car</span> Mitra</div>
-        <div class="driver-chip">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span id="namaDriver">Driver</span>
-        </div>
-      </nav>
-
-      <div class="content">
-
-        <!-- 🔹 Toggle Online/Offline -->
-        <div class="online-card off" id="onlineCard">
-          <div class="online-info">
-            <div class="online-title">
-              <span class="dot"></span>
-              <span id="onlineTeks">Anda OFFLINE</span>
-            </div>
-            <div class="online-sub" id="onlineSub">Aktifkan untuk mulai menerima order penumpang.</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="toggleOnline" />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <!-- 🔹 Statistik hari ini -->
-        <div class="stats-row">
-          <div class="stat-box s-hijau">
-            <div class="stat-val" id="statTrip">0</div>
-            <div class="stat-lbl">Trip Selesai</div>
-          </div>
-          <div class="stat-box s-amber">
-            <div class="stat-val" id="statBaru">0</div>
-            <div class="stat-lbl">Order Baru</div>
-          </div>
-          <div class="stat-box s-biru">
-            <div class="stat-val" id="statPendapatan">Rp0</div>
-            <div class="stat-lbl">Pendapatan</div>
-          </div>
-        </div>
-
-        <!-- 🔹 Daftar order -->
-        <div class="section-title">
-          <span>Order Masuk</span>
-          <small id="wilayahLabel">—</small>
-        </div>
-
-        <div class="order-area" id="orderArea">
-          <div class="empty-state" id="emptyState">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5h11L19 11"/><path d="M3 16v-3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3"/><circle cx="7" cy="16.5" r="1.8"/><circle cx="17" cy="16.5" r="1.8"/></svg>
-            <p><b>Belum ada order masuk.</b><br>Order penumpang akan muncul di sini secara otomatis saat kamu ONLINE.</p>
-          </div>
-        </div>
-
-        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
-      </div>
-
+  <div class="kcari-lain">
+    <div class="kaksi">
+      <button class="aksi" id="aTurbo"><span class="lingkar"><svg viewBox="0 0 24 24" width="25" height="25" fill="#00694f"><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg></span><span class="lbl">Turbo</span></button>
+      <button class="aksi" id="aLayanan"><span class="lingkar"><svg viewBox="0 0 24 24" width="25" height="25" fill="#00694f"><path d="M18.9 6.5A1.5 1.5 0 0 0 17.5 5.5h-11A1.5 1.5 0 0 0 5.1 6.5L3.5 11v6a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h11v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-6zM6.9 7.5h10.2l1 3H5.9zM7 14.5A1.5 1.5 0 1 1 8.5 13 1.5 1.5 0 0 1 7 14.5zm10 0A1.5 1.5 0 1 1 18.5 13 1.5 1.5 0 0 1 17 14.5z"/></svg></span><span class="lbl">Jenis layanan</span></button>
+      <button class="aksi" id="aTujuan"><span class="lingkar"><svg viewBox="0 0 24 24" width="25" height="25" fill="#00694f"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5z"/></svg></span><span class="lbl">Tujuan Saya</span></button>
+      <button class="aksi" id="aLain"><span class="lingkar"><svg viewBox="0 0 24 24" width="25" height="25" fill="#00694f"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span><span class="lbl">Lainnya</span></button>
     </div>
   </div>
+</div>
 
-  <div class="toast" id="toast"></div>
+<div class="popup" id="popupOrder">
+  <div class="po-top">
+    <button class="po-close" id="poTutup">✕</button>
+    <div class="po-rp">Rp</div>
+    <div class="po-nominal" id="poTarif">0</div>
+    <div class="po-bersih">Pendapatan bersih</div>
+    <div class="po-badges">
+      <span class="badge b-tunai" id="poTunai">Tunai</span>
+      <span class="badge b-non" id="poNontunai">Nontunai</span>
+      <span class="badge" id="poPromosi" style="background:#f7c948;color:#1b2130">Promo</span>
+    </div>
+  </div>
+  <div class="po-mid">
+    <div class="po-layanan"><svg viewBox="0 0 24 24" width="25" height="25" fill="#fff"><path d="M18.9 6.5A1.5 1.5 0 0 0 17.5 5.5h-11A1.5 1.5 0 0 0 5.1 6.5L3.5 11v6a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h11v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-6zM6.9 7.5h10.2l1 3H5.9z"/></svg><span id="poLayanan">GetCar</span></div>
+    <hr style="border:none;border-top:1px solid #38414f;margin:0 -20px">
+    <div class="po-route">
+      <div class="stop"><div class="rail"><div class="rdot rdot-g"></div><div style="width:2px;flex:1;background:#4a5468;min-height:24px;margin:4px 0"></div></div><div class="stop-body"><div class="stop-judul"><span class="stop-nama" id="poJemputNama">—</span><span class="stop-jarak" id="poJemputKm"></span></div><div class="stop-alamat" id="poJemputAlamat"></div></div></div>
+      <div class="stop"><div class="rail"><div class="rdot rdot-r"></div></div><div class="stop-body"><div class="stop-judul"><span class="stop-nama" id="poAntarNama">—</span><span class="stop-jarak" id="poAntarKm"></span></div><div class="stop-alamat" id="poAntarAlamat"></div></div></div>
+    </div>
+  </div>
+  <div class="po-bottom"><button class="po-terima" id="poTerima">Terima<span class="po-count" id="poCount">15</span></button></div>
+</div>
 
+<div class="nv-banner">
+  <div class="nv-arr"><svg viewBox="0 0 24 24" width="32" height="32" fill="#fff"><path d="M12 3 4 13h5v8h6v-8h5z"/></svg></div>
+  <div class="nv-kolom">
+    <div class="nv-dist" id="nvDist">—</div>
+    <div class="nv-jalan" id="nvJalan">—</div>
+  </div>
+</div>
+<button class="nv-shield" id="nvShield"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 2 4.5 5v6c0 5 3.2 8.7 7.5 10 4.3-1.3 7.5-5 7.5-10V5z" fill="#26a69a"/><circle cx="12" cy="11" r="2" fill="#0f2a2e"/><path d="M11 12.5h2v4h-2z" fill="#0f2a2e"/></svg></button>
+<div class="nv-speed" id="navSpeed"><b id="nvKmh">0</b> km/j</div>
+<button class="nv-gear" id="nvGear"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M19.4 13a7.5 7.5 0 0 0 .1-1 7.5 7.5 0 0 0-.1-1l2.1-1.6a.5.5 0 0 0 .1-.7l-2-3.4a.5.5 0 0 0-.6-.2l-2.5 1a7.7 7.7 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 0-.5.5l-.4 2.6a7.7 7.7 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.4a.5.5 0 0 0 .1.7L4.5 11a7.5 7.5 0 0 0-.1 1 7.5 7.5 0 0 0 .1 1l-2.1 1.6a.5.5 0 0 0-.1.7l2 3.4c.1.2.4.3.6.2l2.5-1c.5.4 1.1.7 1.7 1l.4 2.6c0 .3.2.5.5.5h4c.3 0 .5-.2.5-.5l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1c.2.1.5 0 .6-.2l2-3.4a.5.5 0 0 0-.1-.7zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z" fill="#202124"/></svg></button>
+
+<div class="nv-sheet" id="nvSheet">
+  <div class="sh-top" id="shTop">
+    <button class="sh-lokasi" id="nvLokasi"><span class="sh-lok-num">2</span><span class="sh-lok-lbl">Lokasi</span></button>
+    <div class="sh-mid"><div class="sh-step" id="shStep">—</div></div>
+    <button class="sh-gam" id="nvGambaran"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#17181b" stroke-width="2.4" stroke-linecap="round"><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8.4 19H15a3.6 3.6 0 0 0 0-7.2H9a3.6 3.6 0 0 1 0-7.2h6.6"/></svg><span>Gambaran</span></button>
+  </div>
+  <div class="sh-body">
+    <div class="sh-row">
+      <div class="sh-cust">
+        <div class="sh-nama" id="shNama">—</div>
+        <div class="sh-alamat" id="shAlamat">—</div>
+        <div class="sh-harga"><span class="sh-rp" id="shTarif">Rp0</span><span class="sh-bayar non" id="shBayar">Nontunai</span></div>
+      </div>
+      <button class="sh-chat" id="shChat"><svg viewBox="0 0 24 24" width="25" height="25"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" fill="#fff"/><path d="M7 9h10M7 12.5h7" stroke="#123527" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="sh-jaminan"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 4.5 5v6c0 5 3.2 8.7 7.5 10 4.3-1.3 7.5-5 7.5-10V5z" fill="#e8eaed"/></svg> Ada jaminan tarif untuk Anda</div>
+    <div class="sh-aksi">
+      <button class="sh-utama" id="nvAksi">Jemput</button>
+      <button class="sh-grid" id="shGrid"><svg viewBox="0 0 24 24" width="25" height="25" fill="#fff"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+    </div>
+  </div>
+</div>
+<button class="sh-float" id="shFloat">Jemput</button>
+
+<div class="pay" id="pageBayar">
+  <div class="pay-head">
+    <button class="pay-back" id="payBack"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+    <div class="pay-title" id="payJudul">Pembayaran</div>
+  </div>
+  <div class="pay-hero">
+    <div class="pay-ico"><svg viewBox="0 0 64 40" width="58" height="40"><rect x="2" y="2" width="60" height="36" rx="5" fill="none" stroke="#0d9f4c" stroke-width="4"/><circle cx="32" cy="20" r="10" fill="none" stroke="#0d9f4c" stroke-width="4"/><text x="32" y="26" text-anchor="middle" font-size="16" font-weight="800" fill="#0d9f4c" font-family="sans-serif">$</text></svg></div>
+    <div class="pay-rp">Rp<b id="payNominal">0</b></div>
+    <div class="pay-sub" id="paySub">Ambil tunai</div>
+  </div>
+  <div class="pay-sheet">
+    <div class="pay-handle"></div>
+    <div class="pay-chips">
+      <button class="chip" id="chipTol">Tol +</button>
+      <button class="chip" id="chipLain">Lain-lain +</button>
+    </div>
+    <div class="pay-rows" id="payRows"></div>
+    <div class="pay-slide" id="paySlide">
+      <div class="pay-slide-txt" id="payTxt">Geser untuk konfirmasi pembayaran</div>
+      <div class="pay-knob" id="payKnob"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 5 13 12 6 19"/><polyline points="13 5 20 12 13 19"/></svg></div>
+    </div>
+  </div>
+</div>
+
+<div class="dr" id="pageDetail">
+  <div class="dr-head">
+    <button class="dr-back" id="drBack"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#202124" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+    <div class="dr-title">Detail rute</div>
+  </div>
+  <div class="dr-body">
+    <div class="dr-sec garis">
+      <div class="dr-label hijau"><svg width="25" height="25" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#00b14f"/><circle cx="12" cy="12" r="4.2" fill="#fff"/></svg>1. Penjemputan</div>
+      <div class="dr-nama" id="drJNama">—</div>
+      <div class="dr-alamat" id="drJAlamat">—</div>
+      <div class="dr-pax">
+        <span class="dr-ava"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="8" r="3.4" fill="#fff"/><path d="M12 12.6c-3.6 0-6 2.2-6 5.4v.6h12v-.6c0-3.2-2.4-5.4-6-5.4z" fill="#fff"/></svg></span>
+        <b id="drPax1">—</b>
+        <span class="dr-aksi">
+          <button class="dr-btn" id="drTel"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#202124" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg></button>
+          <button class="dr-btn" id="drChat1"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#202124" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+        </span>
+      </div>
+      <div class="dr-row"><span>Layanan</span><b id="drLayanan">—</b></div>
+    </div>
+    <div class="dr-sec">
+      <div class="dr-label oranye"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2a7.5 7.5 0 0 0-7.5 7.5C4.5 15.7 12 22 12 22s7.5-6.3 7.5-12.5A7.5 7.5 0 0 0 12 2z" fill="#e2591e"/><circle cx="12" cy="9.5" r="2.6" fill="#fff"/></svg>2. Pengantaran</div>
+      <div class="dr-nama" id="drANama">—</div>
+      <div class="dr-alamat" id="drAAlamat">—</div>
+      <div class="dr-pax">
+        <span class="dr-ava"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="8" r="3.4" fill="#fff"/><path d="M12 12.6c-3.6 0-6 2.2-6 5.4v.6h12v-.6c0-3.2-2.4-5.4-6-5.4z" fill="#fff"/></svg></span>
+        <b id="drPax2">—</b>
+      </div>
+      <div class="dr-row"><span>Estimasi pendapatan</span><b id="drHarga" style="color:#00b14f">Rp0</b></div>
+      <div class="dr-row"><span>Total perjalanan</span><b id="drKm">—</b></div>
+      <div class="dr-row"><span>Metode pembayaran</span><span class="db" id="drMetode">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="jl" id="pageJenis">
+  <div class="jl-head">
+    <button class="jl-back" id="jlBack"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#202124" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+    <div class="jl-title">Jenis Layanan</div>
+    <button class="jl-help" id="jlBantuan"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="none" stroke="#202124" stroke-width="2"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.72.28-1.2.92-1.2 1.68v.42" fill="none" stroke="#202124" stroke-width="2" stroke-linecap="round"/><circle cx="11.8" cy="16.9" r="1.15" fill="#202124"/></svg></button>
+  </div>
+  <div class="jl-body">
+    <h3 class="jl-sec">Ketersediaan</h3>
+    <div id="jlList"></div>
+    <h3 class="jl-sec mt">Ubah jenis layanan</h3>
+    <button class="jl-ubah" id="jlUbah">
+      <span class="jl-ava"><svg viewBox="0 0 48 48" width="52" height="52"><circle cx="24" cy="24" r="24" fill="#e0f1e7"/><circle cx="24" cy="20" r="7" fill="#f6cda6"/><path d="M15.5 18.5c0-5 3.8-8.5 8.5-8.5s8.5 3.5 8.5 8.5v.8h-17z" fill="#2e7d52"/><rect x="14" y="18.6" width="20" height="3" rx="1.5" fill="#256843"/><path d="M10.5 42c1.4-7.8 6.7-12 13.5-12s12.1 4.2 13.5 12z" fill="#2e7d52"/><circle cx="24" cy="39" r="5.8" fill="none" stroke="#1c5636" stroke-width="2.4"/><circle cx="24" cy="39" r="1.6" fill="#1c5636"/><path d="M18.6 38h4.2M29.4 38h-4.2M24 40.8v3.6" stroke="#1c5636" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+      <span class="jl-ubah-tx"><b>Pengajuan untuk ubah jenis layanan</b><small>Ini akan mengubah jenis layanan Anda saat ini</small></span>
+    </button>
+  </div>
+</div>
+
+<div class="modal" id="modalBiaya">
+  <div class="modal-card">
+    <h3 id="mbJudul" style="color:#202124">Biaya Tambahan</h3>
+    <div class="c-meta">Ketik nominal biaya</div>
+    <input class="mb-input" id="mbInput" type="number" inputmode="numeric" min="0" placeholder="0">
+    <button class="m-btn hijau" id="mbSimpan">Tambah</button>
+    <button class="m-btn" id="mbBatal">Batal</button>
+  </div>
+</div>
+
+<div class="modal" id="modalSelesai">
+  <div class="modal-card">
+    <div class="ms-ic" id="msEmoji">✅</div>
+    <h3 id="msJudul" style="color:#202124">Pembayaran Diterima</h3>
+    <div class="c-desc" id="mdTarif" style="font-size:25px;color:#00b14f">Rp 0</div>
+    <div class="c-meta" id="msInfo"></div>
+    <button class="m-btn hijau" id="btnRateNav">Beri Rating Penumpang</button>
+  </div>
+</div>
+
+<div class="modal" id="modalRate">
+  <div class="modal-card">
+    <h3 style="color:#202124">Beri Rating Penumpang</h3>
+    <div class="c-meta" id="rtNama">—</div>
+    <div class="rate-big" id="rtStars"></div>
+    <div class="rate-lbl" id="rtLbl">Ketuk bintang</div>
+    <div class="rtags" id="rtTags"></div>
+    <button class="m-btn hijau" id="rtKirim" disabled>Kirim Rating</button>
+    <button class="m-btn" id="rtLewati">Lewati</button>
+  </div>
+</div>
+
+<div class="modal" id="modalChat">
+  <div class="modal-card" style="text-align:left">
+    <h3 id="chatJudul" style="text-align:center">Chat Penumpang</h3>
+    <div class="chat-box" id="chatIsi"></div>
+    <div class="chat-row">
+      <input id="chatInput" placeholder="Tulis pesan…" maxlength="120">
+      <button id="chatKirim"><svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
+    </div>
+    <button class="m-btn" id="chatTutup">Tutup</button>
+  </div>
+</div>
+
+<div class="modal" id="modalMenu"><div class="modal-card" style="text-align:left"><h3 id="mmJudul" style="text-align:center;color:#202124">Menu</h3><div id="mmIsi"></div><button class="m-btn" id="mmTutup">Tutup</button></div></div>
+<div class="modal" id="modalCuaca"><div class="modal-card"><h3 style="color:#202124">Cuaca Sekitar</h3><div id="cuacaIsi"><div class="memuat">Memuat…</div></div><button class="m-btn" id="modalTutup">Tutup</button></div></div>
+<div class="toast" id="toast"></div>
+
+<nav class="nav">
+  <button class="aktif" data-hal="Beranda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="21" height="21"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Beranda</span></button>
+  <button data-hal="pendapatan.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="21" height="21"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Pendapatan</span></button>
+  <button data-hal="kotakmasuk.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="21" height="21"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span>Kotak Mas</span></button>
+  <button data-hal="perencanaan.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="21" height="21"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Perencana</span></button>
+  <button data-hal="profil.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="21" height="21"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profil</span></button>
+</nav>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>if(typeof L==='undefined')document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"><\/script>');</script>
+
+<!-- ===== FIREBASE — SAMA dengan aplikasi penumpang (get-car-a9ba7) ===== -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
-  // ================= KONFIGURASI FIREBASE =================
-  const firebaseConfig = {
-    apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
-    authDomain: "kadek-ed34e.firebaseapp.com",
-    databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
-    projectId: "kadek-ed34e",
-    messagingSenderId: "65756136303",
-    appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // ================= NOMOR DARI URL =================
-  const params  = new URLSearchParams(window.location.search);
-  let telepon = (params.get("telepon") || "").trim();
-
-  // Normalisasi ke +62...
-  if (telepon.startsWith("0"))       telepon = "+62" + telepon.slice(1);
-  else if (telepon.startsWith("62")) telepon = "+" + telepon;
-  else if (telepon.startsWith("8"))  telepon = "+62" + telepon;
-
-  console.log("📱 Dashboard driver untuk:", telepon);
-
-  // ================= ELEMEN =================
-  const gate           = document.getElementById("gate");
-  const gateLink       = document.getElementById("gateLink");
-  const namaDriverEl   = document.getElementById("namaDriver");
-  const onlineCard     = document.getElementById("onlineCard");
-  const onlineTeks     = document.getElementById("onlineTeks");
-  const onlineSub      = document.getElementById("onlineSub");
-  const toggleOnline   = document.getElementById("toggleOnline");
-  const statTripEl     = document.getElementById("statTrip");
-  const statBaruEl     = document.getElementById("statBaru");
-  const statDuitEl     = document.getElementById("statPendapatan");
-  const orderArea      = document.getElementById("orderArea");
-  const emptyState     = document.getElementById("emptyState");
-  const wilayahLabel   = document.getElementById("wilayahLabel");
-  const toastEl        = document.getElementById("toast");
-
-  let recordKey   = null;
-  let dataDriver  = null;
-  let onlineMode  = false;
-  let semuaOrder  = {};
-  let sudahToast  = {}; // anti toast dobel untuk order yang sama
-
-  // ================= TOAST =================
-  function toast(pesan, tipe = "info", durasi = 2600) {
-    toastEl.innerHTML = pesan;
-    toastEl.className = "toast show " + tipe;
-    clearTimeout(toastEl._timer);
-    toastEl._timer = setTimeout(() => toastEl.classList.remove("show"), durasi);
-  }
-
-  // ================= FORMAT RUPIAH =================
-  function rupiah(n) {
-    return "Rp" + Number(n || 0).toLocaleString("id-ID");
-  }
-
-  // ============================================================
-  // 🔒 GERBANG — pantau status pendaftaran
-  // ============================================================
-  db.ref("pendaftaran")
-    .orderByChild("telepon")
-    .equalTo(telepon)
-    .on("value", snapshot => {
-      if (!snapshot.exists()) {
-        console.warn("Record pendaftaran tidak ditemukan");
-        return;
-      }
-
-      snapshot.forEach(child => {
-        recordKey  = child.key;
-        dataDriver = child.val();
-      });
-
-      const status = dataDriver.status;
-
-      // ✅ Hanya disetujui/aktif yang boleh masuk
-      if (status === "disetujui" || status === "aktif") {
-        gate.classList.add("hide");
-        masukDashboard();
-      } else {
-        gate.classList.remove("hide");
-        gateLink.href = "status.html?telepon=" + encodeURIComponent(telepon);
-        if (status === "suspend") {
-          document.getElementById("gateText").innerHTML =
-            "Akunmu sedang <b>di-suspend</b>. Hubungi admin untuk informasi lebih lanjut.";
-        }
-      }
-    });
-
-  // ============================================================
-  // 🚗 DASHBOARD — setelah lolos gerbang
-  // ============================================================
-  function masukDashboard() {
-    // Nama & wilayah driver
-    const nama = dataDriver.nama || dataDriver.name || "Driver";
-    namaDriverEl.textContent = nama.split(" ")[0] + " ⭐";
-    wilayahLabel.textContent = "Wilayah: " + (dataDriver.wilayah || "-");
-
-    // Pulihkan mode online dari database
-    onlineMode = !!dataDriver.online;
-    toggleOnline.checked = onlineMode;
-    perbaruiTampilanOnline();
-
-    // Pantau status online (sinkron antar perangkat)
-    db.ref("pendaftaran/" + recordKey + "/online").on("value", snap => {
-      onlineMode = !!snap.val();
-      toggleOnline.checked = onlineMode;
-      perbaruiTampilanOnline();
-    });
-
-    // 🔔 Pantau order milik driver ini
-    db.ref("order")
-      .orderByChild("teleponDriver")
-      .equalTo(telepon)
-      .on("value", snap => {
-        semuaOrder = snap.val() || {};
-        renderOrder();
-      });
-
-    // Suara saat order baru masuk (butuh interaksi user dulu di sebagian browser)
-    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/medium_bell_ring.ogg");
-    let orderSebelumnya = null;
-    db.ref("order").orderByChild("teleponDriver").equalTo(telepon).on("value", snap => {
-      const keys = Object.keys(snap.val() || {}).filter(k => {
-        const o = snap.val()[k];
-        return o.status === "baru";
-      });
-      if (orderSebelumnya !== null && keys.length > orderSebelumnya && onlineMode) {
-        audio.play().catch(() => {});
-        toast("🔔 <b>Order baru masuk!</b>", "sukses");
-      }
-      orderSebelumnya = keys.length;
-    });
-  }
-
-  // ================= ONLINE / OFFLINE =================
-  toggleOnline.addEventListener("change", () => {
-    if (!recordKey) return;
-    onlineMode = toggleOnline.checked;
-
-    db.ref("pendaftaran/" + recordKey).update({
-      online: onlineMode,
-      onlineWaktu: new Date().toLocaleString("id-ID")
-    });
-
-    perbaruiTampilanOnline();
-
-    if (onlineMode) toast("🟢 Anda <b>ONLINE</b> — siap menerima order!", "sukses");
-    else            toast("⚪ Anda <b>OFFLINE</b>", "info");
-  });
-
-  function perbaruiTampilanOnline() {
-    onlineCard.classList.toggle("on", onlineMode);
-    onlineCard.classList.toggle("off", !onlineMode);
-    if (onlineMode) {
-      onlineTeks.textContent = "Anda ONLINE";
-      onlineSub.textContent  = "Menunggu order penumpang masuk...";
-    } else {
-      onlineTeks.textContent = "Anda OFFLINE";
-      onlineSub.textContent  = "Aktifkan untuk mulai menerima order penumpang.";
-    }
-    renderOrder();
-  }
-
-  // ================= RENDER ORDER =================
-  function renderOrder() {
-    const daftar = Object.entries(semuaOrder)
-      .map(([key, o]) => ({ key, ...o }))
-      .filter(o => o.status === "baru" || o.status === "diterima")
-      .sort((a, b) => (a.status === "diterima" ? -1 : 1)); // trip aktif di atas
-
-    // Statistik
-    const selesai = Object.values(semuaOrder).filter(o => o.status === "selesai");
-    const baru    = Object.values(semuaOrder).filter(o => o.status === "baru");
-    const totalDuit = selesai.reduce((s, o) => s + Number(o.harga || 0), 0);
-    statTripEl.textContent = selesai.length;
-    statBaruEl.textContent = baru.length;
-    statDuitEl.textContent = rupiah(totalDuit);
-
-    // Kosong
-    const orderNode = orderArea.querySelectorAll(".order-card");
-    orderNode.forEach(n => n.remove());
-
-    if (!daftar.length) {
-      emptyState.style.display = "block";
-      if (!onlineMode) {
-        emptyState.querySelector("p").innerHTML =
-          "<b>Anda sedang OFFLINE.</b><br>Aktifkan toggle di atas untuk mulai menerima order.";
-      } else {
-        emptyState.querySelector("p").innerHTML =
-          "<b>Belum ada order masuk.</b><br>Order penumpang akan muncul di sini secara otomatis.";
-      }
-      return;
-    }
-    emptyState.style.display = "none";
-
-    daftar.forEach(o => {
-      const card = document.createElement("div");
-      card.className = "order-card" + (o.status === "diterima" ? " aktif" : "");
-      card.innerHTML = `
-        <div class="order-head">
-          <span class="order-tag">${o.status === "diterima" ? "🚗 Trip Aktif" : "🔔 Order Baru"}</span>
-          <span class="order-waktu">${o.waktu || ""}</span>
-        </div>
-        <div class="rute">
-          <div class="rute-row">
-            <span class="rute-dot"></span>
-            <div>
-              <div class="rute-label">Penumpang — Jemput</div>
-              <div class="rute-teks">${o.penumpang || "Penumpang"} · ${o.jemput || "-"}</div>
-            </div>
-          </div>
-          <div class="rute-row tujuan">
-            <span class="rute-dot"></span>
-            <div>
-              <div class="rute-label">Tujuan</div>
-              <div class="rute-teks">${o.tujuan || "-"}</div>
-            </div>
-          </div>
-        </div>
-        <div class="order-foot">
-          <div class="order-harga">${rupiah(o.harga)}<small>Estimasi tarif</small></div>
-          ${o.status === "baru" ? `
-          <div class="order-btns">
-            <button class="obtn obtn-tolak" onclick="tolakOrder('${o.key}')">Tolak</button>
-            <button class="obtn obtn-terima" onclick="terimaOrder('${o.key}')">Terima</button>
-          </div>` : `
-          <button class="obtn obtn-terima" onclick="selesaikanOrder('${o.key}')">Selesai ✓</button>`}
-        </div>
-      `;
-      orderArea.appendChild(card);
-    });
-  }
-
-  // ================= AKSI ORDER =================
-  function terimaOrder(key) {
-    db.ref("order/" + key).update({
-      status: "diterima",
-      diterimaWaktu: new Date().toLocaleString("id-ID")
-    }).then(() => toast("✅ Order <b>diterima!</b> Jemput penumpang sekarang.", "sukses"))
-      .catch(err => toast("Gagal: " + err.message, "info"));
-  }
-
-  function tolakOrder(key) {
-    db.ref("order/" + key).update({
-      status: "ditolak",
-      ditolakWaktu: new Date().toLocaleString("id-ID")
-    }).then(() => toast("Order ditolak.", "info"));
-  }
-
-  function selesaikanOrder(key) {
-    db.ref("order/" + key).update({
-      status: "selesai",
-      selesaiWaktu: new Date().toLocaleString("id-ID")
-    }).then(() => {
-      const o = semuaOrder[key] || {};
-      toast("🎉 Trip selesai! +" + rupiah(o.harga), "sukses", 3200);
-    });
-  }
-
-  // Escape — tutup apa pun tidak perlu di sini
-  document.addEventListener("keydown", e => {
-    if (e.key !== "Escape") return;
-    const layar = document.fullscreenElement || window.innerHeight === screen.height;
-    if (layar) document.exitFullscreen?.();
-  });
+const firebaseConfig={apiKey:"AIzaSyCmipezL0P9gWuLZP0Frwa4inyy_1ca72g",authDomain:"get-car-a9ba7.firebaseapp.com",databaseURL:"https://get-car-a9ba7-default-rtdb.firebaseio.com",projectId:"get-car-a9ba7",storageBucket:"get-car-a9ba7.firebasestorage.app",messagingSenderId:"562840540570",appId:"1:562840540570:web:5c6dd0b34ee95c31281623"};
+try{firebase.initializeApp(firebaseConfig)}catch(e){}
+var _db=firebase.firestore();
+try{_db.enablePersistence().catch(()=>{})}catch(e){}
+let DRV_ID=localStorage.getItem('gc_driver_id');
+if(!DRV_ID){DRV_ID='drv-'+Math.random().toString(36).slice(2,10);try{localStorage.setItem('gc_driver_id',DRV_ID)}catch(_){}}
+/* pengganti driver-sync.js */
+const SYNC={_buf:{},_t:null,simpan(d){Object.assign(this._buf,d);clearTimeout(this._t);this._t=setTimeout(()=>{const p=Object.assign({},this._buf);this._buf={};p.updated=Date.now();_db.collection('drivers').doc(DRV_ID).set(p,{merge:true}).catch(()=>{})},400)}};
 </script>
 
+<script>
+if(typeof L==='undefined'){
+  document.body.innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;color:#202124">Gagal memuat peta. Periksa koneksi internet, lalu muat ulang.</div>';
+  throw new Error('Leaflet gagal dimuat');
+}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rp=n=>'Rp'+Number(n||0).toLocaleString('id-ID');
+const fmtN=n=>Number(n||0).toLocaleString('id-ID');
+const isoHari=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+window.addEventListener('error',e=>{try{toast('Kesalahan: '+e.message)}catch(_){}});
+
+/* Splash hanya saat dibuka pertama */
+let sudahBuka=false;
+try{sudahBuka=sessionStorage.getItem('gc_seen')==='1';sessionStorage.setItem('gc_seen','1')}catch(_){}
+if(sudahBuka){const s=$('splash');if(s){s.style.transition='none';s.classList.add('hilang')}}
+else{setTimeout(()=>{const s=$('splash');if(s)s.classList.add('hilang')},1300);}
+
+let toastTimer;
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('tampil');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('tampil'),2200);}
+function bukaInfo(judul,html){$('mmJudul').textContent=judul;$('mmIsi').innerHTML=html;$('modalMenu').classList.add('tampil');}
+ $('mmTutup').addEventListener('click',()=>$('modalMenu').classList.remove('tampil'));
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('tampil')});
+});
+
+const ICO={
+ car:'<path d="M18.9 6.5A1.5 1.5 0 0 0 17.5 5.5h-11A1.5 1.5 0 0 0 5.1 6.5L3.5 11v6a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h11v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-6zM6.9 7.5h10.2l1 3H5.9zM7 14.5A1.5 1.5 0 1 1 8.5 13 1.5 1.5 0 0 1 7 14.5zm10 0A1.5 1.5 0 1 1 18.5 13 1.5 1.5 0 0 1 17 14.5z"/>'
+};
+
+/* ================= PETA - BALI ================= */
+const BALI=[-8.6705,115.2126];
+const map=L.map('map',{zoomControl:false,attributionControl:false}).setView(BALI,13);
+const tile=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+
+const GAYA=[['offline','Hemat'],['','Normal'],['dark','Gelap']];let gi=0;
+ $('fabLapisan').addEventListener('click',()=>{
+  gi=(gi+1)%GAYA.length;
+  const m=$('map');m.classList.remove('offline','dark');
+  if(GAYA[gi][0])m.classList.add(GAYA[gi][0]);
+  tile.redraw();toast('Peta: '+GAYA[gi][1]);
+});
+ $('fabRefresh').addEventListener('click',()=>location.reload());
+
+/* ================= MARKER DRIVER + KECEPATAN ================= */
+let online=false,drvLatlng=null,drvMarker=null,drvPanah=null,gpsFixPertama=false,lastSyncPos=0;
+function fokusDriver(){if(drvLatlng)map.setView(drvLatlng,16)}
+function posisiDriver(lat,lng,heading,pan){
+  drvLatlng=[lat,lng];
+  if(!drvMarker){
+    drvMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',iconSize:[46,46],iconAnchor:[23,23],
+      html:'<div class="driver-bubble" id="drvBub"><svg class="panah" viewBox="0 0 24 24" width="27" height="27" fill="#00b14f">'+ICO.car+'</svg></div>'})}).addTo(map);
+    drvPanah=drvMarker.getElement().querySelector('.panah');
+  }else drvMarker.setLatLng([lat,lng]);
+  if(heading!=null&&!isNaN(heading)&&drvPanah)drvPanah.style.transform='rotate('+(heading+90)+'deg)';
+  const b=document.getElementById('drvBub');if(b)b.classList.toggle('online',online);
+  if(pan)fokusDriver();
+}
+function gpsOk(p){
+  const la=p.coords.latitude,ln=p.coords.longitude;
+  posisiDriver(la,ln,p.coords.heading,!gpsFixPertama);
+  gpsFixPertama=true;
+  try{localStorage.setItem('gc_lastpos',JSON.stringify([la,ln]))}catch(_){}
+  if(document.body.classList.contains('di-nav')){
+    const kmh=Math.round((p.coords.speed||0)*3.6);
+    $('nvKmh').textContent=isNaN(kmh)?0:Math.max(0,kmh);
+  }
+  const now=Date.now();
+  if(now-lastSyncPos>15000){lastSyncPos=now;SYNC.simpan({lastPos:{lat:la,lng:ln}})}
+}
+let lastPos=null;try{lastPos=JSON.parse(localStorage.getItem('gc_lastpos'))}catch(_){}
+if(Array.isArray(lastPos)&&lastPos.length===2)posisiDriver(lastPos[0],lastPos[1],null,true);
+else posisiDriver(BALI[0],BALI[1],null,true);
+
+if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(gpsOk,()=>{},{enableHighAccuracy:false,timeout:10000,maximumAge:60000});
+  navigator.geolocation.watchPosition(gpsOk,()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:25000});
+}
+ $('fabLokasi').addEventListener('click',()=>{fokusDriver();toast('Lokasi Anda');});
+
+/* ================= ONLINE / OFFLINE ================= */
+function setOnline(v,awal){
+  online=v;
+  try{localStorage.setItem('gc_online',v?'1':'0')}catch(_){}
+  document.body.classList.toggle('online',v);
+  $('btnUtama').classList.toggle('online',v);
+  $('kolomBawah').classList.toggle('tampil',v);
+  document.body.classList.toggle('kolom-ciut',v&&$('kolomBawah').classList.contains('ciut'));
+  $('kartu').style.display=v?'none':'';
+  const b=document.getElementById('drvBub');if(b)b.classList.toggle('online',v);
+  $('kcariTeks').textContent='Mencari orderan';
+  SYNC.simpan({online:v});
+  if(!awal)toast(v?'Anda ONLINE — mencari orderan':'Anda OFFLINE');
+}
+ $('btnUtama').addEventListener('click',()=>{if(document.body.classList.contains('di-nav'))return;setOnline(!online)});
+let savedOn=false;try{savedOn=localStorage.getItem('gc_online')==='1'}catch(_){}
+setOnline(savedOn,true);
+
+/* ================= CIUTKAN KOLOM ================= */
+function toggleCiut(){
+  $('kolomBawah').classList.toggle('ciut');
+  document.body.classList.toggle('kolom-ciut',$('kolomBawah').classList.contains('ciut'));
+}
+ $('btnCiut').addEventListener('click',e=>{e.stopPropagation();toggleCiut()});
+ $('kcariBox').addEventListener('click',toggleCiut);
+
+/* ================= KARTU INFO ================= */
+function setKartuInfo(teks){
+  $('kartuIsi').innerHTML='<div class="baris"><svg viewBox="0 0 24 24" width="34" height="34" style="flex-shrink:0"><circle cx="12" cy="12" r="11" fill="#eaf3ef"/><path d="M12 7v6M12 16.2v.3" stroke="#00913f" stroke-width="2.4" stroke-linecap="round"/></svg><div class="teks">'+esc(teks)+'</div></div>';
+  $('btnBaca').style.display='block';
+}
+window.setKartuInfo=setKartuInfo;
+setKartuInfo('Selamat datang di GetCar Driver! Ketuk tombol Aktifkan untuk mulai menerima orderan.');
+ $('btnBaca').addEventListener('click',()=>{$('kartu').classList.add('terbuka');$('btnBaca').style.display='none'});
+
+/* ================= JENIS LAYANAN ================= */
+const JL_KEY='gc_jenis_layanan';
+const JL_DEFAULT=[{nama:'GetCar',on:true},{nama:'GetCar XL',on:true},{nama:'GetCar Hemat',on:false},{nama:'GetCar Priority (BETA)',on:true}];
+let jlState;
+try{jlState=JSON.parse(localStorage.getItem(JL_KEY))||JL_DEFAULT.slice()}catch(_){jlState=JL_DEFAULT.slice()}
+if(!Array.isArray(jlState)||!jlState.length)jlState=JL_DEFAULT.slice();
+function renderJenis(){
+  $('jlList').innerHTML=jlState.map((s,i)=>'<div class="jl-row"><span class="jl-nama">'+esc(s.nama)+'</span><label class="sw"><input type="checkbox" data-i="'+i+'" '+(s.on?'checked':'')+'><em></em></label></div>').join('');
+}
+function simpanJenis(){try{localStorage.setItem(JL_KEY,JSON.stringify(jlState))}catch(_){}
+  SYNC.simpan({jenisLayanan:jenisAktif()});}
+ $('jlList').addEventListener('change',e=>{
+  const inp=e.target.closest('input[type=checkbox]');if(!inp)return;
+  const i=+inp.dataset.i;
+  if(!inp.checked&&!jlState.some((s,k)=>k!==i&&s.on)){inp.checked=true;toast('Minimal satu jenis layanan harus aktif');return}
+  jlState[i].on=inp.checked;simpanJenis();toast(jlState[i].nama+(inp.checked?' diaktifkan':' dinonaktifkan'));
+});
+ $('jlList').addEventListener('click',e=>{
+  if(e.target.closest('.sw'))return;
+  const row=e.target.closest('.jl-row');if(!row)return;
+  const inp=row.querySelector('input');inp.checked=!inp.checked;
+  inp.dispatchEvent(new Event('change',{bubbles:true}));
+});
+function bukaJenis(){renderJenis();$('pageJenis').classList.add('tampil')}
+ $('aLayanan').addEventListener('click',bukaJenis);
+ $('jlBack').addEventListener('click',()=>$('pageJenis').classList.remove('tampil'));
+ $('jlBantuan').addEventListener('click',()=>bukaInfo('Tentang Jenis Layanan','<p style="color:#5f6368;font-size:15px;line-height:1.6;text-align:left">Aktifkan layanan yang ingin Anda terima orderannya. Minimal satu layanan harus aktif.</p>'));
+ $('jlUbah').addEventListener('click',()=>bukaInfo('Pengajuan Ubah Layanan','<p style="color:#5f6368;font-size:15px;line-height:1.6;text-align:left">Ajukan perubahan jenis layanan kendaraan melalui CS 1500-000. Verifikasi 1-3 hari kerja.</p>'));
+window.jenisAktif=()=>jlState.filter(s=>s.on).map(s=>s.nama);
+
+/* ================= TOMBOL KOLOM ================= */
+ $('aTurbo').addEventListener('click',function(){this.classList.toggle('on');toast(this.classList.contains('on')?'Turbo ON — prioritas order':'Turbo OFF')});
+ $('aTujuan').addEventListener('click',()=>{
+  const t=localStorage.getItem('gc_tujuan')||'';
+  bukaInfo('Tujuan Saya',
+    '<input class="m-in" id="tjInput" placeholder="Contoh: Ubud, Gianyar…" value="'+esc(t)+'">'+
+    '<button class="m-btn hijau" id="tjSimpan">Simpan Tujuan</button>'+
+    (t?'<button class="m-btn" id="tjHapus">Hapus Tujuan</button>':''));
+  document.getElementById('tjSimpan').addEventListener('click',()=>{
+    const v=document.getElementById('tjInput').value.trim();
+    if(v){localStorage.setItem('gc_tujuan',v);$('aTujuan').classList.add('on');toast('Tujuan diset: '+v)}
+    else toast('Tulis tujuan terlebih dulu');
+    $('modalMenu').classList.remove('tampil');
+  });
+  const hp=document.getElementById('tjHapus');
+  if(hp)hp.addEventListener('click',()=>{localStorage.removeItem('gc_tujuan');$('aTujuan').classList.remove('on');toast('Tujuan dihapus');$('modalMenu').classList.remove('tampil')});
+});
+if(localStorage.getItem('gc_tujuan'))$('aTujuan').classList.add('on');
+ $('aLain').addEventListener('click',()=>bukaInfo('Menu Lainnya',
+  '<button class="menu-row" id="mmJl"><span>🚕 Jenis layanan</span><span>›</span></button>'+
+  '<button class="menu-row" id="mmBantuan"><span>❓ Bantuan</span><span>›</span></button>'+
+  '<button class="menu-row" id="mmCs"><span>💬 Chat CS</span><span>›</span></button>'));
+document.addEventListener('click',e=>{
+  if(e.target.closest('#mmJl')){$('modalMenu').classList.remove('tampil');bukaJenis()}
+  if(e.target.closest('#mmBantuan')){$('modalMenu').classList.remove('tampil');bukaInfo('Pusat Bantuan','<div class="r"><span>Hotline 24 jam</span><b style="color:#202124">1500-000</b></div><div class="r"><span>Chat CS</span><b style="color:#202124">Buka menu Lainnya</b></div>')}
+  if(e.target.closest('#mmCs')){$('modalMenu').classList.remove('tampil');$('chatJudul').textContent='Chat CS';$('modalChat').classList.add('tampil')}
+});
+
+/* ============================================================
+   ORDER DARI FIREBASE — koleksi 'order', format SAMA dengan
+   aplikasi penumpang: penumpang, jemput{nama,alamat,lat,lng},
+   antar{...}, tarif, tunai, catatan, dibuat, status
+   ============================================================ */
+function jarakKm(a,b){const R=6371,dLa=(b[0]-a[0])*Math.PI/180,dLo=(b[1]-a[1])*Math.PI/180;const x=Math.sin(dLa/2)**2+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function fmtKm(km){return km<1?Math.round(km*1000)+' m':km.toFixed(1).replace('.',',')+' km'}
+
+let orderAktif=null,poInterval=null,chatPax='Penumpang',orderDocId=null,diTolak={},chatUnsub=null,orderUnsubDrv=null;
+
+window.tampilOrder=function(o,docId){
+  if(!o||!o.jemput||!o.antar)return;
+  if(orderAktif||document.body.classList.contains('di-nav')||$('popupOrder').classList.contains('tampil'))return;
+  if(o.layanan&&!jenisAktif().includes(o.layanan))return;
+  if(diTolak[docId])return;
+  const from=drvLatlng||BALI;
+  const jLat=Number(o.jemput.lat),jLng=Number(o.jemput.lng),aLat=Number(o.antar.lat),aLng=Number(o.antar.lng);
+  o.kmJemput=jarakKm(from,[jLat,jLng]);
+  o.kmAntar=jarakKm([jLat,jLng],[aLat,aLng]);
+  orderAktif=o;orderDocId=docId||null;chatPax=o.penumpang||'Penumpang';
+  $('poTarif').textContent=fmtN(o.tarif||0);
+  $('poTunai').style.display=o.tunai?'inline-flex':'none';
+  $('poNontunai').style.display=o.tunai?'none':'inline-flex';
+  $('poPromosi').style.display='none';
+  $('poLayanan').textContent=o.layanan||'GetCar';
+  $('poJemputNama').textContent=o.jemput.nama||'Jemput';
+  $('poJemputKm').textContent=fmtKm(o.kmJemput);
+  $('poJemputAlamat').textContent=(o.jemput.alamat||'')+(o.catatan?'\n📝 '+o.catatan:'');
+  $('poAntarNama').textContent=o.antar.nama||'Tujuan';
+  $('poAntarKm').textContent=fmtKm(o.kmAntar);
+  $('poAntarAlamat').textContent=o.antar.alamat||'';
+  $('popupOrder').classList.add('tampil');
+  let s=15;const c=$('poCount');c.textContent=s;c.classList.remove('menipis');
+  clearInterval(poInterval);
+  poInterval=setInterval(()=>{s--;c.textContent=s;if(s<=5)c.classList.add('menipis');if(s<=0)window.tolakOrderMasuk()},1000);
+};
+window.tolakOrderMasuk=function(){
+  clearInterval(poInterval);$('popupOrder').classList.remove('tampil');
+  if(orderAktif){
+    if(orderDocId){diTolak[orderDocId]=true;
+      _db.collection('order').doc(orderDocId).update({status:'ditolak',ditolak:Date.now()}).catch(()=>{});}
+    orderAktif=null;orderDocId=null;toast('Order ditolak / kedaluwarsa');
+  }
+};
+ $('poTutup').addEventListener('click',()=>window.tolakOrderMasuk());
+ $('poTerima').addEventListener('click',()=>{
+  if(!orderAktif)return;
+  if(orderDocId){
+    let pf=null;try{pf=JSON.parse(localStorage.getItem('gc_profil'))}catch(_){}
+    /* kirim data driver → tampil di HP penumpang */
+    _db.collection('order').doc(orderDocId).update({
+      status:'diterima',diterima:Date.now(),
+      driver:{
+        nama:localStorage.getItem('gc_nama')||'Driver GetCar',
+        telepon:localStorage.getItem('gc_telp')||'',
+        nopol:localStorage.getItem('gc_nopol')||'DK 1234 AB',
+        rating:(pf&&pf.rating)||4.9
+      }
+    }).catch(()=>{});
+    /* dengarkan pembatalan oleh penumpang */
+    if(orderUnsubDrv)orderUnsubDrv();
+    orderUnsubDrv=_db.collection('order').doc(orderDocId).onSnapshot(s=>{
+      const d=s.data();
+      if(d&&d.status==='dibatalkan'){
+        if(orderUnsubDrv){orderUnsubDrv();orderUnsubDrv=null}
+        toast('Penumpang membatalkan order');
+        akhiriPerjalanan(false);
+      }
+    },()=>{});
+  }
+  mulaiNavigasi(orderAktif);
+});
+
+/* Listener order pending — tanpa orderBy agar tidak butuh composite index */
+_db.collection('order').where('status','==','pending').limit(5)
+  .onSnapshot(snap=>{
+    if(snap.empty)return;
+    if(orderAktif||document.body.classList.contains('di-nav')||$('popupOrder').classList.contains('tampil'))return;
+    let best=null;
+    snap.forEach(d=>{
+      const o=d.data();
+      if(diTolak[d.id])return;
+      if((o.dibuat||0)<Date.now()-120000)return; /* lewati order > 2 menit */
+      if(!best||(o.dibuat||0)>(best.data.dibuat||0))best={id:d.id,data:o};
+    });
+    if(best)tampilOrder(best.data,best.id);
+  },e=>console.warn('Listen order gagal:',e.message));
+
+/* ================= NAVIGASI ================= */
+let ruteLine=null,pinCust=null,navMode='jemput';
+function hapusRute(){if(ruteLine){map.removeLayer(ruteLine);ruteLine=null}if(pinCust){map.removeLayer(pinCust);pinCust=null}}
+function gambarRute(o){
+  hapusRute();
+  const dari=drvLatlng||BALI;
+  ruteLine=L.polyline([dari,[o.jemput.lat,o.jemput.lng],[o.antar.lat,o.antar.lng]],{color:'#1a73e8',weight:5,opacity:.8}).addTo(map);
+  map.fitBounds(ruteLine.getBounds(),{padding:[60,60]});
+}
+function pinPenumpang(latlng,nama){
+  if(pinCust)map.removeLayer(pinCust);
+  pinCust=L.marker(latlng,{icon:L.divIcon({className:'',iconSize:[46,80],iconAnchor:[23,64],
+    html:'<div class="callout">'+esc(nama)+'</div><div class="pin-cust"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="8" r="3.4" fill="#fff"/><path d="M12 12.6c-3.6 0-6 2.2-6 5.4v.6h12v-.6c0-3.2-2.4-5.4-6-5.4z" fill="#fff"/></svg></div><div class="pin-cust-ekor"></div>'})}).addTo(map);
+}
+function setBanner(judul,tempat,km){
+  $('shStep').textContent=judul;
+  $('nvDist').textContent=km;
+  $('nvJalan').textContent=tempat||'';
+}
+function setAksi(mode){
+  navMode=mode;
+  const b=$('nvAksi'),f=$('shFloat');
+  b.className='sh-utama';f.className='sh-float';
+  if(mode==='jemput'){b.textContent='Jemput';f.textContent='Jemput';b.classList.add('tunggu');f.classList.add('tunggu');}
+  else if(mode==='antar'){b.textContent='Mulai Perjalanan';f.textContent='Mulai Perjalanan';b.classList.add('jalan');f.classList.add('jalan');}
+  else if(mode==='turun'){b.textContent='Turunkan Penumpang';f.textContent='Turunkan Penumpang';b.classList.add('turun');f.classList.add('turun');}
+  else{b.textContent='Tagih Pembayaran';f.textContent='Tagih Pembayaran';b.classList.add('bayar');f.classList.add('bayar');}
+}
+function mulaiNavigasi(o){
+  clearInterval(poInterval);
+  $('popupOrder').classList.remove('tampil');
+  document.body.classList.add('di-nav');
+  $('nvSheet').classList.remove('ciut');
+  $('nvKmh').textContent='0';
+  const b=document.getElementById('drvBub');if(b)b.classList.add('nav');
+  gambarRute(o);
+  pinPenumpang([o.jemput.lat,o.jemput.lng],o.penumpang||'Penumpang');
+  $('shNama').textContent=o.penumpang||'Penumpang';
+  $('shAlamat').textContent=o.jemput.nama||'';
+  $('shTarif').textContent=rp(o.tarif||0);
+  $('shBayar').textContent=o.tunai?'Tunai':'Nontunai';
+  $('shBayar').className='sh-bayar '+(o.tunai?'tunai':'non');
+  setBanner('1 • Jemput Penumpang',o.jemput.nama,fmtKm(o.kmJemput));
+  setAksi('jemput');
+  $('drJNama').textContent=o.jemput.nama||'—';
+  $('drJAlamat').textContent=(o.jemput.alamat||'—')+(o.catatan?'\n📝 '+o.catatan:'');
+  $('drANama').textContent=o.antar.nama||'—';$('drAAlamat').textContent=o.antar.alamat||'—';
+  $('drPax1').textContent=o.penumpang||'—';$('drPax2').textContent=o.penumpang||'—';
+  $('drHarga').textContent=rp(o.tarif||0);
+  $('drKm').textContent=fmtKm(o.kmJemput+o.kmAntar);
+  $('drMetode').textContent=o.tunai?'Tunai':'Nontunai';
+  $('drLayanan').textContent=o.layanan||'—';
+  pasangChat();
+  toast('Order diterima — menuju titik jemput');
+}
+ $('nvAksi').addEventListener('click',()=>aksiNav());
+ $('shFloat').addEventListener('click',()=>aksiNav());
+function aksiNav(){
+  const o=orderAktif;if(!o)return;
+  if(navMode==='jemput'){
+    /* beri tahu penumpang: perjalanan dimulai */
+    if(orderDocId)_db.collection('order').doc(orderDocId).update({status:'berjalan',berjalan:Date.now()}).catch(()=>{});
+    setBanner('2 • Antar ke Tujuan',o.antar.nama,fmtKm(o.kmAntar));
+    setAksi('antar');toast('Penumpang naik — menuju '+o.antar.nama);
+  }else if(navMode==='antar'){
+    if(orderDocId)_db.collection('order').doc(orderDocId).update({status:'tiba'}).catch(()=>{});
+    setBanner('3 • Turunkan Penumpang',o.antar.nama,'0 m');
+    setAksi('turun');toast('Sampai di tujuan');
+  }else if(navMode==='turun'){
+    setAksi('bayar');setBanner('4 • Tagih Pembayaran',o.antar.nama,'0 m');
+    toast('Tagih pembayaran kepada penumpang');
+  }else bukaPembayaran();
+}
+ $('nvLokasi').addEventListener('click',e=>{e.stopPropagation();$('pageDetail').classList.add('tampil')});
+ $('nvGambaran').addEventListener('click',e=>{e.stopPropagation();if(ruteLine)map.fitBounds(ruteLine.getBounds(),{padding:[60,60]});$('nvSheet').classList.remove('ciut')});
+ $('shTop').addEventListener('click',()=>$('nvSheet').classList.toggle('ciut'));
+ $('nvShield').addEventListener('click',function(){this.classList.toggle('aman');toast(this.classList.contains('aman')?'Mode aman ON':'Mode aman OFF')});
+ $('nvGear').addEventListener('click',()=>bukaInfo('Pengaturan Navigasi',
+  '<button class="menu-row" id="stHitung"><span>🔄 Hitung ulang rute</span><span>›</span></button>'+
+  '<button class="menu-row" id="stSatelit"><span>🛰️ Ganti gaya peta</span><span>›</span></button>'));
+document.addEventListener('click',e=>{
+  if(e.target.closest('#stHitung')){if(orderAktif){gambarRute(orderAktif);toast('Rute dihitung ulang')}}
+  if(e.target.closest('#stSatelit')){$('modalMenu').classList.remove('tampil');$('fabLapisan').click()}
+});
+ $('shGrid').addEventListener('click',()=>bukaInfo('Menu Cepat',
+  '<button class="menu-row" id="qSelesai"><span>✅ Selesaikan perjalanan</span><span>›</span></button>'+
+  '<button class="menu-row" id="qBagikan"><span>📤 Bagikan perjalanan</span><span>›</span></button>'+
+  '<button class="menu-row" id="qBatal"><span style="color:#d93025">⚠️ Batalkan order</span><span>›</span></button>'));
+document.addEventListener('click',e=>{
+  if(e.target.closest('#qSelesai')){$('modalMenu').classList.remove('tampil');bukaPembayaran()}
+  if(e.target.closest('#qBagikan')){$('modalMenu').classList.remove('tampil');if(navigator.share)navigator.share({title:'Perjalanan GetCar'}).catch(()=>{});else toast('Tautan perjalanan siap dibagikan')}
+  if(e.target.closest('#qBatal')){
+    $('modalMenu').classList.remove('tampil');
+    bukaInfo('Batalkan Order?','<p style="color:#5f6368;font-size:15px;line-height:1.5">Pembatalan dapat memengaruhi skor Anda.</p><button class="m-btn merah" id="qBatalYa">Ya, Batalkan</button><button class="m-btn" id="qBatalTidak">Lanjutkan Perjalanan</button>');
+  }
+  if(e.target.closest('#qBatalYa')){
+    $('modalMenu').classList.remove('tampil');
+    if(orderDocId)_db.collection('order').doc(orderDocId).update({status:'dibatalkan',dibatalkan:Date.now()}).catch(()=>{});
+    akhiriPerjalanan(false);toast('Order dibatalkan');
+  }
+  if(e.target.closest('#qBatalTidak'))$('modalMenu').classList.remove('tampil');
+});
+
+/* ================= PEMBAYARAN ================= */
+let bayar=null;
+function bukaPembayaran(){
+  const o=orderAktif;if(!o)return;
+  bayar={tarif:o.tarif||0,extras:[],tunai:!!o.tunai,pax:o.penumpang||'Penumpang'};
+  $('payJudul').textContent='Pembayaran untuk '+(o.penumpang||'penumpang');
+  $('paySub').textContent=o.tunai?'Ambil tunai':'Dibayar via GetPay';
+  renderBayar();
+  $('pageBayar').classList.add('tampil');
+}
+function renderBayar(){
+  const rows=[{label:'Tarif perjalanan',jumlah:bayar.tarif}].concat(bayar.extras);
+  let total=bayar.tarif;bayar.extras.forEach(x=>total+=x.jumlah);
+  $('payRows').innerHTML=rows.map((r,i)=>
+    '<div class="pay-row"><span>'+esc(r.label)+(i>0?' <button class="pd-link" data-del="'+i+'">hapus</button>':'')+'</span><b>'+rp(r.jumlah)+'</b></div>').join('')+
+    '<div class="pay-row total"><span>Total</span><b>'+rp(total)+'</b></div>';
+  $('payNominal').textContent=fmtN(total);
+  $('payRows').querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',()=>{bayar.extras.splice(+btn.dataset.del-1,1);renderBayar()}));
+}
+function modalBiaya(judul){
+  $('mbJudul').textContent=judul;$('mbInput').value='';
+  $('mbSimpan').dataset.mode=judul==='Biaya Tol'?'tol':'lain';
+  $('modalBiaya').classList.add('tampil');
+}
+ $('chipTol').addEventListener('click',()=>modalBiaya('Biaya Tol'));
+ $('chipLain').addEventListener('click',()=>modalBiaya('Biaya Lain-lain'));
+ $('mbBatal').addEventListener('click',()=>$('modalBiaya').classList.remove('tampil'));
+ $('mbSimpan').addEventListener('click',()=>{
+  const v=parseInt($('mbInput').value,10);
+  if(!v||v<0){toast('Masukkan nominal yang valid');return}
+  bayar.extras.push({label:$('mbSimpan').dataset.mode==='tol'?'Biaya tol':'Biaya lain-lain',jumlah:v});
+  $('modalBiaya').classList.remove('tampil');renderBayar();toast('Biaya ditambahkan');
+});
+ $('payBack').addEventListener('click',()=>{$('pageBayar').classList.remove('tampil');toast('Gunakan tombol Tagih Pembayaran untuk melanjutkan')});
+(function(){
+  const slide=$('paySlide'),knob=$('payKnob'),txt=$('payTxt');
+  let startX=0,dx=0,drag=false;
+  const max=()=>slide.offsetWidth-knob.offsetWidth-10;
+  slide.addEventListener('pointerdown',e=>{drag=true;startX=e.clientX-dx;knob.setPointerCapture(e.pointerId)});
+  slide.addEventListener('pointermove',e=>{if(!drag)return;dx=Math.max(0,Math.min(max(),e.clientX-startX));knob.style.left=(5+dx)+'px';txt.style.opacity=1-dx/max()});
+  slide.addEventListener('pointerup',()=>{
+    if(!drag)return;drag=false;
+    if(dx>=max()*.85)konfirmasiBayar();
+    dx=0;knob.style.left='5px';txt.style.opacity=1;
+  });
+})();
+function konfirmasiBayar(){
+  if(!bayar)return;
+  let total=bayar.tarif;bayar.extras.forEach(x=>total+=x.jumlah);
+  $('pageBayar').classList.remove('tampil');
+  $('msEmoji').textContent=bayar.tunai?'💵':'📱';
+  $('msJudul').textContent=bayar.tunai?'Pembayaran Tunai Diterima':'Pembayaran GetPay Diterima';
+  $('mdTarif').textContent=rp(total);
+  $('msInfo').textContent=(bayar.tunai?'Tunai':'Nontunai')+' • '+bayar.pax+' • '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  bayar.total=total;
+  $('modalSelesai').classList.add('tampil');
+}
+
+/* ================= RATING ================= */
+let rtNilai=0;
+const RT_LABEL={1:'Kurang sekali',2:'Kurang',3:'Cukup',4:'Bagus',5:'Luar biasa!'};
+const RT_TAGS=['Ramah','Nyaman','Aman','Supir keren','Mobil bersih','Rute cepat'];
+function renderStars(){$('rtStars').innerHTML=[1,2,3,4,5].map(n=>'<span class="rstar'+(n<=rtNilai?' on':'')+'" data-n="'+n+'">★</span>').join('')}
+ $('rtStars').addEventListener('click',e=>{const s=e.target.closest('.rstar');if(!s)return;rtNilai=+s.dataset.n;renderStars();$('rtLbl').textContent=RT_LABEL[rtNilai];$('rtKirim').disabled=false});
+ $('rtTags').innerHTML=RT_TAGS.map(t=>'<button class="rtag">'+t+'</button>').join('');
+ $('rtTags').addEventListener('click',e=>{const t=e.target.closest('.rtag');if(t)t.classList.toggle('on')});
+ $('btnRateNav').addEventListener('click',()=>{
+  $('modalSelesai').classList.remove('tampil');
+  rtNilai=0;renderStars();$('rtLbl').textContent='Ketuk bintang';$('rtKirim').disabled=true;
+  $('rtNama').textContent=bayar?bayar.pax:'—';
+  $('rtTags').querySelectorAll('.rtag').forEach(t=>t.classList.remove('on'));
+  $('modalRate').classList.add('tampil');
+});
+ $('rtLewati').addEventListener('click',()=>{$('modalRate').classList.remove('tampil');akhiriPerjalanan(true)});
+ $('rtKirim').addEventListener('click',()=>{
+  const tags=Array.from($('rtTags').querySelectorAll('.rtag.on')).map(t=>t.textContent);
+  const KEY='gc_profil';
+  let pf=null;try{pf=JSON.parse(localStorage.getItem(KEY))}catch(_){pf=null}
+  const d=pf||{};
+  const dist=Object.assign({5:0,4:0,3:0,2:0,1:0},d.distribusi||{});
+  dist[rtNilai]=(dist[rtNilai]||0)+1;
+  const tot=Object.values(dist).reduce((a,b)=>a+b,0);
+  const avg=Object.keys(dist).reduce((s,k)=>s+k*dist[k],0)/tot;
+  const upd={distribusi:dist,jumlahOrder:tot,rating:Math.round(avg*100)/100,
+    ulasan:[{nama:chatPax,bintang:rtNilai,teks:tags.join(', ')||'—'}].concat(d.ulasan||[]).slice(0,5),
+    updated:'baru saja'};
+  try{localStorage.setItem(KEY,JSON.stringify(upd))}catch(_){}
+  SYNC.simpan({profil:upd});
+  $('modalRate').classList.remove('tampil');
+  akhiriPerjalanan(true);
+});
+
+/* ================= AKHIRI PERJALANAN ================= */
+function akhiriPerjalanan(catat){
+  if(orderUnsubDrv){orderUnsubDrv();orderUnsubDrv=null}
+  document.body.classList.remove('di-nav');
+  hapusRute();
+  const b=document.getElementById('drvBub');if(b)b.classList.remove('nav');
+  if(chatUnsub){chatUnsub();chatUnsub=null}
+  if(orderAktif&&catat&&bayar){
+    const o=orderAktif,tot=bayar.total||o.tarif||0;
+    const now=new Date();
+    const PD_KEY='gc_pendapatan';
+    let pd=null;try{pd=JSON.parse(localStorage.getItem(PD_KEY))}catch(_){pd=null}
+    if(!pd||typeof pd!=='object')pd={};
+    const rw=[{waktu:now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),layanan:o.layanan||'GetCar',rute:(o.jemput.nama||'')+' → '+(o.antar.nama||''),jumlah:tot,tgl:isoHari(now)}].concat(pd.riwayat||[]).slice(0,60);
+    const key=isoHari(now);
+    const harian=Object.assign({},pd.harian||{});
+    const h=harian[key]||{jumlah:0,order:0};
+    h.jumlah+=tot;h.order+=1;harian[key]=h;
+    const upd={hariIni:(pd.hariIni||0)+tot,mingguIni:(pd.mingguIni||0)+tot,orderSelesai:(pd.orderSelesai||0)+1,riwayat:rw,harian:harian};
+    if(!bayar.tunai){
+      upd.dompet=(pd.dompet||0)+tot;
+      const trx=Object.assign([],pd.transaksi||[]);
+      trx.unshift({tgl:now.toLocaleDateString('id-ID',{day:'numeric',month:'short'})+' • '+now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),ket:'Pendapatan order '+(o.layanan||'GetCar'),jumlah:tot,tipe:'masuk'});
+      upd.transaksi=trx.slice(0,50);
+    }
+    try{localStorage.setItem(PD_KEY,JSON.stringify(upd))}catch(_){}
+    SYNC.simpan({pendapatan:upd});
+    /* beri tahu penumpang: perjalanan selesai */
+    if(orderDocId)_db.collection('order').doc(orderDocId).update({status:'selesai',selesai:Date.now(),total:tot}).catch(()=>{});
+  }
+  orderAktif=null;bayar=null;orderDocId=null;
+  toast('Perjalanan selesai — Terima kasih!');
+}
+
+/* ================= CHAT (subkoleksi 'chat' — sama dengan penumpang) ================= */
+function pasangChat(){
+  if(chatUnsub){chatUnsub();chatUnsub=null}
+  $('chatIsi').innerHTML='';
+  if(!orderDocId)return;
+  chatUnsub=_db.collection('order').doc(orderDocId).collection('chat').orderBy('waktu').limit(50)
+    .onSnapshot(s=>{
+      s.docChanges().forEach(ch=>{
+        if(ch.type==='added'){
+          const m=ch.doc.data();
+          if(m.dari==='driver')return; /* pesan sendiri sudah tampil */
+          $('chatIsi').insertAdjacentHTML('beforeend','<div class="pesan them">'+esc(m.teks||'')+'</div>');
+          $('chatIsi').scrollTop=1e6;
+        }
+      });
+    },()=>{});
+}
+ $('shChat').addEventListener('click',()=>{$('chatJudul').textContent='Chat — '+chatPax;$('modalChat').classList.add('tampil')});
+ $('drChat1').addEventListener('click',()=>{$('chatJudul').textContent='Chat — '+(orderAktif?(orderAktif.penumpang||'Penumpang'):'Penumpang');$('modalChat').classList.add('tampil')});
+ $('chatTutup').addEventListener('click',()=>$('modalChat').classList.remove('tampil'));
+function kirimChat(){
+  const v=$('chatInput').value.trim();if(!v)return;
+  $('chatIsi').insertAdjacentHTML('beforeend','<div class="pesan me">'+esc(v)+'</div>');
+  $('chatInput').value='';$('chatIsi').scrollTop=1e6;
+  if(orderDocId)_db.collection('order').doc(orderDocId).collection('chat').add({dari:'driver',teks:v,waktu:Date.now()}).catch(()=>{});
+}
+ $('chatKirim').addEventListener('click',kirimChat);
+ $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')kirimChat()});
+window.chatMasuk=function(teks){
+  $('chatIsi').insertAdjacentHTML('beforeend','<div class="pesan them">'+esc(teks)+'</div>');
+  $('chatIsi').scrollTop=1e6;
+};
+ $('drTel').addEventListener('click',()=>{
+  const t=orderAktif&&orderAktif.telepon;
+  if(t)location.href='tel:'+t;
+  else toast('Nomor penumpang tidak tersedia');
+});
+ $('drBack').addEventListener('click',()=>$('pageDetail').classList.remove('tampil'));
+
+/* ================= CUACA ================= */
+ $('fabCuaca').addEventListener('click',()=>{
+  $('cuacaIsi').innerHTML='<div class="memuat">Memuat…</div>';
+  $('modalCuaca').classList.add('tampil');
+  const loc=drvLatlng||BALI;
+  fetch('https://api.open-meteo.com/v1/forecast?latitude='+loc[0]+'&longitude='+loc[1]+'&current_weather=true')
+    .then(r=>r.json()).then(d=>{
+      const w=d.current_weather;
+      const kode={0:'Cerah ☀️',1:'Cerah berawan 🌤',2:'Berawan ⛅',3:'Mendung ☁️',45:'Berkabut 🌫',51:'Gerimis 🌦',61:'Hujan ringan 🌧',63:'Hujan 🌧',65:'Hujan lebat ⛈',80:'Hujan lokal 🌧',95:'Badai petir ⛈'};
+      $('cuacaIsi').innerHTML=
+        '<div class="r"><span>'+(kode[w.weathercode]||'Cuaca')+'</span><b style="color:#202124">'+w.temperature+'°C</b></div>'+
+        '<div class="r"><span>Kecepatan angin</span><b style="color:#202124">'+w.windspeed+' km/j</b></div>'+
+        '<div class="catatan" style="font-size:11px;color:#9aa0a6;text-align:center;margin-top:10px">Data live: Open-Meteo • lokasi Anda sekarang</div>';
+    }).catch(()=>{
+      $('cuacaIsi').innerHTML='<div class="memuat">Gagal memuat data cuaca. Periksa koneksi.</div>';
+    });
+});
+ $('modalTutup').addEventListener('click',()=>$('modalCuaca').classList.remove('tampil'));
+
+/* ================= NAV BAWAH → halaman terpisah ================= */
+document.querySelectorAll('.nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const hal=btn.dataset.hal;
+    if(hal==='Beranda')return;
+    location.href=hal;
+  });
+});
+
+window.addEventListener('beforeunload',()=>{try{localStorage.setItem('gc_online',online?'1':'0')}catch(_){}});
+</script>
 </body>
 </html>
