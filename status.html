@@ -8,13 +8,14 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-<!-- 🔥 Firebase — hanya Realtime Database -->
+<!-- 🔥 Firebase — Realtime Database -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
+  // Background foto (dimuat dulu supaya tidak kedip)
   const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
   const bg = new Image();
   bg.onload = () => document.body.classList.add("has-photo");
@@ -27,397 +28,417 @@
   :root {
     --navy: #0a1628;
     --accent: #2f7bff;
-    --accent-deep: #0f5ae0;
     --green: #2ecc71;
     --amber: #ffb84d;
+    --oranye: #ffa24a;
     --merah: #ff6b6b;
-    --white: #ffffff;
-    --glass: rgba(255, 255, 255, 0.10);
-    --glass-border: rgba(255, 255, 255, 0.22);
+    --glass: rgba(255,255,255,0.10);
+    --glass-border: rgba(255,255,255,0.22);
   }
 
   html, body { height: 100%; }
-
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--navy);
-    color: var(--white);
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
+    background: var(--navy); color: #fff;
+    display: flex; justify-content: center; overflow: hidden;
   }
-
   .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
-
   .hero {
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    position: relative; height: 100%; display: flex; flex-direction: column;
     background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
     overflow: hidden;
   }
-
   body.has-photo .hero {
     background-image:
       linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
       url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
-    background-size: cover;
-    background-position: center;
+    background-size: cover; background-position: center;
   }
-
   .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
   .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
   .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
 
   .navbar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
-    z-index: 10;
+    position: relative; display: flex; align-items: center;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px; z-index: 10;
   }
-
-  .brand {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 15px;
-    font-weight: 800;
-    white-space: nowrap;
-  }
+  .brand { position: absolute; left: 50%; transform: translateX(-50%); font-size: 15px; font-weight: 800; white-space: nowrap; }
   .brand span { color: var(--accent); }
-
   .version {
-    margin-left: auto;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.18);
-    padding: 5px 12px;
-    border-radius: 20px;
+    margin-left: auto; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+    padding: 5px 12px; border-radius: 20px;
   }
 
   .content {
-    position: relative;
-    z-index: 10;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative; z-index: 10; flex: 1;
+    display: flex; flex-direction: column; align-items: center;
     padding: 10px 26px calc(20px + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
-
-  /* 🔹 Logo */
   .logo-small {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
+    width: 64px; height: 64px; object-fit: contain;
     filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
     animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
     margin-bottom: 4px;
   }
-
   .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.75);
-    margin: 10px 0 8px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(255,255,255,0.75); margin: 10px 0 8px;
   }
-  .eyebrow::before {
-    content: "";
-    width: 22px; height: 2px;
-    background: var(--accent);
-    border-radius: 2px;
-  }
-
+  .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
   h1 {
-    font-size: clamp(24px, 6.5vw, 30px);
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
-    text-align: center;
+    font-size: clamp(24px, 6.5vw, 30px); font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.5px; margin-bottom: 8px; text-align: center;
     text-shadow: 0 2px 20px rgba(0,0,0,0.35);
   }
   h1 span {
     background: linear-gradient(90deg, #6db3ff, #2f7bff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
-
   .desc {
-    font-size: 14px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.75);
-    text-align: center;
-    max-width: 320px;
-    margin-bottom: 22px;
+    font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.75);
+    text-align: center; max-width: 320px; margin-bottom: 22px;
   }
-  .desc b { color: var(--white); }
+  .desc b { color: #fff; }
 
   /* ============================================================
-     ✅ IKON STATUS BESAR — berubah sesuai kondisi
-     ============================================================ */
+     IKON STATUS BESAR
+  ============================================================ */
   .status-icon {
-    width: 96px; height: 96px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    animation: pop 0.8s 0.2s ease both;
-    position: relative;
+    width: 96px; height: 96px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; animation: pop 0.8s 0.2s ease both; position: relative;
   }
   .status-icon svg { width: 44px; height: 44px; }
-
-  /* Menunggu — amber berdenyut */
   .status-icon.menunggu {
-    background: rgba(255, 184, 77, 0.14);
-    border: 2.5px solid var(--amber);
-    box-shadow: 0 0 30px rgba(255, 184, 77, 0.35);
+    background: rgba(255,184,77,0.14); border: 2.5px solid var(--amber);
+    box-shadow: 0 0 30px rgba(255,184,77,0.35);
   }
   .status-icon.menunggu svg { color: var(--amber); }
   .status-icon.menunggu::after {
-    content: "";
-    position: absolute;
-    inset: -2.5px;
-    border-radius: 50%;
-    border: 2.5px solid var(--amber);
-    animation: denyutRing 2s ease-out infinite;
+    content: ""; position: absolute; inset: -2.5px; border-radius: 50%;
+    border: 2.5px solid var(--amber); animation: denyutRing 2s ease-out infinite;
   }
-
-  /* Disetujui — hijau */
   .status-icon.disetujui {
-    background: rgba(46, 204, 113, 0.14);
-    border: 2.5px solid var(--green);
-    box-shadow: 0 0 34px rgba(46, 204, 113, 0.45);
+    background: rgba(46,204,113,0.14); border: 2.5px solid var(--green);
+    box-shadow: 0 0 34px rgba(46,204,113,0.45);
   }
   .status-icon.disetujui svg { color: var(--green); }
-
-  /* Ditunda/suspend — merah */
   .status-icon.ditunda {
-    background: rgba(255, 107, 107, 0.14);
-    border: 2.5px solid var(--merah);
-    box-shadow: 0 0 30px rgba(255, 107, 107, 0.35);
+    background: rgba(255,107,107,0.14); border: 2.5px solid var(--merah);
+    box-shadow: 0 0 30px rgba(255,107,107,0.35);
   }
   .status-icon.ditunda svg { color: var(--merah); }
-
-  @keyframes denyutRing {
-    0%   { transform: scale(1);   opacity: 0.7; }
-    100% { transform: scale(1.5); opacity: 0; }
+  .status-icon.perbaikan {
+    background: rgba(255,162,74,0.16); border: 2.5px solid var(--oranye);
+    box-shadow: 0 0 34px rgba(255,162,74,0.5);
   }
+  .status-icon.perbaikan svg { color: var(--oranye); }
+  .status-icon.perbaikan::after {
+    content: ""; position: absolute; inset: -2.5px; border-radius: 50%;
+    border: 2.5px solid var(--oranye); animation: denyutRing 1.2s ease-out infinite;
+  }
+  .status-icon.terkirim {
+    background: rgba(47,123,255,0.14); border: 2.5px solid var(--accent);
+    box-shadow: 0 0 34px rgba(47,123,255,0.45);
+  }
+  .status-icon.terkirim svg { color: #6db3ff; }
+  @keyframes denyutRing { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
 
   /* ============================================================
-     📋 KARTU STATUS UTAMA
-     ============================================================ */
+     KARTU STATUS
+  ============================================================ */
   .status-card {
-    width: 100%;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
+    width: 100%; background: var(--glass); border: 1px solid var(--glass-border);
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border-radius: 24px;
-    padding: 24px 22px;
+    border-radius: 24px; padding: 24px 22px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.35);
     animation: fadeUp 0.7s 0.4s ease both;
   }
+  .status-judul { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; text-align: center; margin-bottom: 6px; }
+  .status-sub { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 20px; }
 
-  .status-judul {
-    font-size: 19px;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    text-align: center;
-    margin-bottom: 6px;
-  }
-
-  .status-sub {
-    font-size: 13.5px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.7);
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  /* Pil status berwarna */
   .status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-size: 14px;
-    font-weight: 700;
-    margin: 0 auto 22px;
-    display: flex;
-    width: fit-content;
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 10px 20px; border-radius: 40px; font-size: 14px; font-weight: 700;
+    margin: 0 auto 22px; display: flex; width: fit-content;
   }
-  .status-pill .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    animation: denyutDot 1.4s ease-in-out infinite;
-  }
-  .sp-amber { background: rgba(255,184,77,0.14);  border: 1.5px solid var(--amber);  color: var(--amber); }
+  .status-pill .dot { width: 10px; height: 10px; border-radius: 50%; animation: denyutDot 1.4s ease-in-out infinite; }
+  .sp-amber  { background: rgba(255,184,77,0.14);  border: 1.5px solid var(--amber);  color: var(--amber); }
   .sp-amber .dot { background: var(--amber); }
-  .sp-hijau { background: rgba(46,204,113,0.14);  border: 1.5px solid var(--green);  color: var(--green); }
+  .sp-hijau  { background: rgba(46,204,113,0.14);  border: 1.5px solid var(--green);  color: var(--green); }
   .sp-hijau .dot { background: var(--green); animation: none; }
-  .sp-merah { background: rgba(255,107,107,0.14); border: 1.5px solid var(--merah); color: var(--merah); }
+  .sp-merah  { background: rgba(255,107,107,0.14); border: 1.5px solid var(--merah); color: var(--merah); }
   .sp-merah .dot { background: var(--merah); animation: none; }
-
-  @keyframes denyutDot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: 0.4; transform: scale(0.75); }
-  }
-
-  /* ============================================================
-     📶 TIMELINE LANGKAH PENDAFTARAN
-     ============================================================ */
-  .timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .tl-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    padding: 7px 0;
-  }
-
-  /* Garis vertikal penghubung */
-  .tl-item:not(:last-child)::before {
-    content: "";
-    position: absolute;
-    left: 15px;
-    top: 34px;
-    bottom: -12px;
-    width: 2px;
-    background: rgba(46, 204, 113, 0.35);
-  }
-
-  .tl-check {
-    width: 32px; height: 32px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(46, 204, 113, 0.15);
-    border: 1.5px solid var(--green);
-    z-index: 1;
-  }
-  .tl-check svg {
-    width: 15px; height: 15px;
-    color: var(--green);
-  }
-
-  .tl-teks {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.85);
-  }
-  .tl-teks small {
-    display: block;
-    font-size: 11px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.45);
-    margin-top: 1px;
-  }
+  .sp-oranye { background: rgba(255,162,74,0.16);  border: 1.5px solid var(--oranye); color: var(--oranye); }
+  .sp-oranye .dot { background: var(--oranye); }
+  .sp-biru   { background: rgba(47,123,255,0.14);  border: 1.5px solid var(--accent); color: #6db3ff; }
+  .sp-biru .dot { background: #6db3ff; animation: none; }
+  @keyframes denyutDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.75); } }
 
   /* ============================================================
-     ℹ️ INFO & KONTAK
-     ============================================================ */
-  .info-box {
+     KARTU PERMINTAAN PERBAIKAN
+  ============================================================ */
+  .perbaikan-card {
     width: 100%;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    background: rgba(47,123,255,0.12);
-    border: 1px solid rgba(47,123,255,0.30);
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-top: 18px;
+    background: rgba(255,162,74,0.10); border: 1.5px solid rgba(255,162,74,0.5);
+    border-radius: 22px; padding: 20px 18px; margin-bottom: 18px;
+    animation: fadeUp 0.6s ease both, getarMasuk 0.5s 0.3s ease;
+    box-shadow: 0 14px 40px rgba(255,162,74,0.15);
+  }
+  @keyframes getarMasuk {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
+  }
+  .perbaikan-card.lewat-tenggat { background: rgba(255,107,107,0.10); border-color: rgba(255,107,107,0.55); }
+  .perbaikan-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .perbaikan-head h3 { font-size: 15.5px; font-weight: 800; flex: 1; line-height: 1.3; }
+  .urgensi-badge {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 4px 11px; border-radius: 14px; white-space: nowrap;
+    background: rgba(255,162,74,0.18); color: #ffb86b; border: 1px solid rgba(255,162,74,0.45);
+  }
+  .urgensi-badge.mendesak { background: rgba(255,107,107,0.18); color: #ff9b9b; border-color: rgba(255,107,107,0.5); }
+  .perbaikan-meta { font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,0.55); margin-bottom: 12px; }
+  .perbaikan-meta b { color: #ffb86b; }
+  .perbaikan-meta .lewat { color: #ff9b9b; }
+  .fix-label { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+  .fix-items { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+  .fix-items span {
+    font-size: 12px; font-weight: 700; padding: 7px 13px; border-radius: 20px;
+    background: rgba(255,162,74,0.15); color: #ffb86b; border: 1px solid rgba(255,162,74,0.4);
+  }
+  .fix-catatan {
+    background: rgba(0,0,0,0.25); border-left: 3px solid var(--oranye);
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.85); margin-bottom: 16px;
+  }
+  .fix-catatan b { color: #ffb86b; }
+  .fix-btn {
+    width: 100%; border: none; border-radius: 16px; padding: 16px;
+    font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+    background: linear-gradient(135deg, var(--oranye), #e07b1f);
+    color: #fff; box-shadow: 0 10px 26px rgba(255,162,74,0.4);
+    transition: transform 0.15s ease;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+  }
+  .fix-btn:active { transform: scale(0.97); }
+  .fix-btn svg { width: 18px; height: 18px; }
+
+  /* ============================================================
+     TIMELINE
+  ============================================================ */
+  .timeline { display: flex; flex-direction: column; }
+  .tl-item { display: flex; align-items: center; gap: 14px; position: relative; padding: 7px 0; }
+  .tl-item:not(:last-child)::before {
+    content: ""; position: absolute; left: 15px; top: 34px; bottom: -12px;
+    width: 2px; background: rgba(46,204,113,0.35);
+  }
+  .tl-check {
+    width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(46,204,113,0.15); border: 1.5px solid var(--green); z-index: 1;
+  }
+  .tl-check svg { width: 15px; height: 15px; color: var(--green); }
+  .tl-teks { font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.85); }
+  .tl-teks small { display: block; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+  .info-box {
+    width: 100%; display: flex; align-items: flex-start; gap: 12px;
+    background: rgba(47,123,255,0.12); border: 1px solid rgba(47,123,255,0.30);
+    border-radius: 16px; padding: 14px 16px; margin-top: 18px;
     animation: fadeUp 0.7s 0.55s ease both;
   }
   .info-box svg { width: 20px; height: 20px; flex-shrink: 0; color: #6db3ff; margin-top: 1px; }
   .info-box p { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.85); }
-  .info-box b { color: var(--white); }
+  .info-box b { color: #fff; }
 
   .refresh-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 11px 24px;
-    border: 1.5px solid rgba(255,255,255,0.25);
-    border-radius: 40px;
-    background: rgba(255,255,255,0.08);
-    color: var(--white);
-    font-family: inherit;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 16px; padding: 11px 24px;
+    border: 1.5px solid rgba(255,255,255,0.25); border-radius: 40px;
+    background: rgba(255,255,255,0.08); color: #fff;
+    font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
     transition: background 0.2s ease, transform 0.15s ease;
     animation: fadeUp 0.7s 0.65s ease both;
   }
-  .refresh-btn:hover  { background: rgba(255,255,255,0.15); }
+  .refresh-btn:hover { background: rgba(255,255,255,0.15); }
   .refresh-btn:active { transform: scale(0.96); }
   .refresh-btn svg { width: 15px; height: 15px; }
 
-  .copyright {
-    margin-top: auto;
-    padding-top: 24px;
-    text-align: center;
-    font-size: 11px;
-    color: rgba(255,255,255,0.45);
-    user-select: none;
-  }
+  .copyright { margin-top: auto; padding-top: 24px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.45); user-select: none; }
+
+  .confetti { position: fixed; top: -10px; width: 10px; height: 14px; z-index: 500; border-radius: 2px; animation: jatuh linear forwards; }
+  @keyframes jatuh { to { transform: translateY(105vh) rotate(720deg); opacity: 0.6; } }
 
   /* ============================================================
-     🎉 KONFETI saat disetujui
-     ============================================================ */
-  .confetti {
-    position: fixed;
-    top: -10px;
-    width: 10px;
-    height: 14px;
-    z-index: 500;
-    border-radius: 2px;
-    animation: jatuh linear forwards;
+     ⭐ PANEL PERBAIKAN (di halaman yang sama)
+  ============================================================ */
+  .panel-overlay {
+    position: fixed; inset: 0; z-index: 600;
+    background: rgba(3,8,18,0.75); backdrop-filter: blur(6px);
+    display: flex; justify-content: center; align-items: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.28s ease;
   }
-  @keyframes jatuh {
-    to { transform: translateY(105vh) rotate(720deg); opacity: 0.6; }
+  .panel-overlay.active { opacity: 1; pointer-events: auto; }
+  .panel {
+    width: 100%; max-width: 430px; height: 94dvh;
+    background: linear-gradient(170deg, #10233f 0%, #0a1628 60%);
+    border: 1px solid var(--glass-border); border-bottom: none;
+    border-radius: 26px 26px 0 0;
+    display: flex; flex-direction: column;
+    transform: translateY(105%);
+    transition: transform 0.38s cubic-bezier(0.22,1,0.36,1);
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
+  }
+  .panel-overlay.active .panel { transform: translateY(0); }
+  .panel-grip { width: 44px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.25); margin: 10px auto 2px; flex-shrink: 0; }
+  .panel-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+  }
+  .panel-head h2 { font-size: 16.5px; font-weight: 800; flex: 1; line-height: 1.3; }
+  .panel-close {
+    width: 34px; height: 34px; flex-shrink: 0;
+    border-radius: 11px; border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08); color: #fff; font-size: 15px; cursor: pointer;
+  }
+  .panel-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px 20px calc(20px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; gap: 13px;
+  }
+  .panel-banner {
+    border-radius: 18px; padding: 15px;
+    border: 1.5px solid rgba(255,162,74,0.5); background: rgba(255,162,74,0.10);
+  }
+  .panel-banner.mendesak { border-color: rgba(255,107,107,0.55); background: rgba(255,107,107,0.10); }
+  .panel-banner .pb-meta { font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,0.55); margin-bottom: 9px; }
+  .panel-banner .pb-meta b { color: #ffb86b; }
+  .panel-banner .pb-meta .lewat { color: #ff9b9b; }
+  .panel-banner .pb-catatan {
+    background: rgba(0,0,0,0.25); border-left: 3px solid var(--oranye);
+    border-radius: 9px; padding: 10px 12px;
+    font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.85);
+  }
+  .panel-banner .pb-catatan b { color: #ffb86b; }
+
+  .progres {
+    position: sticky; top: 0; z-index: 5;
+    background: rgba(13,27,50,0.95); backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px; padding: 11px 14px;
+    display: flex; align-items: center; gap: 11px;
+  }
+  .progres-teks { font-size: 12px; font-weight: 800; white-space: nowrap; }
+  .progres-teks b { color: var(--oranye); font-size: 15px; }
+  .progres-track { flex: 1; height: 7px; background: rgba(255,255,255,0.12); border-radius: 4px; overflow: hidden; }
+  .progres-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--oranye), #e07b1f);
+    border-radius: 4px; transition: width 0.4s cubic-bezier(0.22,1,0.36,1), background 0.3s ease;
+  }
+  .progres-fill.penuh { background: linear-gradient(90deg, var(--green), #1fa06a); }
+
+  .field-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; margin-bottom: 7px; flex-wrap: wrap; }
+  .tanda {
+    font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px;
+    padding: 2.5px 8px; border-radius: 10px;
+    background: rgba(255,162,74,0.16); color: #ffb86b;
+    border: 1px solid rgba(255,162,74,0.4); white-space: nowrap;
+  }
+  .field input, .field textarea {
+    width: 100%; background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 13px; padding: 12px 14px;
+    color: #fff; font-family: inherit; font-size: 14.5px; font-weight: 600; outline: none;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--oranye); box-shadow: 0 0 0 4px rgba(255,162,74,0.18); }
+  .field input.salah { border-color: var(--merah); box-shadow: 0 0 0 4px rgba(255,107,107,0.15); }
+  .field .hint { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 5px; font-weight: 600; }
+  .field .err { font-size: 11px; color: #ff9b9b; margin-top: 5px; font-weight: 700; display: none; }
+
+  .upload-box {
+    border: 1.5px dashed rgba(255,162,74,0.5); background: rgba(255,162,74,0.06);
+    border-radius: 16px; padding: 13px; transition: all 0.2s ease;
+  }
+  .upload-box.terisi { border-style: solid; border-color: rgba(46,204,113,0.55); background: rgba(46,204,113,0.07); }
+  .upload-row { display: flex; gap: 12px; align-items: flex-start; }
+  .upload-foto { position: relative; flex-shrink: 0; }
+  .upload-foto img {
+    width: 92px; height: 72px; object-fit: cover;
+    border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.3); display: block;
+  }
+  .upload-foto img.baru { border: 2px solid var(--green); box-shadow: 0 0 12px rgba(46,204,113,0.4); }
+  .upload-foto .tag {
+    position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%);
+    font-size: 8.5px; font-weight: 800; letter-spacing: 0.5px;
+    padding: 2px 8px; border-radius: 8px; white-space: nowrap;
+    background: rgba(0,0,0,0.75); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2);
+  }
+  .upload-foto .tag.baru { background: var(--green); color: #fff; border-color: var(--green); }
+  .upload-foto .no-foto {
+    width: 92px; height: 72px; border-radius: 12px;
+    border: 1.5px dashed rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9.5px; color: rgba(255,255,255,0.35); font-weight: 700; text-align: center;
+  }
+  .upload-kanan { flex: 1; min-width: 0; }
+  .upload-kanan p { font-size: 11.5px; line-height: 1.5; color: rgba(255,255,255,0.6); font-weight: 600; margin-bottom: 9px; }
+  .btn-pilih {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,162,74,0.15); border: 1px solid rgba(255,162,74,0.45);
+    color: #ffb86b; font-family: inherit; font-size: 12.5px; font-weight: 800;
+    padding: 10px 16px; border-radius: 12px; cursor: pointer; transition: background 0.2s ease;
+  }
+  .btn-pilih:hover { background: rgba(255,162,74,0.28); }
+  .btn-pilih svg { width: 14px; height: 14px; }
+
+  .panel-kirim {
+    margin-top: 6px; width: 100%; border: none; border-radius: 16px; padding: 16px;
+    font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+    background: linear-gradient(135deg, var(--oranye), #e07b1f);
+    color: #fff; box-shadow: 0 10px 26px rgba(255,162,74,0.4);
+    transition: transform 0.15s ease, opacity 0.2s ease;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+  }
+  .panel-kirim:active { transform: scale(0.97); }
+  .panel-kirim:disabled { opacity: 0.5; cursor: not-allowed; }
+  .panel-kirim svg { width: 18px; height: 18px; }
+  .panel-kirim-info { text-align: center; font-size: 11px; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: -3px; }
+
+  .panel-sukses { text-align: center; padding: 30px 12px 10px; display: none; flex-direction: column; align-items: center; }
+  .panel-sukses.tampil { display: flex; animation: fadeUp 0.45s ease both; }
+  .panel-sukses .ikon {
+    width: 90px; height: 90px; margin-bottom: 16px; border-radius: 50%;
+    background: rgba(46,204,113,0.14); border: 2.5px solid var(--green);
+    box-shadow: 0 0 34px rgba(46,204,113,0.45);
+    display: flex; align-items: center; justify-content: center;
+    animation: pop 0.7s ease both;
+  }
+  .panel-sukses .ikon svg { width: 42px; height: 42px; color: var(--green); }
+  .panel-sukses h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+  .panel-sukses p { font-size: 13.5px; line-height: 1.65; color: rgba(255,255,255,0.7); max-width: 300px; margin-bottom: 18px; }
+  .panel-sukses p b { color: #fff; }
+  .panel-sukses button {
+    border: 1.5px solid rgba(255,255,255,0.25); border-radius: 40px;
+    padding: 12px 28px; background: rgba(255,255,255,0.08); color: #fff;
+    font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
   }
 
-  /* 🔹 Animasi */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes pop {
-    from { opacity: 0; transform: scale(0.7); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-6px); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .navbar    { animation: fadeUp 0.6s ease both; }
-  .eyebrow   { animation: fadeUp 0.7s 0.2s ease both; }
-  h1         { animation: fadeUp 0.7s 0.3s ease both; }
-  .desc      { animation: fadeUp 0.7s 0.35s ease both; }
+  .navbar  { animation: fadeUp 0.6s ease both; }
+  .eyebrow { animation: fadeUp 0.7s 0.2s ease both; }
+  h1       { animation: fadeUp 0.7s 0.3s ease both; }
+  .desc    { animation: fadeUp 0.7s 0.35s ease both; }
 
   @media (max-width: 360px) {
     .content { padding-left: 20px; padding-right: 20px; }
@@ -437,7 +458,7 @@
       <nav class="navbar">
         <div style="width:60px"></div>
         <div class="brand">Get <span>Car</span></div>
-        <div class="version">V1.103.1</div>
+        <div class="version">V1.107.0</div>
       </nav>
 
       <div class="content">
@@ -448,32 +469,31 @@
         <h1 id="judulUtama">Pendaftaran <span>Berhasil Dikirim!</span></h1>
         <p class="desc" id="descUtama">Selamat! Semua data dan dokumen kamu sudah kami terima lengkap.</p>
 
-        <!-- 🔹 Ikon status besar (berubah realtime) -->
+        <!-- Ikon status besar -->
         <div class="status-icon menunggu" id="statusIcon">
-          <!-- Ikon jam (menunggu) -->
           <svg id="icoMenunggu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <!-- Ikon centang (disetujui) — disembunyikan dulu -->
           <svg id="icoSetuju" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <!-- Ikon peringatan (ditunda) — disembunyikan dulu -->
           <svg id="icoTunda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg id="icoPerbaikan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg id="icoTerkirim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </div>
 
-        <!-- 🔹 Kartu status -->
+        <!-- Kartu permintaan perbaikan -->
+        <div class="perbaikan-card" id="perbaikanCard" style="display:none"></div>
+
+        <!-- Kartu status -->
         <div class="status-card">
           <div class="status-pill sp-amber" id="statusPill">
             <span class="dot"></span>
-            <span id="pillText">Menunggu Verifikasi Admin</span>
+            <span id="pillText">Menunggu Verifikasi</span>
           </div>
-
           <div class="status-judul" id="cardJudul">Dokumen Sedang Ditinjau</div>
           <p class="status-sub" id="cardSub">
             Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini biasanya
             memakan waktu <b>1×24 jam</b> pada hari kerja. Kamu akan dihubungi
             melalui nomor telepon yang terdaftar.
           </p>
-
-          <!-- 📶 Timeline langkah selesai -->
-          <div class="timeline">
+          <div class="timeline" id="timelineEl">
             <div class="tl-item">
               <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
               <div class="tl-teks">Verifikasi Nomor & OTP<small>Nomor telepon terkonfirmasi</small></div>
@@ -497,7 +517,6 @@
           </div>
         </div>
 
-        <!-- 🔹 Info bantuan -->
         <div class="info-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           <p>Halaman ini <b>otomatis diperbarui</b> saat admin memverifikasi. Simpan atau bookmark halaman ini untuk cek status kapan saja.</p>
@@ -514,8 +533,20 @@
     </div>
   </div>
 
+  <!-- ⭐ PANEL PERBAIKAN -->
+  <div class="panel-overlay" id="panelOverlay">
+    <div class="panel">
+      <div class="panel-grip"></div>
+      <div class="panel-head" id="panelHead">
+        <h2>🔧 Perbaiki Pendaftaran</h2>
+        <button class="panel-close" data-tutup>✕</button>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+    </div>
+  </div>
+
 <script>
-  // ================= KONFIGURASI FIREBASE =================
+  // ================= FIREBASE =================
   const firebaseConfig = {
     apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
     authDomain: "kadek-ed34e.firebaseapp.com",
@@ -528,29 +559,115 @@
   const db = firebase.database();
 
   // ================= ELEMEN =================
-  const judulUtama = document.getElementById("judulUtama");
-  const descUtama  = document.getElementById("descUtama");
-  const statusIcon = document.getElementById("statusIcon");
-  const icoMenunggu = document.getElementById("icoMenunggu");
-  const icoSetuju   = document.getElementById("icoSetuju");
-  const icoTunda    = document.getElementById("icoTunda");
-  const statusPill  = document.getElementById("statusPill");
-  const pillText    = document.getElementById("pillText");
-  const cardJudul   = document.getElementById("cardJudul");
-  const cardSub     = document.getElementById("cardSub");
+  const judulUtama   = document.getElementById("judulUtama");
+  const descUtama    = document.getElementById("descUtama");
+  const statusIcon   = document.getElementById("statusIcon");
+  const icoMenunggu  = document.getElementById("icoMenunggu");
+  const icoSetuju    = document.getElementById("icoSetuju");
+  const icoTunda     = document.getElementById("icoTunda");
+  const icoPerbaikan = document.getElementById("icoPerbaikan");
+  const icoTerkirim  = document.getElementById("icoTerkirim");
+  const statusPill   = document.getElementById("statusPill");
+  const pillText     = document.getElementById("pillText");
+  const cardJudul    = document.getElementById("cardJudul");
+  const cardSub      = document.getElementById("cardSub");
+  const perbaikanCard= document.getElementById("perbaikanCard");
+  const timelineEl   = document.getElementById("timelineEl");
+  const panelOverlay = document.getElementById("panelOverlay");
+  const panelBody    = document.getElementById("panelBody");
+  const panelHead    = document.getElementById("panelHead");
 
-  // ================= AMBIL NOMOR DARI URL =================
+  // ================= STATE =================
+  let kunciPendaftaran = null;
+  let dataSekarang     = null;
+  let fileBaru         = {};
+  let sudahJalanServer = false;   // guard agar fallback tidak dobel pasang
+
+  // ================= URL =================
   const params  = new URLSearchParams(window.location.search);
   let telepon = (params.get("telepon") || "").trim();
-
-  // Normalisasi ke +62...
   if (telepon.startsWith("0"))       telepon = "+62" + telepon.slice(1);
   else if (telepon.startsWith("62")) telepon = "+" + telepon;
   else if (telepon.startsWith("8"))  telepon = "+62" + telepon;
-
   console.log("📱 Melihat status untuk:", telepon);
 
-  // ================= KONFETI SAAT DISETUJUI =================
+  // ================= LABEL & KONSTANTA =================
+  const LABEL_ITEM = {
+    nama:"Nama", telepon:"Telepon", email:"Email", wilayah:"Wilayah", password:"Password",
+    ktp:"Foto KTP", selfie:"Foto Selfie", sim:"Foto SIM", stnk:"Foto STNK",
+    kendaraan:"Foto Kendaraan", rekening:"Foto Rekening", skck:"Foto SKCK", koperasi:"Foto Koperasi"
+  };
+  const LABEL_URGENSI = { rendah:"🟢 Rendah", normal:"🟡 Normal", tinggi:"🟠 Tinggi", mendesak:"🔴 Mendesak" };
+  const FIELD_TEKS = {
+    nama:     { tipe:"text",     label:"Nama Lengkap",        hint:"Sesuai KTP" },
+    telepon:  { tipe:"tel",      label:"Nomor Telepon",       hint:"Aktif & bisa dihubungi" },
+    email:    { tipe:"email",    label:"Alamat Email",        hint:"Email yang valid" },
+    wilayah:  { tipe:"text",     label:"Wilayah Operasional", hint:"Kota/kabupaten kerja" },
+    password: { tipe:"password", label:"Password Akun",       hint:"Minimal 6 karakter" }
+  };
+  const FIELD_DOK = {
+    ktp:       { label:"Foto KTP",            hint:"Jelas, tidak buram, semua nomor terbaca" },
+    selfie:    { label:"Foto Selfie",         hint:"Wajah penuh terlihat, latar terang" },
+    sim:       { label:"Foto SIM",            hint:"SIM masih berlaku, tidak terpotong" },
+    stnk:      { label:"Foto STNK",           hint:"Nama & plat sesuai kendaraan" },
+    kendaraan: { label:"Foto Kendaraan",      hint:"Tampak jelas, plat nomor terbaca" },
+    rekening:  { label:"Foto Rekening",       hint:"Buku tabungan/kartu atas nama sendiri" },
+    skck:      { label:"Foto SKCK",           hint:"Masih berlaku (maks. 6 bulan)" },
+    koperasi:  { label:"Foto Kartu Koperasi", hint:"Kartu koperasi yang masih aktif" }
+  };
+  // Alias nama field lama (data lama bisa punya nama beda)
+  const ALIAS = {
+    ktp:["dok_ktp","foto_ktp"], selfie:["selvi","foto_selfie"],
+    sim:["foto_sim","dok_sim"], stnk:["foto_stnk","dok_stnk"],
+    kendaraan:["mobil","foto_kendaraan","foto_mobil"],
+    rekening:["rek","rekening_foto","buku_rekening","dok_rekening"],
+    skck:["foto_skck","dok_skck"],
+    koperasi:["koperasi_foto","dok_koperasi","surat_koperasi"]
+  };
+  function fotoLama(d, k) {
+    for (const kk of [k, ...(ALIAS[k] || [])]) {
+      if (d[kk] && d[kk] !== "-" && String(d[kk]).length > 20) return d[kk];
+    }
+    return null;
+  }
+
+  // ============================================================
+  // ⭐ ANTI-ALARM BERULANG (tersimpan permanen → tahan refresh & tutup)
+  // ============================================================
+  function sudahDiingatkan(ts) {
+    return ts <= parseInt(localStorage.getItem("gc_notif_perbaikan_ts") || "0", 10);
+  }
+  function tandaiDiingatkan(ts) {
+    localStorage.setItem("gc_notif_perbaikan_ts", String(ts));
+  }
+  function sudahDirayakan(ts) {
+    return ts <= parseInt(localStorage.getItem("gc_notif_setuju_ts") || "0", 10);
+  }
+  function tandaiDirayakan(ts) {
+    localStorage.setItem("gc_notif_setuju_ts", String(ts));
+  }
+
+  // ================= ALARM (bunyi + getar) =================
+  function alarmPerbaikan() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let t = ctx.currentTime;
+      for (let i = 0; i < 3; i++) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.value = 700 + i * 150;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.3, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.4);
+        t += 0.45;
+      }
+    } catch (e) { /* audio diblokir browser — abaikan */ }
+    if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+  }
+
+  // ================= KONFETI =================
   function hujanKonfeti() {
     const warna = ["#2ecc71", "#2f7bff", "#ffb84d", "#ff6b6b", "#7ee2a8", "#6db3ff"];
     for (let i = 0; i < 60; i++) {
@@ -565,16 +682,393 @@
     }
   }
 
-  // ================= TAMPILKAN STATUS SESUAI KONDISI =================
-  function tampilkanStatus(status) {
-    // Reset dulu
-    statusIcon.classList.remove("menunggu", "disetujui", "ditunda");
-    statusPill.classList.remove("sp-amber", "sp-hijau", "sp-merah");
+  function waktuRelatif(ts) {
+    if (!ts) return "";
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return "baru saja";
+    const m = Math.floor(s / 60); if (m < 60) return m + " menit lalu";
+    const j = Math.floor(m / 60); if (j < 24) return j + " jam lalu";
+    return Math.floor(j / 24) + " hari lalu";
+  }
+
+  // ============================================================
+  // ⭐⭐ TOMBOL "PERBAIKI SEKARANG" → BUKA PANEL DI HALAMAN INI
+  // ============================================================
+  function perbaikiSekarang() {
+    console.log("🔧 Tombol perbaiki diklik. dataSekarang:", !!dataSekarang);
+    if (!dataSekarang || !dataSekarang.perbaikan) {
+      alert("Data perbaikan belum termuat. Periksa koneksi lalu muat ulang halaman.");
+      return;
+    }
+    bukaPanelPerbaikan();
+  }
+
+  function bukaPanelPerbaikan() {
+    const p = dataSekarang.perbaikan;
+    const items = Object.keys(p.item || {}).filter(k => LABEL_ITEM[k]);
+    if (!items.length) { alert("Tidak ada item perbaikan yang terdaftar."); return; }
+
+    fileBaru = {};
+    panelHead.innerHTML =
+      `<h2>🔧 Perbaiki ${items.length} Data</h2>
+       <button class="panel-close" data-tutup>✕</button>`;
+
+    // ---- Banner: urgensi, tenggat, catatan ----
+    const urg = p.urgensi || "normal";
+    const lewatTenggat = p.tenggat_ts && p.tenggat_ts < Date.now();
+    let meta = `Permintaan ke-${p.putaran || 1} • ${waktuRelatif(p.waktu_diminta)}`;
+    if (p.tenggat_ts) {
+      const sisa = Math.ceil((p.tenggat_ts - Date.now()) / 86400000);
+      meta += lewatTenggat
+        ? ` • <span class="lewat">⛔ Batas waktu lewat — segera perbaiki!</span>`
+        : ` • ⏰ sisa <b>${sisa} hari</b>`;
+    }
+
+    let html = `
+      <div class="panel-banner ${urg === "mendesak" || lewatTenggat ? "mendesak" : ""}">
+        <div class="pb-meta">${meta}</div>
+        ${p.catatan ? `<div class="pb-catatan"><b>📝 Catatan admin:</b><br>${p.catatan}</div>` : ""}
+      </div>
+      <div class="progres">
+        <span class="progres-teks"><b id="progNum">0</b>/<span>${items.length}</span></span>
+        <div class="progres-track"><div class="progres-fill" id="progFill"></div></div>
+        <span style="font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.5)">selesai</span>
+      </div>
+      <div class="fix-label">Isi / unggah ulang hanya yang diminta:</div>`;
+
+    // ---- Field dinamis: HANYA item yang ditandai admin ----
+    items.forEach(k => {
+      if (FIELD_TEKS[k]) {
+        const f = FIELD_TEKS[k];
+        html += `
+        <div class="field" data-item="${k}">
+          <div class="field-label">${f.label} <span class="tanda">Wajib diperbaiki</span></div>
+          <input type="${f.tipe}" id="fix-${k}" value="${String(dataSekarang[k] || "").replace(/"/g,"&quot;")}" />
+          <div class="hint">${f.hint}</div>
+          <div class="err" id="err-${k}">Kolom ini wajib diisi.</div>
+        </div>`;
+      } else if (FIELD_DOK[k]) {
+        const f = FIELD_DOK[k];
+        const lama = fotoLama(dataSekarang, k);
+        html += `
+        <div class="field" data-item="${k}">
+          <div class="field-label">${f.label} <span class="tanda">Wajib unggah ulang</span></div>
+          <div class="upload-box" id="box-${k}">
+            <div class="upload-row">
+              <div class="upload-foto">
+                ${lama
+                  ? `<img src="${lama}" id="img-${k}" alt="${f.label}" /><span class="tag" id="tag-${k}">FOTO LAMA</span>`
+                  : `<div class="no-foto">BELUM ADA<br>FOTO</div>`}
+              </div>
+              <div class="upload-kanan">
+                <p>${f.hint}</p>
+                <button type="button" class="btn-pilih" id="btn-${k}" data-pilih="${k}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  ${lama ? "Ganti Foto" : "Pilih Foto"}
+                </button>
+                <input type="file" accept="image/*" id="file-${k}" style="display:none" />
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }
+    });
+
+    html += `
+      <button class="panel-kirim" id="btnKirimPanel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span id="btnKirimTeks">Kirim Perbaikan</span>
+      </button>
+      <div class="panel-kirim-info">Setelah dikirim, admin akan memverifikasi ulang (±1×24 jam).</div>
+      <div class="panel-sukses" id="panelSukses">
+        <div class="ikon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>Perbaikan Terkirim! 🎉</h3>
+        <p>Semua data yang diperbaiki sudah <b>berhasil diunggah ulang</b>. Status di halaman ini otomatis berubah menjadi <b>"Perbaikan Terkirim"</b>.</p>
+        <button data-tutup>📋 Lihat Status</button>
+      </div>`;
+
+    panelBody.innerHTML = html;
+    panelBody.scrollTop = 0;
+
+    // ---- Handler file: validasi + kompres + preview + progres ----
+    items.forEach(k => {
+      if (!FIELD_DOK[k]) return;
+      const input = document.getElementById("file-" + k);
+      input.addEventListener("change", async () => {
+        const file = input.files[0];
+        if (!file) return;
+        if (!file.type || !file.type.startsWith("image/")) {
+          alert("❌ File harus gambar (JPG/PNG).\nFoto iPhone HEIC? Screenshot dulu, lalu unggah hasilnya.");
+          input.value = "";
+          return;
+        }
+        if (file.size > 15 * 1024 * 1024) {
+          alert("❌ Foto terlalu besar (maks 15 MB).");
+          input.value = "";
+          return;
+        }
+        const btn = document.getElementById("btn-" + k);
+        const teksAsli = btn.innerHTML;
+        btn.innerHTML = "⏳ Memproses...";
+        try {
+          const dataUrl = await kompresGambar(file);
+          fileBaru[k] = dataUrl;
+          const box = document.getElementById("box-" + k);
+          box.classList.add("terisi");
+          box.querySelector(".upload-foto").innerHTML =
+            `<img src="${dataUrl}" class="baru" /><span class="tag baru">✓ FOTO BARU</span>`;
+          btn.innerHTML = "🔄 Ganti Lagi";
+          perbaruiProgres();
+        } catch (e) {
+          alert("Gagal memproses gambar: " + e.message);
+          btn.innerHTML = teksAsli;
+        }
+      });
+    });
+
+    // ---- Handler teks: hapus error + update progres ----
+    items.forEach(k => {
+      if (!FIELD_TEKS[k]) return;
+      document.getElementById("fix-" + k).addEventListener("input", () => {
+        const el = document.getElementById("fix-" + k);
+        if (el.value.trim()) {
+          el.classList.remove("salah");
+          document.getElementById("err-" + k).style.display = "none";
+        }
+        perbaruiProgres();
+      });
+    });
+
+    document.getElementById("btnKirimPanel").onclick = kirimPerbaikan;
+    panelOverlay.classList.add("active");
+    perbaruiProgres();
+  }
+
+  function tutupPanel() { panelOverlay.classList.remove("active"); }
+
+  // ⭐ EVENT DELEGATION — semua tombol penting pasti merespons
+  document.addEventListener("click", e => {
+    const perbaikiBtn = e.target.closest("[data-perbaiki]");
+    if (perbaikiBtn) { perbaikiSekarang(); return; }
+    const pilihBtn = e.target.closest("[data-pilih]");
+    if (pilihBtn) {
+      const f = document.getElementById("file-" + pilihBtn.dataset.pilih);
+      if (f) f.click();
+      return;
+    }
+    if (e.target.closest("[data-tutup]")) { tutupPanel(); return; }
+    if (e.target === panelOverlay) tutupPanel();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") tutupPanel(); });
+
+  // ================= PROGRES PANEL =================
+  function itemsPerbaikan() {
+    return Object.keys(((dataSekarang || {}).perbaikan || {}).item || {}).filter(k => LABEL_ITEM[k]);
+  }
+  function itemSelesai(k) {
+    if (FIELD_TEKS[k]) {
+      const el = document.getElementById("fix-" + k);
+      return el && el.value.trim().length > 0;
+    }
+    if (FIELD_DOK[k]) return !!fileBaru[k];
+    return false;
+  }
+  function perbaruiProgres() {
+    const items = itemsPerbaikan();
+    const selesai = items.filter(k => itemSelesai(k)).length;
+    const num = document.getElementById("progNum");
+    const fill = document.getElementById("progFill");
+    if (!num || !fill) return;
+    num.textContent = selesai;
+    fill.style.width = (items.length ? (selesai / items.length) * 100 : 0) + "%";
+    fill.classList.toggle("penuh", selesai === items.length && items.length > 0);
+  }
+
+  // ================= KOMPRES GAMBAR =================
+  function kompresGambar(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const skala = Math.min(1, 1100 / Math.max(img.width, img.height));
+          canvas.width  = Math.round(img.width * skala);
+          canvas.height = Math.round(img.height * skala);
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.72));
+        };
+        img.onerror = () => reject(new Error("Format gambar tidak didukung"));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error("Gagal membaca file"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ================= KIRIM PERBAIKAN =================
+  function kirimPerbaikan() {
+    const items = itemsPerbaikan();
+    const p = dataSekarang.perbaikan;
+
+    // Validasi semua item harus terisi
+    let valid = true;
+    items.forEach(k => {
+      if (FIELD_TEKS[k]) {
+        const el = document.getElementById("fix-" + k);
+        const err = document.getElementById("err-" + k);
+        if (!el.value.trim()) {
+          el.classList.add("salah");
+          err.style.display = "block";
+          valid = false;
+        }
+      } else if (FIELD_DOK[k] && !fileBaru[k]) {
+        const box = document.getElementById("box-" + k);
+        if (box) {
+          box.style.borderColor = "var(--merah)";
+          setTimeout(() => box.style.borderColor = "", 2500);
+        }
+        valid = false;
+      }
+    });
+
+    if (!valid) {
+      const kurang = items.filter(k => !itemSelesai(k));
+      alert("⚠️ Masih ada " + kurang.length + " data yang belum diperbaiki:\n\n" +
+        kurang.map(k => "• " + LABEL_ITEM[k]).join("\n") + "\n\nLengkapi dulu semua yang ditandai.");
+      const pertama = kurang[0];
+      const el = document.getElementById("fix-" + pertama) || document.getElementById("box-" + pertama);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (!confirm("Kirim semua perbaikan sekarang?\n\nData lama akan diganti, dan admin akan memverifikasi ulang.")) return;
+
+    // Susun update
+    const updates = {};
+    items.forEach(k => {
+      if (FIELD_TEKS[k]) {
+        updates[k] = document.getElementById("fix-" + k).value.trim();
+      } else if (FIELD_DOK[k]) {
+        updates[k] = fileBaru[k];
+        (ALIAS[k] || []).forEach(a => updates[a] = null); // bersihkan alias lama
+      }
+    });
+
+    const ts = Date.now();
+    updates.status = "foto_terkirim";                    // kembali ke antrean verifikasi
+    updates["perbaikan/selesai"] = true;
+    updates["perbaikan/waktu_perbaikan"] = ts;
+    updates["notifikasi/tipe"] = "perbaikan_selesai";
+    updates["notifikasi/pesan"] = "Driver sudah memperbaiki dan mengirim ulang datanya (putaran " + (p.putaran || 1) + ").";
+    updates["notifikasi/waktu"] = ts;
+    updates["notifikasi/sudah_dibaca"] = false;
+
+    const btn = document.getElementById("btnKirimPanel");
+    btn.disabled = true;
+    document.getElementById("btnKirimTeks").textContent = "⏳ Mengirim...";
+
+    db.ref("pendaftaran/" + kunciPendaftaran).update(updates)
+      .then(() => {
+        // Tampilkan sukses di dalam panel
+        document.querySelectorAll("#panelBody > *:not(.panel-sukses)").forEach(el => el.style.display = "none");
+        document.getElementById("panelSukses").classList.add("tampil");
+        hujanKonfeti();
+        // Status realtime di latar belakang otomatis berubah jadi "Perbaikan Terkirim"
+      })
+      .catch(err => {
+        alert("❌ Gagal mengirim: " + err.message + "\n\nPeriksa koneksi lalu coba lagi.");
+        btn.disabled = false;
+        document.getElementById("btnKirimTeks").textContent = "Kirim Perbaikan";
+      });
+  }
+
+  // ================= KARTU PERBAIKAN (halaman utama) =================
+  function tampilkanKartuPerbaikan(p) {
+    const items = Object.keys(p.item || {}).map(k => LABEL_ITEM[k] || k);
+    const urgensi = p.urgensi || "normal";
+    const lewatTenggat = p.tenggat_ts && p.tenggat_ts < Date.now();
+
+    let meta = `Permintaan ke-${p.putaran || 1} • ${waktuRelatif(p.waktu_diminta)}`;
+    if (p.tenggat_ts) {
+      const sisa = Math.ceil((p.tenggat_ts - Date.now()) / 86400000);
+      meta += lewatTenggat
+        ? ` • <span class="lewat">⛔ Batas waktu lewat — segera perbaiki!</span>`
+        : ` • ⏰ sisa <b>${sisa} hari</b>`;
+    }
+
+    perbaikanCard.classList.toggle("lewat-tenggat", !!lewatTenggat);
+    perbaikanCard.innerHTML = `
+      <div class="perbaikan-head">
+        <h3>⚠️ Pendaftaran Kamu Perlu Diperbaiki</h3>
+        <span class="urgensi-badge ${urgensi === "mendesak" ? "mendesak" : ""}">${LABEL_URGENSI[urgensi] || "🟡 Normal"}</span>
+      </div>
+      <div class="perbaikan-meta">${meta}</div>
+      <div class="fix-label">Yang perlu diperbaiki:</div>
+      <div class="fix-items">${items.map(i => `<span>${i}</span>`).join("") || "<span>Data pendaftaran</span>"}</div>
+      ${p.catatan ? `<div class="fix-catatan"><b>📝 Catatan admin:</b><br>${p.catatan}</div>` : ""}
+      <button class="fix-btn" data-perbaiki>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Perbaiki Sekarang
+      </button>`;
+    perbaikanCard.style.display = "block";
+  }
+
+  // ============================================================
+  // TAMPILKAN STATUS (semua kondisi)
+  // ============================================================
+  function tampilkanStatus(d) {
+    const status = (d && d.status) || "menunggu";
+    const adaPerbaikanAktif = status === "perlu_perbaikan" && d.perbaikan && !d.perbaikan.selesai;
+    const perbaikanSelesai  = d.perbaikan && d.perbaikan.selesai && status !== "perlu_perbaikan";
+
+    // Reset semua tampilan dulu
+    statusIcon.classList.remove("menunggu", "disetujui", "ditunda", "perbaikan", "terkirim");
+    statusPill.classList.remove("sp-amber", "sp-hijau", "sp-merah", "sp-oranye", "sp-biru");
     icoMenunggu.style.display = "none";
     icoSetuju.style.display   = "none";
     icoTunda.style.display    = "none";
+    icoPerbaikan.style.display= "none";
+    icoTerkirim.style.display = "none";
 
-    if (status === "disetujui" || status === "aktif") {
+    if (adaPerbaikanAktif) {
+      // ⚠️ ADMIN MINTA PERBAIKAN
+      statusIcon.classList.add("perbaikan");
+      statusPill.classList.add("sp-oranye");
+      icoPerbaikan.style.display = "block";
+      pillText.textContent = "Perbaikan Diminta";
+      judulUtama.innerHTML = 'Pendaftaran <span>Perlu Diperbaiki</span>';
+      descUtama.innerHTML = "Admin menemukan data yang <b>belum sesuai</b>. Perbaiki segera agar pendaftaranmu lanjut diproses.";
+      cardJudul.textContent = "Tindakan Diperlukan";
+      cardSub.innerHTML = "Periksa daftar di bawah, perbaiki data/dokumen yang ditandai, lalu kirim ulang. Setelah itu admin akan <b>memverifikasi ulang</b>.";
+      timelineEl.style.display = "none";
+      tampilkanKartuPerbaikan(d.perbaikan);
+
+      // 🔔 Alarm HANYA untuk permintaan yang belum pernah dibunyikan
+      // (dicek via timestamp → tahan refresh & tutup browser)
+      const tsPermintaan = d.perbaikan.waktu_diminta || 0;
+      if (tsPermintaan > 0 && !sudahDiingatkan(tsPermintaan)) {
+        alarmPerbaikan();
+        tandaiDiingatkan(tsPermintaan);
+      }
+      if (kunciPendaftaran) localStorage.setItem("gc_kunci_pendaftaran", kunciPendaftaran);
+    }
+    else if (perbaikanSelesai) {
+      // ✈️ PERBAIKAN SUDAH DIKIRIM → MENUNGGU VERIFIKASI ULANG
+      statusIcon.classList.add("terkirim");
+      statusPill.classList.add("sp-biru");
+      icoTerkirim.style.display = "block";
+      pillText.textContent = "Perbaikan Terkirim";
+      judulUtama.innerHTML = 'Perbaikan <span>Berhasil Dikirim!</span>';
+      descUtama.innerHTML = "Data perbaikanmu sudah kami terima. Admin akan <b>memverifikasi ulang</b> segera.";
+      cardJudul.textContent = "Menunggu Verifikasi Ulang";
+      cardSub.innerHTML = "Kamu sudah mengirim perbaikan (putaran " + (d.perbaikan.putaran || 1) + "). Admin akan memeriksa dan mengabari melalui halaman ini. <b>Tidak perlu melakukan apa-apa lagi.</b>";
+      timelineEl.style.display = "none";
+      perbaikanCard.style.display = "none";
+    }
+    else if (status === "disetujui" || status === "aktif") {
       // 🎉 DISETUJUI
       statusIcon.classList.add("disetujui");
       statusPill.classList.add("sp-hijau");
@@ -584,10 +1078,17 @@
       descUtama.innerHTML = "Akun driver Get Car kamu telah <b>aktif</b>. Silakan hubungi admin untuk informasi aktivasi aplikasi dan mulai menerima trip!";
       cardJudul.textContent = "Verifikasi Berhasil 🎉";
       cardSub.innerHTML = "Semua dokumen kamu telah <b>diverifikasi dan disetujui</b> oleh admin. Selamat bergabung dengan keluarga besar Get Car — PT Bali Global Trans!";
-      hujanKonfeti();
-
-    } else if (status === "suspend") {
-      // ⚠️ DITUNDA / SUSPEND
+      timelineEl.style.display = "";
+      perbaikanCard.style.display = "none";
+      // 🎉 Konfeti HANYA sekali per kejadian persetujuan (tahan refresh)
+      const tsSetuju = d.waktu_setuju || 0;
+      if (!sudahDirayakan(tsSetuju)) {
+        hujanKonfeti();
+        tandaiDirayakan(tsSetuju > 0 ? tsSetuju : Date.now());
+      }
+    }
+    else if (status === "suspend") {
+      // ⚠️ DITUNDA
       statusIcon.classList.add("ditunda");
       statusPill.classList.add("sp-merah");
       icoTunda.style.display = "block";
@@ -596,8 +1097,23 @@
       descUtama.innerHTML = "Saat ini pendaftaranmu <b>ditunda</b>. Silakan hubungi admin untuk keterangan lebih lanjut.";
       cardJudul.textContent = "Menunggu Tindakan Admin";
       cardSub.innerHTML = "Ada kendala pada pendaftaranmu. Hubungi admin melalui nomor telepon atau kantor PT Bali Global Trans untuk mengetahui detailnya.";
-
-    } else {
+      timelineEl.style.display = "";
+      perbaikanCard.style.display = "none";
+    }
+    else if (status === "ditolak" || status === "ditolak_duplikat") {
+      // 🚫 DITOLAK
+      statusIcon.classList.add("ditunda");
+      statusPill.classList.add("sp-merah");
+      icoTunda.style.display = "block";
+      pillText.textContent = "Pendaftaran Ditolak";
+      judulUtama.innerHTML = 'Pendaftaran <span>Tidak Diterima</span>';
+      descUtama.innerHTML = "Pendaftaranmu <b>ditolak</b>" + (d.alasan ? ": " + d.alasan : ".");
+      cardJudul.textContent = "Pendaftaran Ditolak";
+      cardSub.innerHTML = "Hubungi admin atau kantor PT Bali Global Trans jika kamu merasa ini keliru, atau daftar ulang dengan data yang benar.";
+      timelineEl.style.display = "";
+      perbaikanCard.style.display = "none";
+    }
+    else {
       // ⏳ MENUNGGU VERIFIKASI (default)
       statusIcon.classList.add("menunggu");
       statusPill.classList.add("sp-amber");
@@ -607,41 +1123,53 @@
       descUtama.innerHTML = "Selamat! Semua data dan dokumen kamu sudah kami terima lengkap.";
       cardJudul.textContent = "Dokumen Sedang Ditinjau";
       cardSub.innerHTML = "Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini biasanya memakan waktu <b>1×24 jam</b> pada hari kerja. Kamu akan dihubungi melalui nomor telepon yang terdaftar.";
+      timelineEl.style.display = "";
+      perbaikanCard.style.display = "none";
     }
   }
 
-  // ================= PANTAU STATUS REALTIME =================
+  // ============================================================
+  // PANTAU STATUS REALTIME
+  // — Query server (cepat). Kalau gagal (indexOn belum dipasang),
+  //   otomatis fallback ke mode lokal (filter sendiri).
+  // ============================================================
   function pantauStatus() {
-    if (!telepon) {
-      setStatusError();
-      return;
-    }
+    if (!telepon) { console.warn("Tidak ada ?telepon= di URL"); return; }
 
+    const terapkanData = child => {
+      const d = child.val();
+      kunciPendaftaran = child.key;
+      dataSekarang = d;
+      console.log("🔄 Status:", d.status, "| kunci:", child.key);
+      tampilkanStatus(d);
+    };
+
+    const filterLokal = snap => {
+      if (sudahJalanServer) return; // server sudah jalan → hentikan lokal
+      let ketemu = false;
+      snap.forEach(child => {
+        const d = child.val();
+        const tel = String(d.telepon || d.nomor || "");
+        if (tel === telepon) { ketemu = true; terapkanData(child); }
+      });
+      if (!ketemu) tampilkanStatus({ status: "menunggu" });
+    };
+
+    // Coba query server (butuh .indexOn telepon di Rules)
     db.ref("pendaftaran")
-      .orderByChild("telepon")
-      .equalTo(telepon)
+      .orderByChild("telepon").equalTo(telepon)
       .on("value",
-        snapshot => {
-          if (!snapshot.exists()) {
-            console.warn("Record tidak ditemukan — tampilkan status default (menunggu)");
-            tampilkanStatus("menunggu");
-            return;
-          }
-          snapshot.forEach(child => {
-            const d = child.val();
-            console.log("🔄 Status terkini:", d.status);
-            tampilkanStatus(d.status || "menunggu");
-          });
+        snap => {
+          sudahJalanServer = true;
+          if (!snap.exists()) { tampilkanStatus({ status: "menunggu" }); return; }
+          snap.forEach(terapkanData);
         },
-        error => {
-          console.error("Firebase error:", error);
-          tampilkanStatus("menunggu");
+        err => {
+          // ❌ Query server gagal → fallback lokal (limit 2000 terakhir)
+          console.warn("⚠️ Query server gagal (pasang .indexOn di Rules). Mode lokal aktif:", err.message);
+          db.ref("pendaftaran").limitToLast(2000).on("value", filterLokal);
         }
       );
-  }
-
-  function setStatusError() {
-    pillText.textContent = "Menunggu Verifikasi Admin";
   }
 
   // Tombol periksa manual (feedback kecil)
@@ -650,14 +1178,13 @@
     const ikon = btn.querySelector("svg");
     ikon.style.animation = "spin 0.7s linear";
     setTimeout(() => { ikon.style.animation = ""; }, 750);
-    // Status sudah realtime — cukup kasih feedback
     const asli = pillText.textContent;
     pillText.textContent = "Status terbaru dimuat ✓";
     setTimeout(() => { pillText.textContent = asli; }, 1200);
   }
 
   // ================= MULAI =================
-  tampilkanStatus("menunggu"); // tampilkan dulu sebelum data datang
+  tampilkanStatus({ status: "menunggu" }); // tampilkan dulu sebelum data datang
   pantauStatus();
 </script>
 
