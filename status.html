@@ -10,12 +10,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-<!-- 🔥 Firebase — Realtime Database -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
-  // Background foto (dimuat dulu supaya tidak kedip)
   const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
   const bg = new Image();
   bg.onload = () => document.body.classList.add("has-photo");
@@ -79,7 +77,7 @@
   .logo-small {
     width: 64px; height: 64px; object-fit: contain;
     filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
-    animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
+    animation: pop 0.7s 0.1s ease both;
     margin-bottom: 4px;
   }
   .eyebrow {
@@ -103,9 +101,7 @@
   }
   .desc b { color: #fff; }
 
-  /* ============================================================
-     IKON STATUS BESAR
-  ============================================================ */
+  /* ===== IKON STATUS BESAR ===== */
   .status-icon {
     width: 96px; height: 96px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -147,9 +143,7 @@
   .status-icon.terkirim svg { color: #6db3ff; }
   @keyframes denyutRing { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
 
-  /* ============================================================
-     KARTU STATUS
-  ============================================================ */
+  /* ===== KARTU STATUS ===== */
   .status-card {
     width: 100%; background: var(--glass); border: 1px solid var(--glass-border);
     backdrop-filter: blur(20px) saturate(140%);
@@ -179,30 +173,29 @@
   .sp-biru .dot { background: #6db3ff; animation: none; }
   @keyframes denyutDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.75); } }
 
-  /* ============================================================
-     KARTU PERMINTAAN PERBAIKAN
-  ============================================================ */
+  /* ===== KARTU PERMINTAAN PERBAIKAN ===== */
   .perbaikan-card {
     width: 100%;
     background: rgba(255,162,74,0.10); border: 1.5px solid rgba(255,162,74,0.5);
     border-radius: 22px; padding: 20px 18px; margin-bottom: 18px;
-    animation: fadeUp 0.6s ease both, getarMasuk 0.5s 0.3s ease;
+    animation: fadeUp 0.6s ease both;
     box-shadow: 0 14px 40px rgba(255,162,74,0.15);
-  }
-  @keyframes getarMasuk {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
   }
   .perbaikan-card.lewat-tenggat { background: rgba(255,107,107,0.10); border-color: rgba(255,107,107,0.55); }
   .perbaikan-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .perbaikan-head svg { width: 19px; height: 19px; color: var(--oranye); flex-shrink: 0; }
+  .perbaikan-card.lewat-tenggat .perbaikan-head svg { color: var(--merah); }
   .perbaikan-head h3 { font-size: 15.5px; font-weight: 800; flex: 1; line-height: 1.3; }
   .urgensi-badge {
+    display: inline-flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
     padding: 4px 11px; border-radius: 14px; white-space: nowrap;
     background: rgba(255,162,74,0.18); color: #ffb86b; border: 1px solid rgba(255,162,74,0.45);
   }
+  .urgensi-badge .titik { width: 7px; height: 7px; border-radius: 50%; background: var(--oranye); }
   .urgensi-badge.mendesak { background: rgba(255,107,107,0.18); color: #ff9b9b; border-color: rgba(255,107,107,0.5); }
+  .urgensi-badge.mendesak .titik { background: var(--merah); }
+  .urgensi-badge.rendah .titik { background: var(--green); }
   .perbaikan-meta { font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,0.55); margin-bottom: 12px; }
   .perbaikan-meta b { color: #ffb86b; }
   .perbaikan-meta .lewat { color: #ff9b9b; }
@@ -229,9 +222,39 @@
   .fix-btn:active { transform: scale(0.97); }
   .fix-btn svg { width: 18px; height: 18px; }
 
-  /* ============================================================
-     TIMELINE
-  ============================================================ */
+  /* ===== KARTU ARAHAN LOGIN ===== */
+  .login-card {
+    width: 100%;
+    background: rgba(46, 204, 113, 0.10);
+    border: 1.5px solid rgba(46, 204, 113, 0.55);
+    border-radius: 22px;
+    padding: 20px 18px;
+    margin-bottom: 18px;
+    text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+  .login-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+  .login-card p  { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
+  .login-card p b { color: var(--green); }
+  .login-btn {
+    width: 100%; border: none; border-radius: 16px; padding: 16px;
+    font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+    background: linear-gradient(135deg, var(--green), #1fa06a);
+    color: #fff; box-shadow: 0 10px 26px rgba(46, 204, 113, 0.4);
+    transition: transform 0.15s ease;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+  }
+  .login-btn:active { transform: scale(0.97); }
+  .login-btn svg { width: 18px; height: 18px; }
+  .login-tunda {
+    margin-top: 10px;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.45);
+    font-family: inherit; font-size: 11.5px; font-weight: 700;
+    text-decoration: underline;
+  }
+
+  /* ===== TIMELINE ===== */
   .timeline { display: flex; flex-direction: column; }
   .tl-item { display: flex; align-items: center; gap: 14px; position: relative; padding: 7px 0; }
   .tl-item:not(:last-child)::before {
@@ -272,12 +295,7 @@
 
   .copyright { margin-top: auto; padding-top: 24px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.45); user-select: none; }
 
-  .confetti { position: fixed; top: -10px; width: 10px; height: 14px; z-index: 500; border-radius: 2px; animation: jatuh linear forwards; }
-  @keyframes jatuh { to { transform: translateY(105vh) rotate(720deg); opacity: 0.6; } }
-
-  /* ============================================================
-     ⭐ PANEL PERBAIKAN (di halaman yang sama)
-  ============================================================ */
+  /* ===== PANEL PERBAIKAN ===== */
   .panel-overlay {
     position: fixed; inset: 0; z-index: 600;
     background: rgba(3,8,18,0.75); backdrop-filter: blur(6px);
@@ -432,7 +450,6 @@
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes pop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
-  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .navbar  { animation: fadeUp 0.6s ease both; }
@@ -458,30 +475,28 @@
       <nav class="navbar">
         <div style="width:60px"></div>
         <div class="brand">Get <span>Car</span></div>
-        <div class="version">V1.107.0</div>
+        <div class="version">V1.108.0</div>
       </nav>
 
       <div class="content">
 
-        <img src="get.png" alt="Logo Get Car" class="logo-small" onerror="this.style.display='none'" />
+        <img src="get.png" alt="Get Car" class="logo-small" onerror="this.style.display='none'" />
 
         <div class="eyebrow">Status Pendaftaran</div>
-        <h1 id="judulUtama">Pendaftaran <span>Berhasil Dikirim!</span></h1>
-        <p class="desc" id="descUtama">Selamat! Semua data dan dokumen kamu sudah kami terima lengkap.</p>
+        <h1 id="judulUtama">Pendaftaran <span>Berhasil Dikirim</span></h1>
+        <p class="desc" id="descUtama">Seluruh data dan dokumen Anda telah kami terima.</p>
 
-        <!-- Ikon status besar -->
         <div class="status-icon menunggu" id="statusIcon">
           <svg id="icoMenunggu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <svg id="icoSetuju" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <svg id="icoTunda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <svg id="icoPerbaikan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <svg id="icoTerkirim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <svg id="icoSetuju" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <svg id="icoTunda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg id="icoPerbaikan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg id="icoTerkirim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </div>
 
-        <!-- Kartu permintaan perbaikan -->
         <div class="perbaikan-card" id="perbaikanCard" style="display:none"></div>
+        <div class="login-card" id="loginCard" style="display:none"></div>
 
-        <!-- Kartu status -->
         <div class="status-card">
           <div class="status-pill sp-amber" id="statusPill">
             <span class="dot"></span>
@@ -489,8 +504,8 @@
           </div>
           <div class="status-judul" id="cardJudul">Dokumen Sedang Ditinjau</div>
           <p class="status-sub" id="cardSub">
-            Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini biasanya
-            memakan waktu <b>1×24 jam</b> pada hari kerja. Kamu akan dihubungi
+            Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini umumnya
+            memakan waktu <b>1×24 jam</b> pada hari kerja. Anda akan dihubungi
             melalui nomor telepon yang terdaftar.
           </p>
           <div class="timeline" id="timelineEl">
@@ -504,7 +519,7 @@
             </div>
             <div class="tl-item">
               <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-              <div class="tl-teks">KTP, Selfie & Dokumen Kendaraan<small>SIM, STNK, foto mobil terkirim</small></div>
+              <div class="tl-teks">KTP, Selfie & Dokumen Kendaraan<small>SIM, STNK, foto kendaraan terkirim</small></div>
             </div>
             <div class="tl-item">
               <div class="tl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -519,7 +534,7 @@
 
         <div class="info-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <p>Halaman ini <b>otomatis diperbarui</b> saat admin memverifikasi. Simpan atau bookmark halaman ini untuk cek status kapan saja.</p>
+          <p>Halaman ini <b>diperbarui otomatis</b> saat admin memverifikasi. Simpan tautan halaman ini untuk memeriksa status kapan saja.</p>
         </div>
 
         <button class="refresh-btn" onclick="periksaSekarang()">
@@ -533,12 +548,12 @@
     </div>
   </div>
 
-  <!-- ⭐ PANEL PERBAIKAN -->
+  <!-- PANEL PERBAIKAN -->
   <div class="panel-overlay" id="panelOverlay">
     <div class="panel">
       <div class="panel-grip"></div>
       <div class="panel-head" id="panelHead">
-        <h2>🔧 Perbaiki Pendaftaran</h2>
+        <h2>Perbaiki Pendaftaran</h2>
         <button class="panel-close" data-tutup>✕</button>
       </div>
       <div class="panel-body" id="panelBody"></div>
@@ -572,6 +587,7 @@
   const cardJudul    = document.getElementById("cardJudul");
   const cardSub      = document.getElementById("cardSub");
   const perbaikanCard= document.getElementById("perbaikanCard");
+  const loginCard    = document.getElementById("loginCard");
   const timelineEl   = document.getElementById("timelineEl");
   const panelOverlay = document.getElementById("panelOverlay");
   const panelBody    = document.getElementById("panelBody");
@@ -581,7 +597,6 @@
   let kunciPendaftaran = null;
   let dataSekarang     = null;
   let fileBaru         = {};
-  let sudahJalanServer = false;   // guard agar fallback tidak dobel pasang
 
   // ================= URL =================
   const params  = new URLSearchParams(window.location.search);
@@ -589,33 +604,32 @@
   if (telepon.startsWith("0"))       telepon = "+62" + telepon.slice(1);
   else if (telepon.startsWith("62")) telepon = "+" + telepon;
   else if (telepon.startsWith("8"))  telepon = "+62" + telepon;
-  console.log("📱 Melihat status untuk:", telepon);
+  console.log("Status untuk:", telepon);
 
-  // ================= LABEL & KONSTANTA =================
+  // ================= KONSTANTA =================
   const LABEL_ITEM = {
     nama:"Nama", telepon:"Telepon", email:"Email", wilayah:"Wilayah", password:"Password",
     ktp:"Foto KTP", selfie:"Foto Selfie", sim:"Foto SIM", stnk:"Foto STNK",
     kendaraan:"Foto Kendaraan", rekening:"Foto Rekening", skck:"Foto SKCK", koperasi:"Foto Koperasi"
   };
-  const LABEL_URGENSI = { rendah:"🟢 Rendah", normal:"🟡 Normal", tinggi:"🟠 Tinggi", mendesak:"🔴 Mendesak" };
+  const LABEL_URGENSI = { rendah:"Rendah", normal:"Normal", tinggi:"Tinggi", mendesak:"Mendesak" };
   const FIELD_TEKS = {
     nama:     { tipe:"text",     label:"Nama Lengkap",        hint:"Sesuai KTP" },
-    telepon:  { tipe:"tel",      label:"Nomor Telepon",       hint:"Aktif & bisa dihubungi" },
-    email:    { tipe:"email",    label:"Alamat Email",        hint:"Email yang valid" },
+    telepon:  { tipe:"tel",      label:"Nomor Telepon",       hint:"Aktif dan dapat dihubungi" },
+    email:    { tipe:"email",    label:"Alamat Email",        hint:"Alamat email yang valid" },
     wilayah:  { tipe:"text",     label:"Wilayah Operasional", hint:"Kota/kabupaten kerja" },
     password: { tipe:"password", label:"Password Akun",       hint:"Minimal 6 karakter" }
   };
   const FIELD_DOK = {
-    ktp:       { label:"Foto KTP",            hint:"Jelas, tidak buram, semua nomor terbaca" },
-    selfie:    { label:"Foto Selfie",         hint:"Wajah penuh terlihat, latar terang" },
+    ktp:       { label:"Foto KTP",            hint:"Jelas, tidak buram, seluruh nomor terbaca" },
+    selfie:    { label:"Foto Selfie",         hint:"Wajah terlihat penuh, latar terang" },
     sim:       { label:"Foto SIM",            hint:"SIM masih berlaku, tidak terpotong" },
-    stnk:      { label:"Foto STNK",           hint:"Nama & plat sesuai kendaraan" },
+    stnk:      { label:"Foto STNK",           hint:"Nama dan plat sesuai kendaraan" },
     kendaraan: { label:"Foto Kendaraan",      hint:"Tampak jelas, plat nomor terbaca" },
     rekening:  { label:"Foto Rekening",       hint:"Buku tabungan/kartu atas nama sendiri" },
     skck:      { label:"Foto SKCK",           hint:"Masih berlaku (maks. 6 bulan)" },
     koperasi:  { label:"Foto Kartu Koperasi", hint:"Kartu koperasi yang masih aktif" }
   };
-  // Alias nama field lama (data lama bisa punya nama beda)
   const ALIAS = {
     ktp:["dok_ktp","foto_ktp"], selfie:["selvi","foto_selfie"],
     sim:["foto_sim","dok_sim"], stnk:["foto_stnk","dok_stnk"],
@@ -631,9 +645,7 @@
     return null;
   }
 
-  // ============================================================
-  // ⭐ ANTI-ALARM BERULANG (tersimpan permanen → tahan refresh & tutup)
-  // ============================================================
+  // ================= ANTI-ALARM BERULANG =================
   function sudahDiingatkan(ts) {
     return ts <= parseInt(localStorage.getItem("gc_notif_perbaikan_ts") || "0", 10);
   }
@@ -647,7 +659,7 @@
     localStorage.setItem("gc_notif_setuju_ts", String(ts));
   }
 
-  // ================= ALARM (bunyi + getar) =================
+  // ================= ALARM SUARA + GETAR =================
   function alarmPerbaikan() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -663,23 +675,8 @@
         o.start(t); o.stop(t + 0.4);
         t += 0.45;
       }
-    } catch (e) { /* audio diblokir browser — abaikan */ }
+    } catch (e) {}
     if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
-  }
-
-  // ================= KONFETI =================
-  function hujanKonfeti() {
-    const warna = ["#2ecc71", "#2f7bff", "#ffb84d", "#ff6b6b", "#7ee2a8", "#6db3ff"];
-    for (let i = 0; i < 60; i++) {
-      const k = document.createElement("div");
-      k.className = "confetti";
-      k.style.left = Math.random() * 100 + "vw";
-      k.style.background = warna[Math.floor(Math.random() * warna.length)];
-      k.style.animationDuration = (2 + Math.random() * 2.5) + "s";
-      k.style.animationDelay = (Math.random() * 0.8) + "s";
-      document.body.appendChild(k);
-      setTimeout(() => k.remove(), 5500);
-    }
   }
 
   function waktuRelatif(ts) {
@@ -692,10 +689,9 @@
   }
 
   // ============================================================
-  // ⭐⭐ TOMBOL "PERBAIKI SEKARANG" → BUKA PANEL DI HALAMAN INI
+  // TOMBOL "PERBAIKI SEKARANG" → PANEL DI HALAMAN INI
   // ============================================================
   function perbaikiSekarang() {
-    console.log("🔧 Tombol perbaiki diklik. dataSekarang:", !!dataSekarang);
     if (!dataSekarang || !dataSekarang.perbaikan) {
       alert("Data perbaikan belum termuat. Periksa koneksi lalu muat ulang halaman.");
       return;
@@ -710,33 +706,31 @@
 
     fileBaru = {};
     panelHead.innerHTML =
-      `<h2>🔧 Perbaiki ${items.length} Data</h2>
+      `<h2>Perbaiki ${items.length} Data</h2>
        <button class="panel-close" data-tutup>✕</button>`;
 
-    // ---- Banner: urgensi, tenggat, catatan ----
     const urg = p.urgensi || "normal";
     const lewatTenggat = p.tenggat_ts && p.tenggat_ts < Date.now();
     let meta = `Permintaan ke-${p.putaran || 1} • ${waktuRelatif(p.waktu_diminta)}`;
     if (p.tenggat_ts) {
       const sisa = Math.ceil((p.tenggat_ts - Date.now()) / 86400000);
       meta += lewatTenggat
-        ? ` • <span class="lewat">⛔ Batas waktu lewat — segera perbaiki!</span>`
-        : ` • ⏰ sisa <b>${sisa} hari</b>`;
+        ? ` • <span class="lewat">Batas waktu terlampaui — segera perbaiki</span>`
+        : ` • Sisa waktu: <b>${sisa} hari</b>`;
     }
 
     let html = `
       <div class="panel-banner ${urg === "mendesak" || lewatTenggat ? "mendesak" : ""}">
         <div class="pb-meta">${meta}</div>
-        ${p.catatan ? `<div class="pb-catatan"><b>📝 Catatan admin:</b><br>${p.catatan}</div>` : ""}
+        ${p.catatan ? `<div class="pb-catatan"><b>Catatan Admin:</b><br>${p.catatan}</div>` : ""}
       </div>
       <div class="progres">
         <span class="progres-teks"><b id="progNum">0</b>/<span>${items.length}</span></span>
         <div class="progres-track"><div class="progres-fill" id="progFill"></div></div>
         <span style="font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.5)">selesai</span>
       </div>
-      <div class="fix-label">Isi / unggah ulang hanya yang diminta:</div>`;
+      <div class="fix-label">Lengkapi hanya bagian yang diminta:</div>`;
 
-    // ---- Field dinamis: HANYA item yang ditandai admin ----
     items.forEach(k => {
       if (FIELD_TEKS[k]) {
         const f = FIELD_TEKS[k];
@@ -779,20 +773,19 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         <span id="btnKirimTeks">Kirim Perbaikan</span>
       </button>
-      <div class="panel-kirim-info">Setelah dikirim, admin akan memverifikasi ulang (±1×24 jam).</div>
+      <div class="panel-kirim-info">Setelah dikirim, admin akan melakukan verifikasi ulang (±1×24 jam).</div>
       <div class="panel-sukses" id="panelSukses">
         <div class="ikon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <h3>Perbaikan Terkirim! 🎉</h3>
-        <p>Semua data yang diperbaiki sudah <b>berhasil diunggah ulang</b>. Status di halaman ini otomatis berubah menjadi <b>"Perbaikan Terkirim"</b>.</p>
-        <button data-tutup>📋 Lihat Status</button>
+        <h3>Perbaikan Terkirim</h3>
+        <p>Seluruh data yang diperbaiki telah <b>berhasil diunggah</b>. Status pada halaman ini akan berubah menjadi <b>"Perbaikan Terkirim"</b> secara otomatis.</p>
+        <button data-tutup>Lihat Status</button>
       </div>`;
 
     panelBody.innerHTML = html;
     panelBody.scrollTop = 0;
 
-    // ---- Handler file: validasi + kompres + preview + progres ----
     items.forEach(k => {
       if (!FIELD_DOK[k]) return;
       const input = document.getElementById("file-" + k);
@@ -800,26 +793,26 @@
         const file = input.files[0];
         if (!file) return;
         if (!file.type || !file.type.startsWith("image/")) {
-          alert("❌ File harus gambar (JPG/PNG).\nFoto iPhone HEIC? Screenshot dulu, lalu unggah hasilnya.");
+          alert("Berkas harus berupa gambar (JPG/PNG).\nUntuk foto format HEIC (iPhone), ambil tangkapan layar terlebih dahulu lalu unggah hasilnya.");
           input.value = "";
           return;
         }
         if (file.size > 15 * 1024 * 1024) {
-          alert("❌ Foto terlalu besar (maks 15 MB).");
+          alert("Ukuran foto terlalu besar (maksimal 15 MB).");
           input.value = "";
           return;
         }
         const btn = document.getElementById("btn-" + k);
         const teksAsli = btn.innerHTML;
-        btn.innerHTML = "⏳ Memproses...";
+        btn.innerHTML = "Memproses...";
         try {
           const dataUrl = await kompresGambar(file);
           fileBaru[k] = dataUrl;
           const box = document.getElementById("box-" + k);
           box.classList.add("terisi");
           box.querySelector(".upload-foto").innerHTML =
-            `<img src="${dataUrl}" class="baru" /><span class="tag baru">✓ FOTO BARU</span>`;
-          btn.innerHTML = "🔄 Ganti Lagi";
+            `<img src="${dataUrl}" class="baru" /><span class="tag baru">FOTO BARU</span>`;
+          btn.innerHTML = "Ganti Foto";
           perbaruiProgres();
         } catch (e) {
           alert("Gagal memproses gambar: " + e.message);
@@ -828,7 +821,6 @@
       });
     });
 
-    // ---- Handler teks: hapus error + update progres ----
     items.forEach(k => {
       if (!FIELD_TEKS[k]) return;
       document.getElementById("fix-" + k).addEventListener("input", () => {
@@ -848,7 +840,6 @@
 
   function tutupPanel() { panelOverlay.classList.remove("active"); }
 
-  // ⭐ EVENT DELEGATION — semua tombol penting pasti merespons
   document.addEventListener("click", e => {
     const perbaikiBtn = e.target.closest("[data-perbaiki]");
     if (perbaikiBtn) { perbaikiSekarang(); return; }
@@ -863,7 +854,7 @@
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape") tutupPanel(); });
 
-  // ================= PROGRES PANEL =================
+  // ================= PROGRES =================
   function itemsPerbaikan() {
     return Object.keys(((dataSekarang || {}).perbaikan || {}).item || {}).filter(k => LABEL_ITEM[k]);
   }
@@ -903,7 +894,7 @@
         img.onerror = () => reject(new Error("Format gambar tidak didukung"));
         img.src = e.target.result;
       };
-      reader.onerror = () => reject(new Error("Gagal membaca file"));
+      reader.onerror = () => reject(new Error("Gagal membaca berkas"));
       reader.readAsDataURL(file);
     });
   }
@@ -913,7 +904,6 @@
     const items = itemsPerbaikan();
     const p = dataSekarang.perbaikan;
 
-    // Validasi semua item harus terisi
     let valid = true;
     items.forEach(k => {
       if (FIELD_TEKS[k]) {
@@ -936,56 +926,52 @@
 
     if (!valid) {
       const kurang = items.filter(k => !itemSelesai(k));
-      alert("⚠️ Masih ada " + kurang.length + " data yang belum diperbaiki:\n\n" +
-        kurang.map(k => "• " + LABEL_ITEM[k]).join("\n") + "\n\nLengkapi dulu semua yang ditandai.");
+      alert("Masih terdapat " + kurang.length + " data yang belum diperbaiki:\n\n" +
+        kurang.map(k => "• " + LABEL_ITEM[k]).join("\n") + "\n\nLengkapi seluruh bagian yang ditandai.");
       const pertama = kurang[0];
       const el = document.getElementById("fix-" + pertama) || document.getElementById("box-" + pertama);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
-    if (!confirm("Kirim semua perbaikan sekarang?\n\nData lama akan diganti, dan admin akan memverifikasi ulang.")) return;
+    if (!confirm("Kirim seluruh perbaikan sekarang?\n\nData lama akan diganti, dan admin akan melakukan verifikasi ulang.")) return;
 
-    // Susun update
     const updates = {};
     items.forEach(k => {
       if (FIELD_TEKS[k]) {
         updates[k] = document.getElementById("fix-" + k).value.trim();
       } else if (FIELD_DOK[k]) {
         updates[k] = fileBaru[k];
-        (ALIAS[k] || []).forEach(a => updates[a] = null); // bersihkan alias lama
+        (ALIAS[k] || []).forEach(a => updates[a] = null);
       }
     });
 
     const ts = Date.now();
-    updates.status = "foto_terkirim";                    // kembali ke antrean verifikasi
+    updates.status = "foto_terkirim";
     updates["perbaikan/selesai"] = true;
     updates["perbaikan/waktu_perbaikan"] = ts;
     updates["notifikasi/tipe"] = "perbaikan_selesai";
-    updates["notifikasi/pesan"] = "Driver sudah memperbaiki dan mengirim ulang datanya (putaran " + (p.putaran || 1) + ").";
+    updates["notifikasi/pesan"] = "Driver telah memperbaiki dan mengirim ulang datanya (putaran " + (p.putaran || 1) + ").";
     updates["notifikasi/waktu"] = ts;
     updates["notifikasi/sudah_dibaca"] = false;
 
     const btn = document.getElementById("btnKirimPanel");
     btn.disabled = true;
-    document.getElementById("btnKirimTeks").textContent = "⏳ Mengirim...";
+    document.getElementById("btnKirimTeks").textContent = "Mengirim...";
 
     db.ref("pendaftaran/" + kunciPendaftaran).update(updates)
       .then(() => {
-        // Tampilkan sukses di dalam panel
         document.querySelectorAll("#panelBody > *:not(.panel-sukses)").forEach(el => el.style.display = "none");
         document.getElementById("panelSukses").classList.add("tampil");
-        hujanKonfeti();
-        // Status realtime di latar belakang otomatis berubah jadi "Perbaikan Terkirim"
       })
       .catch(err => {
-        alert("❌ Gagal mengirim: " + err.message + "\n\nPeriksa koneksi lalu coba lagi.");
+        alert("Gagal mengirim: " + err.message + "\n\nPeriksa koneksi lalu coba lagi.");
         btn.disabled = false;
         document.getElementById("btnKirimTeks").textContent = "Kirim Perbaikan";
       });
   }
 
-  // ================= KARTU PERBAIKAN (halaman utama) =================
+  // ================= KARTU PERBAIKAN =================
   function tampilkanKartuPerbaikan(p) {
     const items = Object.keys(p.item || {}).map(k => LABEL_ITEM[k] || k);
     const urgensi = p.urgensi || "normal";
@@ -995,20 +981,23 @@
     if (p.tenggat_ts) {
       const sisa = Math.ceil((p.tenggat_ts - Date.now()) / 86400000);
       meta += lewatTenggat
-        ? ` • <span class="lewat">⛔ Batas waktu lewat — segera perbaiki!</span>`
-        : ` • ⏰ sisa <b>${sisa} hari</b>`;
+        ? ` • <span class="lewat">Batas waktu terlampaui</span>`
+        : ` • Sisa waktu: <b>${sisa} hari</b>`;
     }
+
+    const kelasUrg = urgensi === "mendesak" ? "mendesak" : (urgensi === "rendah" ? "rendah" : "");
 
     perbaikanCard.classList.toggle("lewat-tenggat", !!lewatTenggat);
     perbaikanCard.innerHTML = `
       <div class="perbaikan-head">
-        <h3>⚠️ Pendaftaran Kamu Perlu Diperbaiki</h3>
-        <span class="urgensi-badge ${urgensi === "mendesak" ? "mendesak" : ""}">${LABEL_URGENSI[urgensi] || "🟡 Normal"}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <h3>Pendaftaran Anda Perlu Diperbaiki</h3>
+        <span class="urgensi-badge ${kelasUrg}"><span class="titik"></span>${LABEL_URGENSI[urgensi] || "Normal"}</span>
       </div>
       <div class="perbaikan-meta">${meta}</div>
-      <div class="fix-label">Yang perlu diperbaiki:</div>
+      <div class="fix-label">Bagian yang perlu diperbaiki:</div>
       <div class="fix-items">${items.map(i => `<span>${i}</span>`).join("") || "<span>Data pendaftaran</span>"}</div>
-      ${p.catatan ? `<div class="fix-catatan"><b>📝 Catatan admin:</b><br>${p.catatan}</div>` : ""}
+      ${p.catatan ? `<div class="fix-catatan"><b>Catatan Admin:</b><br>${p.catatan}</div>` : ""}
       <button class="fix-btn" data-perbaiki>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         Perbaiki Sekarang
@@ -1017,14 +1006,58 @@
   }
 
   // ============================================================
-  // TAMPILKAN STATUS (semua kondisi)
+  // DISETUJUI → ARAHAN LOGIN
   // ============================================================
+  let timerLogin = null;
+
+  function tampilkanLoginCard(otomatis) {
+    if (timerLogin) { clearInterval(timerLogin); timerLogin = null; }
+
+    loginCard.innerHTML = `
+      <h3>Akun Driver Anda Telah Aktif</h3>
+      <p>Langkah terakhir: masuk menggunakan <b>nomor telepon dan password</b> Anda untuk mulai menggunakan aplikasi.</p>
+      <button class="login-btn" id="btnBukaLogin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span id="loginBtnTeks">Masuk ke Aplikasi</span>
+      </button>
+      ${otomatis ? `<button class="login-tunda" id="btnTundaLogin">Tetap di halaman ini</button>` : ""}`;
+    loginCard.style.display = "block";
+
+    document.getElementById("btnBukaLogin").onclick = bukaLogin;
+
+    if (otomatis) {
+      let sisa = 5;
+      const teks = document.getElementById("loginBtnTeks");
+      teks.textContent = `Masuk ke Aplikasi (${sisa})`;
+      timerLogin = setInterval(() => {
+        sisa--;
+        if (sisa <= 0) {
+          clearInterval(timerLogin); timerLogin = null;
+          bukaLogin();
+        } else {
+          teks.textContent = `Masuk ke Aplikasi (${sisa})`;
+        }
+      }, 1000);
+
+      document.getElementById("btnTundaLogin").onclick = () => {
+        if (timerLogin) { clearInterval(timerLogin); timerLogin = null; }
+        teks.textContent = "Masuk ke Aplikasi";
+        document.getElementById("btnTundaLogin").style.display = "none";
+      };
+    }
+  }
+
+  function bukaLogin() {
+    if (timerLogin) { clearInterval(timerLogin); timerLogin = null; }
+    location.href = "login.html?telepon=" + encodeURIComponent(telepon);
+  }
+
+  // ================= STATUS =================
   function tampilkanStatus(d) {
     const status = (d && d.status) || "menunggu";
     const adaPerbaikanAktif = status === "perlu_perbaikan" && d.perbaikan && !d.perbaikan.selesai;
     const perbaikanSelesai  = d.perbaikan && d.perbaikan.selesai && status !== "perlu_perbaikan";
 
-    // Reset semua tampilan dulu
     statusIcon.classList.remove("menunggu", "disetujui", "ditunda", "perbaikan", "terkirim");
     statusPill.classList.remove("sp-amber", "sp-hijau", "sp-merah", "sp-oranye", "sp-biru");
     icoMenunggu.style.display = "none";
@@ -1032,22 +1065,20 @@
     icoTunda.style.display    = "none";
     icoPerbaikan.style.display= "none";
     icoTerkirim.style.display = "none";
+    loginCard.style.display   = "none";
 
     if (adaPerbaikanAktif) {
-      // ⚠️ ADMIN MINTA PERBAIKAN
       statusIcon.classList.add("perbaikan");
       statusPill.classList.add("sp-oranye");
       icoPerbaikan.style.display = "block";
       pillText.textContent = "Perbaikan Diminta";
       judulUtama.innerHTML = 'Pendaftaran <span>Perlu Diperbaiki</span>';
-      descUtama.innerHTML = "Admin menemukan data yang <b>belum sesuai</b>. Perbaiki segera agar pendaftaranmu lanjut diproses.";
+      descUtama.innerHTML = "Admin menemukan data yang <b>belum sesuai</b>. Segera perbaiki agar pendaftaran Anda dapat diproses.";
       cardJudul.textContent = "Tindakan Diperlukan";
-      cardSub.innerHTML = "Periksa daftar di bawah, perbaiki data/dokumen yang ditandai, lalu kirim ulang. Setelah itu admin akan <b>memverifikasi ulang</b>.";
+      cardSub.innerHTML = "Periksa daftar di bawah, perbaiki data/dokumen yang ditandai, lalu kirim ulang. Setelah itu admin akan melakukan <b>verifikasi ulang</b>.";
       timelineEl.style.display = "none";
       tampilkanKartuPerbaikan(d.perbaikan);
 
-      // 🔔 Alarm HANYA untuk permintaan yang belum pernah dibunyikan
-      // (dicek via timestamp → tahan refresh & tutup browser)
       const tsPermintaan = d.perbaikan.waktu_diminta || 0;
       if (tsPermintaan > 0 && !sudahDiingatkan(tsPermintaan)) {
         alarmPerbaikan();
@@ -1056,83 +1087,76 @@
       if (kunciPendaftaran) localStorage.setItem("gc_kunci_pendaftaran", kunciPendaftaran);
     }
     else if (perbaikanSelesai) {
-      // ✈️ PERBAIKAN SUDAH DIKIRIM → MENUNGGU VERIFIKASI ULANG
       statusIcon.classList.add("terkirim");
       statusPill.classList.add("sp-biru");
       icoTerkirim.style.display = "block";
       pillText.textContent = "Perbaikan Terkirim";
-      judulUtama.innerHTML = 'Perbaikan <span>Berhasil Dikirim!</span>';
-      descUtama.innerHTML = "Data perbaikanmu sudah kami terima. Admin akan <b>memverifikasi ulang</b> segera.";
+      judulUtama.innerHTML = 'Perbaikan <span>Berhasil Dikirim</span>';
+      descUtama.innerHTML = "Data perbaikan Anda telah kami terima. Admin akan melakukan <b>verifikasi ulang</b>.";
       cardJudul.textContent = "Menunggu Verifikasi Ulang";
-      cardSub.innerHTML = "Kamu sudah mengirim perbaikan (putaran " + (d.perbaikan.putaran || 1) + "). Admin akan memeriksa dan mengabari melalui halaman ini. <b>Tidak perlu melakukan apa-apa lagi.</b>";
+      cardSub.innerHTML = "Anda telah mengirim perbaikan (putaran " + (d.perbaikan.putaran || 1) + "). Admin akan memeriksa dan menginformasikan melalui halaman ini. <b>Tidak ada tindakan lebih lanjut yang diperlukan.</b>";
       timelineEl.style.display = "none";
       perbaikanCard.style.display = "none";
     }
     else if (status === "disetujui" || status === "aktif") {
-      // 🎉 DISETUJUI
       statusIcon.classList.add("disetujui");
       statusPill.classList.add("sp-hijau");
       icoSetuju.style.display = "block";
-      pillText.textContent = "Pendaftaran DISETUJUI!";
-      judulUtama.innerHTML = 'Selamat, Kamu <span>Resmi Menjadi Mitra!</span>';
-      descUtama.innerHTML = "Akun driver Get Car kamu telah <b>aktif</b>. Silakan hubungi admin untuk informasi aktivasi aplikasi dan mulai menerima trip!";
-      cardJudul.textContent = "Verifikasi Berhasil 🎉";
-      cardSub.innerHTML = "Semua dokumen kamu telah <b>diverifikasi dan disetujui</b> oleh admin. Selamat bergabung dengan keluarga besar Get Car — PT Bali Global Trans!";
+      pillText.textContent = "Pendaftaran Disetujui";
+      judulUtama.innerHTML = 'Selamat, Anda <span>Resmi Menjadi Mitra</span>';
+      descUtama.innerHTML = "Akun driver Get Car Anda telah <b>aktif</b>. Lanjutkan dengan masuk ke aplikasi.";
+      cardJudul.textContent = "Verifikasi Berhasil";
+      cardSub.innerHTML = "Seluruh dokumen Anda telah <b>diverifikasi dan disetujui</b> oleh admin. Selamat bergabung dengan PT Bali Global Trans.";
       timelineEl.style.display = "";
       perbaikanCard.style.display = "none";
-      // 🎉 Konfeti HANYA sekali per kejadian persetujuan (tahan refresh)
+
+      // Auto-arah ke login hanya untuk persetujuan baru (tahan refresh)
       const tsSetuju = d.waktu_setuju || 0;
-      if (!sudahDirayakan(tsSetuju)) {
-        hujanKonfeti();
+      const persetujuanBaru = !sudahDirayakan(tsSetuju);
+      if (persetujuanBaru) {
         tandaiDirayakan(tsSetuju > 0 ? tsSetuju : Date.now());
       }
+      tampilkanLoginCard(persetujuanBaru);
     }
     else if (status === "suspend") {
-      // ⚠️ DITUNDA
       statusIcon.classList.add("ditunda");
       statusPill.classList.add("sp-merah");
       icoTunda.style.display = "block";
       pillText.textContent = "Pendaftaran Ditunda";
       judulUtama.innerHTML = 'Pendaftaran <span>Perlu Perhatian</span>';
-      descUtama.innerHTML = "Saat ini pendaftaranmu <b>ditunda</b>. Silakan hubungi admin untuk keterangan lebih lanjut.";
+      descUtama.innerHTML = "Pendaftaran Anda saat ini <b>ditunda</b>. Silakan hubungi admin untuk keterangan lebih lanjut.";
       cardJudul.textContent = "Menunggu Tindakan Admin";
-      cardSub.innerHTML = "Ada kendala pada pendaftaranmu. Hubungi admin melalui nomor telepon atau kantor PT Bali Global Trans untuk mengetahui detailnya.";
+      cardSub.innerHTML = "Terdapat kendala pada pendaftaran Anda. Hubungi admin melalui nomor telepon atau kantor PT Bali Global Trans untuk informasi detail.";
       timelineEl.style.display = "";
       perbaikanCard.style.display = "none";
     }
     else if (status === "ditolak" || status === "ditolak_duplikat") {
-      // 🚫 DITOLAK
       statusIcon.classList.add("ditunda");
       statusPill.classList.add("sp-merah");
       icoTunda.style.display = "block";
       pillText.textContent = "Pendaftaran Ditolak";
       judulUtama.innerHTML = 'Pendaftaran <span>Tidak Diterima</span>';
-      descUtama.innerHTML = "Pendaftaranmu <b>ditolak</b>" + (d.alasan ? ": " + d.alasan : ".");
+      descUtama.innerHTML = "Pendaftaran Anda <b>ditolak</b>" + (d.alasan ? ": " + d.alasan : ".");
       cardJudul.textContent = "Pendaftaran Ditolak";
-      cardSub.innerHTML = "Hubungi admin atau kantor PT Bali Global Trans jika kamu merasa ini keliru, atau daftar ulang dengan data yang benar.";
+      cardSub.innerHTML = "Hubungi admin atau kantor PT Bali Global Trans apabila Anda merasa terdapat kekeliruan, atau daftar ulang dengan data yang benar.";
       timelineEl.style.display = "";
       perbaikanCard.style.display = "none";
     }
     else {
-      // ⏳ MENUNGGU VERIFIKASI (default)
       statusIcon.classList.add("menunggu");
       statusPill.classList.add("sp-amber");
       icoMenunggu.style.display = "block";
       pillText.textContent = "Menunggu Verifikasi Admin";
-      judulUtama.innerHTML = 'Pendaftaran <span>Berhasil Dikirim!</span>';
-      descUtama.innerHTML = "Selamat! Semua data dan dokumen kamu sudah kami terima lengkap.";
+      judulUtama.innerHTML = 'Pendaftaran <span>Berhasil Dikirim</span>';
+      descUtama.innerHTML = "Seluruh data dan dokumen Anda telah kami terima.";
       cardJudul.textContent = "Dokumen Sedang Ditinjau";
-      cardSub.innerHTML = "Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini biasanya memakan waktu <b>1×24 jam</b> pada hari kerja. Kamu akan dihubungi melalui nomor telepon yang terdaftar.";
+      cardSub.innerHTML = "Tim verifikasi kami sedang memeriksa dokumen Anda. Proses ini umumnya memakan waktu <b>1×24 jam</b> pada hari kerja. Anda akan dihubungi melalui nomor telepon yang terdaftar.";
       timelineEl.style.display = "";
       perbaikanCard.style.display = "none";
     }
   }
 
-  // ============================================================
-  // PANTAU STATUS REALTIME
-  // — Query server (cepat). Kalau gagal (indexOn belum dipasang),
-  //   otomatis fallback ke mode lokal (filter sendiri).
-  // ============================================================
+  // ================= REALTIME =================
   function pantauStatus() {
     if (!telepon) { console.warn("Tidak ada ?telepon= di URL"); return; }
 
@@ -1140,12 +1164,10 @@
       const d = child.val();
       kunciPendaftaran = child.key;
       dataSekarang = d;
-      console.log("🔄 Status:", d.status, "| kunci:", child.key);
       tampilkanStatus(d);
     };
 
     const filterLokal = snap => {
-      if (sudahJalanServer) return; // server sudah jalan → hentikan lokal
       let ketemu = false;
       snap.forEach(child => {
         const d = child.val();
@@ -1155,36 +1177,32 @@
       if (!ketemu) tampilkanStatus({ status: "menunggu" });
     };
 
-    // Coba query server (butuh .indexOn telepon di Rules)
     db.ref("pendaftaran")
       .orderByChild("telepon").equalTo(telepon)
       .on("value",
         snap => {
-          sudahJalanServer = true;
           if (!snap.exists()) { tampilkanStatus({ status: "menunggu" }); return; }
           snap.forEach(terapkanData);
         },
         err => {
-          // ❌ Query server gagal → fallback lokal (limit 2000 terakhir)
-          console.warn("⚠️ Query server gagal (pasang .indexOn di Rules). Mode lokal aktif:", err.message);
+          console.warn("Query server gagal, mode lokal aktif:", err.message);
           db.ref("pendaftaran").limitToLast(2000).on("value", filterLokal);
         }
       );
   }
 
-  // Tombol periksa manual (feedback kecil)
   function periksaSekarang() {
     const btn = document.querySelector(".refresh-btn");
     const ikon = btn.querySelector("svg");
     ikon.style.animation = "spin 0.7s linear";
     setTimeout(() => { ikon.style.animation = ""; }, 750);
     const asli = pillText.textContent;
-    pillText.textContent = "Status terbaru dimuat ✓";
+    pillText.textContent = "Status terbaru dimuat";
     setTimeout(() => { pillText.textContent = asli; }, 1200);
   }
 
   // ================= MULAI =================
-  tampilkanStatus({ status: "menunggu" }); // tampilkan dulu sebelum data datang
+  tampilkanStatus({ status: "menunggu" });
   pantauStatus();
 </script>
 
