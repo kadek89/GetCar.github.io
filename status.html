@@ -14,6 +14,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
+  // Background foto (dimuat dulu supaya tidak kedip)
   const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
   const bg = new Image();
   bg.onload = () => document.body.classList.add("has-photo");
@@ -222,7 +223,7 @@
   .fix-btn:active { transform: scale(0.97); }
   .fix-btn svg { width: 18px; height: 18px; }
 
-  /* ===== KARTU ARAHAN LOGIN ===== */
+  /* ===== KARTU ARAHAN DRIVER.HTML ===== */
   .login-card {
     width: 100%;
     background: rgba(46, 204, 113, 0.10);
@@ -475,7 +476,7 @@
       <nav class="navbar">
         <div style="width:60px"></div>
         <div class="brand">Get <span>Car</span></div>
-        <div class="version">V1.108.0</div>
+        <div class="version">V1.109.0</div>
       </nav>
 
       <div class="content">
@@ -689,6 +690,47 @@
   }
 
   // ============================================================
+  // DISETUJUI → OTOMATIS ALIHKAN KE driver.html
+  // ============================================================
+  let timerLogin   = null;
+  let alihBerjalan = false;
+
+  function bukaDriver() {
+    // Simpan sesi → driver.html tahu siapa yang masuk
+    if (telepon) {
+      localStorage.setItem("gc_driver_login", JSON.stringify({
+        telepon: telepon,
+        nama: (dataSekarang && (dataSekarang.nama || dataSekarang.name)) || "",
+        kunci_pendaftaran: kunciPendaftaran || "",
+        waktu: Date.now()
+      }));
+    }
+    location.href = "driver.html?telepon=" + encodeURIComponent(telepon);
+    // ⚠️ Pastikan nama file "driver.html" sesuai dengan file aplikasi driver Anda
+  }
+
+  function alihkanOtomatis(detik) {
+    if (alihBerjalan) return;   // cegah timer dobel (realtime bisa terpicu berulang)
+    alihBerjalan = true;
+
+    let sisa = detik;
+    const tick = () => {
+      const teks = document.getElementById("loginBtnTeks");
+      if (teks) teks.textContent = sisa > 0
+        ? `Masuk ke Aplikasi (${sisa})`
+        : "Membuka aplikasi...";
+      if (sisa <= 0) {
+        clearInterval(timerLogin); timerLogin = null;
+        bukaDriver();
+        return;
+      }
+      sisa--;
+    };
+    tick();
+    timerLogin = setInterval(tick, 1000);
+  }
+
+  // ============================================================
   // TOMBOL "PERBAIKI SEKARANG" → PANEL DI HALAMAN INI
   // ============================================================
   function perbaikiSekarang() {
@@ -840,6 +882,7 @@
 
   function tutupPanel() { panelOverlay.classList.remove("active"); }
 
+  // EVENT DELEGATION — semua tombol penting merespons
   document.addEventListener("click", e => {
     const perbaikiBtn = e.target.closest("[data-perbaiki]");
     if (perbaikiBtn) { perbaikiSekarang(); return; }
@@ -1006,16 +1049,15 @@
   }
 
   // ============================================================
-  // DISETUJUI → ARAHAN LOGIN
+  // KARTU ARAHAN (disetujui → driver.html otomatis)
   // ============================================================
-  let timerLogin = null;
-
   function tampilkanLoginCard(otomatis) {
     if (timerLogin) { clearInterval(timerLogin); timerLogin = null; }
+    alihBerjalan = false;
 
     loginCard.innerHTML = `
       <h3>Akun Driver Anda Telah Aktif</h3>
-      <p>Langkah terakhir: masuk menggunakan <b>nomor telepon dan password</b> Anda untuk mulai menggunakan aplikasi.</p>
+      <p>Pendaftaran Anda <b>disetujui</b>. ${otomatis ? "Anda akan dialihkan ke aplikasi secara otomatis." : "Tekan tombol di bawah untuk membuka aplikasi."}</p>
       <button class="login-btn" id="btnBukaLogin">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         <span id="loginBtnTeks">Masuk ke Aplikasi</span>
@@ -1023,33 +1065,17 @@
       ${otomatis ? `<button class="login-tunda" id="btnTundaLogin">Tetap di halaman ini</button>` : ""}`;
     loginCard.style.display = "block";
 
-    document.getElementById("btnBukaLogin").onclick = bukaLogin;
+    document.getElementById("btnBukaLogin").onclick = bukaDriver;
 
     if (otomatis) {
-      let sisa = 5;
-      const teks = document.getElementById("loginBtnTeks");
-      teks.textContent = `Masuk ke Aplikasi (${sisa})`;
-      timerLogin = setInterval(() => {
-        sisa--;
-        if (sisa <= 0) {
-          clearInterval(timerLogin); timerLogin = null;
-          bukaLogin();
-        } else {
-          teks.textContent = `Masuk ke Aplikasi (${sisa})`;
-        }
-      }, 1000);
-
       document.getElementById("btnTundaLogin").onclick = () => {
         if (timerLogin) { clearInterval(timerLogin); timerLogin = null; }
-        teks.textContent = "Masuk ke Aplikasi";
+        alihBerjalan = false;
+        const teks = document.getElementById("loginBtnTeks");
+        if (teks) teks.textContent = "Masuk ke Aplikasi";
         document.getElementById("btnTundaLogin").style.display = "none";
       };
     }
-  }
-
-  function bukaLogin() {
-    if (timerLogin) { clearInterval(timerLogin); timerLogin = null; }
-    location.href = "login.html?telepon=" + encodeURIComponent(telepon);
   }
 
   // ================= STATUS =================
@@ -1079,6 +1105,7 @@
       timelineEl.style.display = "none";
       tampilkanKartuPerbaikan(d.perbaikan);
 
+      // Alarm hanya untuk permintaan yang belum pernah dibunyikan (tahan refresh)
       const tsPermintaan = d.perbaikan.waktu_diminta || 0;
       if (tsPermintaan > 0 && !sudahDiingatkan(tsPermintaan)) {
         alarmPerbaikan();
@@ -1104,19 +1131,23 @@
       icoSetuju.style.display = "block";
       pillText.textContent = "Pendaftaran Disetujui";
       judulUtama.innerHTML = 'Selamat, Anda <span>Resmi Menjadi Mitra</span>';
-      descUtama.innerHTML = "Akun driver Get Car Anda telah <b>aktif</b>. Lanjutkan dengan masuk ke aplikasi.";
+      descUtama.innerHTML = "Akun driver Get Car Anda telah <b>aktif</b>. Mengalihkan ke aplikasi...";
       cardJudul.textContent = "Verifikasi Berhasil";
       cardSub.innerHTML = "Seluruh dokumen Anda telah <b>diverifikasi dan disetujui</b> oleh admin. Selamat bergabung dengan PT Bali Global Trans.";
       timelineEl.style.display = "";
       perbaikanCard.style.display = "none";
 
-      // Auto-arah ke login hanya untuk persetujuan baru (tahan refresh)
+      // Penanda persetujuan baru (tahan refresh & tutup browser)
       const tsSetuju = d.waktu_setuju || 0;
       const persetujuanBaru = !sudahDirayakan(tsSetuju);
-      if (persetujuanBaru) {
-        tandaiDirayakan(tsSetuju > 0 ? tsSetuju : Date.now());
-      }
+      if (persetujuanBaru) tandaiDirayakan(tsSetuju > 0 ? tsSetuju : Date.now());
+
       tampilkanLoginCard(persetujuanBaru);
+
+      // OTOMATIS ALIHKAN ke driver.html:
+      // - Persetujuan baru → beri waktu 4 detik agar sempat dibaca
+      // - Persetujuan lama → alihkan cepat (1 detik)
+      alihkanOtomatis(persetujuanBaru ? 4 : 1);
     }
     else if (status === "suspend") {
       statusIcon.classList.add("ditunda");
@@ -1156,7 +1187,9 @@
     }
   }
 
-  // ================= REALTIME =================
+  // ============================================================
+  // PANTAU STATUS REALTIME (dengan fallback lokal otomatis)
+  // ============================================================
   function pantauStatus() {
     if (!telepon) { console.warn("Tidak ada ?telepon= di URL"); return; }
 
@@ -1177,6 +1210,7 @@
       if (!ketemu) tampilkanStatus({ status: "menunggu" });
     };
 
+    // Coba query server (butuh .indexOn "telepon" di Rules)
     db.ref("pendaftaran")
       .orderByChild("telepon").equalTo(telepon)
       .on("value",
