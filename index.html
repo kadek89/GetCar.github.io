@@ -6,6 +6,11 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
+  <!-- 📱 PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -230,6 +235,7 @@
       letter-spacing: 0.2px;
       text-decoration: none;
       cursor: pointer;
+      border: none;
       transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
 
@@ -252,7 +258,7 @@
     }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
-    /* Tombol unduh dengan logo Play Store */
+    /* Tombol unduh APK */
     .btn-download {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.25);
@@ -260,9 +266,10 @@
     }
     .btn-download:hover { background: rgba(255,255,255,0.15); }
     .btn-download .ic-play { width: 20px; height: 20px; }
-    .btn-download.sedang-unduh {
-      opacity: 0.7;
-      pointer-events: none;
+    .btn-download:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
     }
 
     /* Toast notifikasi unduhan */
@@ -373,16 +380,16 @@
             Daftar / Cek Status Pendaftaran
           </a>
 
-          <!-- 📥 Tombol ini langsung mengunduh APK saat diklik -->
-          <a href="getcar.apk" download="GetCar-Mitra.apk" id="btnUnduh" class="btn btn-download">
+          <!-- 📥 TOMBOL DOWNLOAD APK — klik = langsung unduh -->
+          <button type="button" id="btnUnduh" class="btn btn-download">
             <svg class="ic-play" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M3.6 1.81 13.79 12 3.6 22.19a1.5 1.5 0 0 1-.44-1.06V2.87c0-.41.17-.79.44-1.06Z" fill="#00A0FF"/>
               <path d="M17.09 8.38 13.79 12l3.3 3.62 3.78-2.16a1.49 1.49 0 0 0 0-2.93L17.09 8.38Z" fill="#FFBC00"/>
               <path d="M3.6 1.81c.24-.24.55-.39.9-.39.3 0 .67.14 1.06.36l11.53 6.6-3.3 3.62L3.6 1.81Z" fill="#00E170"/>
               <path d="M3.8 22.19c.23.24.55.39.9.39.3 0 .67-.14 1.06-.36l11.53-6.6-3.3-3.62L3.8 22.19Z" fill="#FF3A44"/>
             </svg>
-            Unduh Aplikasi (APK)
-          </a>
+            <span id="btnUnduhTeks">Unduh Aplikasi (APK)</span>
+          </button>
 
           <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
         </div>
@@ -391,21 +398,20 @@
     </div>
   </div>
 
-  <!-- 🔔 Toast notifikasi unduhan -->
+  <!-- 🔔 Toast notifikasi -->
   <div id="toast" class="toast"></div>
 
 <script>
   // ============================================================
-  // 📥 UNDUH APK LANGSUNG SAAT TOMBOL DIKLIK
+  // 📥 UNDUH APK — klik tombol = langsung unduh + progress
   // ============================================================
-  // 👇 GANTI sesuai lokasi file APK kamu:
-  //    - File di folder yang sama : "getcar.apk"
-  //    - File di hosting lain     : "https://contoh.com/getcar.apk"
-  //    - Firebase Storage         : "https://firebasestorage.googleapis.com/v0/b/kadek-ed34e.firebasestorage.app/o/getcar.apk?alt=media"
+  // ⚙️ File APK harus bernama "getcar.apk" dan ada di folder yang sama
+  //    dengan index.html ini. Kalau di hosting lain, ganti URL-nya.
   const APK_URL  = "getcar.apk";          // 👈 LOKASI FILE APK
   const APK_NAME = "GetCar-Mitra.apk";    // 👈 Nama file saat tersimpan di HP
 
-  const btnUnduh = document.getElementById("btnUnduh");
+  const btnUnduh  = document.getElementById("btnUnduh");
+  const teksBtn   = document.getElementById("btnUnduhTeks");
   const isAndroid = /android/i.test(navigator.userAgent);
 
   let toastTimer = null;
@@ -417,35 +423,34 @@
     toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
   }
 
-  btnUnduh.addEventListener("click", async (e) => {
-    e.preventDefault();
-    btnUnduh.classList.add("sedang-unduh");
-    tampilkanToast("Menyiapkan unduhan...");
+  btnUnduh.addEventListener("click", async () => {
+    if (btnUnduh.disabled) return;
+    btnUnduh.disabled = true;
 
     try {
-      // Coba unduh via fetch → bisa tampilkan progress & paksa simpan sebagai file
+      teksBtn.textContent = "Menyiapkan unduhan...";
+      tampilkanToast("Menyiapkan unduhan...");
+
       const res = await fetch(APK_URL);
       if (!res.ok) throw new Error("File tidak ditemukan (" + res.status + ")");
 
-      const total = parseInt(res.headers.get("Content-Length") || "0", 10);
+      const total  = parseInt(res.headers.get("Content-Length") || "0", 10);
       const reader = res.body.getReader();
       const chunks = [];
       let diterima = 0;
 
+      // 📊 Progress unduhan di tombol
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         chunks.push(value);
         diterima += value.length;
-
-        if (total) {
-          tampilkanToast("Mengunduh... " + Math.round(diterima / total * 100) + "%");
-        } else {
-          tampilkanToast("Mengunduh... " + Math.round(diterima / 1048576) + " MB");
-        }
+        teksBtn.textContent = total
+          ? "Mengunduh... " + Math.round(diterima / total * 100) + "%"
+          : "Mengunduh... " + Math.round(diterima / 1048576) + " MB";
       }
 
-      // Gabungkan & picu simpan file
+      // 💾 Simpan file ke HP
       const blob = new Blob(chunks);
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
@@ -456,29 +461,41 @@
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 10000);
 
+      teksBtn.textContent = "✅ Selesai! Buka file untuk instal";
       tampilkanToast("✅ Unduhan selesai! Buka file APK untuk menginstal.", "sukses");
 
-      // Peringatan jika bukan Android
       if (!isAndroid) {
-        setTimeout(() => {
-          tampilkanToast("⚠️ File APK hanya bisa diinstal di HP Android.", "error");
-        }, 4000);
+        setTimeout(() => tampilkanToast("⚠️ APK hanya bisa diinstal di HP Android.", "error"), 4000);
       }
 
     } catch (err) {
-      // Fallback: unduhan langsung oleh browser (jika fetch gagal / CORS)
-      console.warn("Fetch gagal, memakai unduhan langsung:", err);
+      // 🔄 Cadangan: unduhan langsung oleh browser
+      console.warn("Fetch gagal, pakai unduhan langsung:", err);
       const a = document.createElement("a");
       a.href = APK_URL;
       a.download = APK_NAME;
       document.body.appendChild(a);
       a.click();
       a.remove();
+      teksBtn.textContent = "Unduhan dimulai...";
       tampilkanToast("Unduhan dimulai — cek folder Downloads.");
-    } finally {
-      btnUnduh.classList.remove("sedang-unduh");
     }
+
+    // 🔁 Kembalikan tombol setelah 4 detik
+    setTimeout(() => {
+      teksBtn.textContent = "Unduh Aplikasi (APK)";
+      btnUnduh.disabled = false;
+    }, 4000);
   });
+
+  // ============================================================
+  // 📱 REGISTRASI SERVICE WORKER (agar bisa offline & jadi PWA)
+  // ============================================================
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js")
+      .then(() => console.log("✅ Service Worker aktif — aplikasi siap offline"))
+      .catch((err) => console.warn("SW gagal didaftarkan:", err));
+  }
 </script>
 
 </body>
