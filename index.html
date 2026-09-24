@@ -6,40 +6,19 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
-  <!-- 📱 PWA Manifest -->
+  <!-- 📱 PWA — ini kunci agar bisa "install" seperti aplikasi asli -->
   <link rel="manifest" href="manifest.json" />
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="apple-touch-icon" href="icon-192.png" />
 
-  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
-      authDomain: "kadek-ed34e.firebaseapp.com",
-      databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
-      projectId: "kadek-ed34e",
-      storageBucket: "kadek-ed34e.firebasestorage.app",
-      messagingSenderId: "65756136303",
-      appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a",
-      measurementId: "G-5WSR57JC7V"
-    };
-
-    const app = initializeApp(firebaseConfig);
-  </script>
-
-  <!-- Cek foto latar — jika gagal dimuat, tetap pakai gradasi gelap elegan -->
   <script>
-    const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
     const bg = new Image();
     bg.onload = () => document.body.classList.add("has-photo");
-    bg.src = BG_URL;
+    bg.src = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
   </script>
 
   <style>
@@ -51,8 +30,8 @@
       --accent-deep: #0f5ae0;
       --green: #2ecc71;
       --white: #ffffff;
-      --glass: rgba(255, 255, 255, 0.10);
-      --glass-border: rgba(255, 255, 255, 0.22);
+      --glass: rgba(255,255,255,0.10);
+      --glass-border: rgba(255,255,255,0.22);
     }
 
     html, body { height: 100%; }
@@ -66,207 +45,111 @@
       overflow: hidden;
     }
 
-    .phone {
-      width: 100%;
-      max-width: 430px;
-      height: 100dvh;
-      overflow: hidden;
-    }
+    .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
 
     .hero {
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+      position: relative; height: 100%;
+      display: flex; flex-direction: column;
       background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+      overflow-y: auto;
     }
 
     body.has-photo .hero {
       background-image:
         linear-gradient(180deg, rgba(6,13,26,0.55) 0%, rgba(6,13,26,0.25) 35%, rgba(6,13,26,0.92) 100%),
         url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
-      background-size: cover;
-      background-position: center;
+      background-size: cover; background-position: center;
     }
 
-    /* 🔔 BANNER PEMBERITAHUAN DOWNLOAD */
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: calc(14px + env(safe-area-inset-top)) 20px 8px;
+      z-index: 10;
+    }
+    .brand { font-size: 15px; font-weight: 800; }
+    .brand span { color: var(--accent); }
+    .version {
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+      padding: 5px 12px; border-radius: 20px;
+    }
+
+    /* 🔔 Banner pemberitahuan — klik = install aplikasi */
     .notice-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0 16px 4px;
-      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      margin: 0 16px 4px; padding: 12px 14px;
       border-radius: 14px;
       background: linear-gradient(90deg, rgba(46,204,113,0.16), rgba(47,123,255,0.16));
       border: 1px solid rgba(46,204,113,0.45);
       cursor: pointer;
       animation: fadeUp 0.6s 0.15s ease both;
-      z-index: 10;
     }
+    .notice-bar:active { transform: scale(0.98); }
     .notice-bar .lonceng {
       position: relative;
-      width: 34px; height: 34px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: rgba(46,204,113,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 50%; background: rgba(46,204,113,0.2);
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
     }
-    /* Titik merah berkedip pada lonceng */
     .notice-bar .lonceng::after {
-      content: "";
-      position: absolute;
-      top: 0; right: 0;
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: #ff4d4d;
-      animation: kedip 1.2s ease infinite;
+      content: ""; position: absolute; top: 0; right: 0;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #ff4d4d; animation: kedip 1.2s ease infinite;
     }
     @keyframes kedip {
-      0%, 100% { opacity: 1;  transform: scale(1);   box-shadow: 0 0 0 0 rgba(255,77,77,0.6); }
-      50%      { opacity: 0.6; transform: scale(0.85); box-shadow: 0 0 0 6px rgba(255,77,77,0); }
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,77,77,0.6); }
+      50%      { opacity: 0.6; box-shadow: 0 0 0 6px rgba(255,77,77,0); }
     }
     .notice-bar .n-teks { flex: 1; line-height: 1.4; }
-    .notice-bar .n-teks b {
-      display: block;
-      font-size: 12.5px;
-      font-weight: 800;
-      color: #7ee2a8;
-    }
-    .notice-bar .n-teks span {
-      font-size: 11.5px;
-      color: rgba(255,255,255,0.75);
-    }
-    .notice-bar .n-panah {
-      flex-shrink: 0;
-      animation: goyang 1.4s ease-in-out infinite;
-    }
-    @keyframes goyang {
-      0%, 100% { transform: translateX(0); }
-      50%      { transform: translateX(4px); }
-    }
-    /* Banner disembunyikan setelah tombol ✕ ditekan */
-    .notice-bar.ditutup { display: none; }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: calc(14px + env(safe-area-inset-top)) 20px 8px;
-      z-index: 10;
-    }
-
-    .brand {
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: var(--white);
-    }
-    .brand span { color: var(--accent); }
-
-    .version {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.4px;
-      color: rgba(255,255,255,0.85);
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 5px 12px;
-      border-radius: 20px;
-    }
+    .notice-bar .n-teks b { display: block; font-size: 13px; font-weight: 800; color: #7ee2a8; }
+    .notice-bar .n-teks span { font-size: 11.5px; color: rgba(255,255,255,0.75); }
 
     .logo-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100px;
-      padding: 10px 0;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      min-height: 100px; padding: 10px 0;
     }
-
     .logo-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       animation: pop 0.8s 0.1s ease both, float 4s 1.2s ease-in-out infinite;
     }
-
     .logo-big {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
+      width: 100px; height: 100px; object-fit: contain;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.45));
     }
-
     .logo-fallback {
-      display: none;
-      width: 96px;
-      height: 96px;
-      border-radius: 24px;
+      display: none; width: 96px; height: 96px; border-radius: 24px;
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white);
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      align-items: center;
-      justify-content: center;
+      font-size: 30px; font-weight: 800;
+      align-items: center; justify-content: center;
     }
 
-    .content {
-      padding: 0 26px;
-      z-index: 10;
-    }
+    .content { padding: 0 26px; z-index: 10; }
 
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.75);
-      margin-bottom: 14px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 14px;
     }
-
-    .eyebrow::before {
-      content: "";
-      width: 22px;
-      height: 2px;
-      background: var(--accent);
-      border-radius: 2px;
-    }
+    .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
 
     .content h1 {
-      font-size: clamp(26px, 7vw, 34px);
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.5px;
-      margin-bottom: 10px;
+      font-size: clamp(26px, 7vw, 34px); font-weight: 800;
+      line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 10px;
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
     }
-
     .content h1 span {
       background: linear-gradient(90deg, #6db3ff, #2f7bff);
-      -webkit-background-clip: text;
-      background-clip: text;
+      -webkit-background-clip: text; background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .content p {
-      font-size: 14.5px;
-      font-weight: 400;
-      line-height: 1.65;
-      color: rgba(255,255,255,0.78);
-      max-width: 300px;
-      margin-bottom: 26px;
+      font-size: 14.5px; line-height: 1.65; color: rgba(255,255,255,0.78);
+      max-width: 300px; margin-bottom: 26px;
     }
 
     .actions {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
+      background: var(--glass); border: 1px solid var(--glass-border);
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
       border-radius: 24px 24px 0 0;
@@ -276,48 +159,30 @@
     }
 
     .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 16px;
-      border-radius: 16px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-      transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 16px; border-radius: 16px;
+      font-family: inherit; font-size: 15px; font-weight: 700;
+      letter-spacing: 0.2px; text-decoration: none; cursor: pointer; border: none;
+      transition: transform 0.15s ease, box-shadow 0.25s ease;
     }
-
     .btn:active { transform: scale(0.97); }
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white);
-      box-shadow: 0 8px 24px rgba(47,123,255,0.4);
-      margin-bottom: 12px;
+      color: var(--white); box-shadow: 0 8px 24px rgba(47,123,255,0.4); margin-bottom: 12px;
     }
-    .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
 
     .btn-ghost {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: var(--white);
-      margin-bottom: 12px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
+      color: var(--white); margin-bottom: 12px;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
-    /* Tombol unduh APK — disorot dengan efek berdenyut */
-    .btn-download {
+    /* 📲 Tombol INSTALL — hijau berdenyut, klik = dialog install Chrome muncul */
+    .btn-install {
       background: linear-gradient(135deg, #1f9e55, #2ecc71);
       border: 1px solid rgba(255,255,255,0.3);
       color: var(--white);
-      box-shadow: 0 8px 24px rgba(46,204,113,0.35);
       animation: denyut 2.2s ease-in-out infinite;
       margin-bottom: 8px;
     }
@@ -325,196 +190,30 @@
       0%, 100% { box-shadow: 0 8px 24px rgba(46,204,113,0.35); }
       50%      { box-shadow: 0 8px 34px rgba(46,204,113,0.65); }
     }
-    .btn-download:disabled {
-      opacity: 0.65;
-      cursor: wait;
-      animation: none;
-      transform: none;
-    }
-    .btn-download .ic-play { width: 20px; height: 20px; }
-
-    /* Link kecil "Cara Install" */
-    .cara-install-link {
-      background: none;
-      border: none;
-      width: 100%;
-      text-align: center;
-      padding: 6px 0 2px;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.55);
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .cara-install-link:hover { color: #6db3ff; }
-
-    /* Toast notifikasi */
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: calc(28px + env(safe-area-inset-bottom));
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(13, 27, 50, 0.94);
-      border: 1px solid rgba(255,255,255,0.22);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      color: var(--white);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 13px 22px;
-      border-radius: 40px;
-      max-width: 88vw;
-      text-align: center;
-      line-height: 1.5;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      z-index: 999;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .toast.sukses { border-color: rgba(46,204,113,0.5); }
-    .toast.error  { border-color: rgba(255,90,90,0.6);  color: #ffb3b3; }
-
-    /* ============================================================
-       📋 MODAL PANDUAN INSTALASI
-       ============================================================ */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 500;
-      background: rgba(3, 8, 18, 0.78);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-    .modal-sheet {
-      width: 100%;
-      max-width: 430px;
-      max-height: 86vh;
-      overflow-y: auto;
-      background: rgba(13, 27, 50, 0.97);
-      border: 1px solid var(--glass-border);
-      border-bottom: none;
-      border-radius: 24px 24px 0 0;
-      padding: 24px 22px calc(24px + env(safe-area-inset-bottom));
-      transform: translateY(100%);
-      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .modal-overlay.active .modal-sheet { transform: translateY(0); }
-
-    .modal-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-    .modal-title {
-      flex: 1;
-      text-align: center;
-      font-size: 19px;
-      font-weight: 800;
-    }
-    .modal-close {
-      width: 32px; height: 32px;
-      flex-shrink: 0;
-      border: none;
-      background: rgba(255,255,255,0.08);
-      border-radius: 50%;
-      color: rgba(255,255,255,0.6);
-      font-size: 15px;
-      cursor: pointer;
-      line-height: 1;
-    }
-
-    .modal-intro {
-      text-align: center;
-      font-size: 13px;
-      line-height: 1.6;
-      color: rgba(255,255,255,0.75);
-      margin-bottom: 16px;
-    }
-    .modal-intro b { color: #7ee2a8; }
-
-    .langkah {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-    .langkah .no {
-      width: 30px; height: 30px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-      font-weight: 800;
-    }
-    .langkah .isi b {
-      display: block;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    .langkah .isi p {
-      font-size: 12.5px;
-      line-height: 1.55;
-      color: rgba(255,255,255,0.72);
-      max-width: none;
-      margin: 0;
-    }
-    .langkah .isi p code {
-      background: rgba(47,123,255,0.18);
-      border: 1px solid rgba(47,123,255,0.35);
-      border-radius: 6px;
-      padding: 1px 7px;
-      font-size: 11.5px;
-      color: #8fc2ff;
-    }
-
-    .modal-aksi {
-      margin-top: 18px;
-    }
+    .btn-install.hidden { display: none; }
 
     .copyright {
-      text-align: center;
-      font-size: 11px;
-      color: rgba(255,255,255,0.45);
-      margin-top: 16px;
-      user-select: none;
+      text-align: center; font-size: 11px;
+      color: rgba(255,255,255,0.45); margin-top: 16px;
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .toast {
+      position: fixed; left: 50%;
+      bottom: calc(28px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(13,27,50,0.94);
+      border: 1px solid rgba(255,255,255,0.22);
+      color: var(--white); font-size: 13px; font-weight: 600;
+      padding: 13px 22px; border-radius: 40px; max-width: 88vw;
+      text-align: center; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease; z-index: 999;
     }
-    @keyframes pop {
-      from { opacity: 0; transform: scale(0.7); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-8px); }
-    }
-    .navbar       { animation: fadeUp 0.6s ease both; }
-    .eyebrow      { animation: fadeUp 0.7s 0.2s ease both; }
-    .content h1   { animation: fadeUp 0.7s 0.3s ease both; }
-    .content p    { animation: fadeUp 0.7s 0.4s ease both; }
-    .btn-primary  { animation: fadeUp 0.7s 0.55s ease both; }
-    .btn-ghost    { animation: fadeUp 0.7s 0.65s ease both; }
-    .btn-download { animation: fadeUp 0.7s 0.75s ease both, denyut 2.2s 1.5s ease-in-out infinite; }
-    .copyright    { animation: fadeUp 0.7s 0.85s ease both; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.sukses { border-color: rgba(46,204,113,0.5); }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pop { from { opacity:0; transform:scale(0.7); } to { opacity:1; transform:scale(1); } }
+    @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
 
     @media (max-width: 360px) {
       .content { padding: 0 22px; }
@@ -528,25 +227,20 @@
   <div class="phone">
     <div class="hero">
 
-      <!-- Navbar -->
       <nav class="navbar">
         <div class="brand">Get <span>Car</span></div>
         <div class="version">V1.103.1</div>
       </nav>
 
-      <!-- 🔔 PEMBERITAHUAN DOWNLOAD APLIKASI (klik = langsung unduh) -->
-      <div class="notice-bar" id="noticeBar" onclick="mulaiUnduh()">
+      <!-- 🔔 BANNER — klik = install aplikasi (seperti RentRide) -->
+      <div class="notice-bar" id="noticeBar" onclick="pasangAplikasi()">
         <div class="lonceng">🔔</div>
         <div class="n-teks">
           <b>Aplikasi Get Car tersedia!</b>
-          <span>Ketuk di sini untuk unduh &amp; instal di HP kamu</span>
+          <span>Ketuk di sini untuk pasang di HP kamu — gratis</span>
         </div>
-        <svg class="n-panah" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#7ee2a8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        <button type="button" onclick="event.stopPropagation(); tutupNotif()" aria-label="Tutup notifikasi"
-                style="width:24px;height:24px;flex-shrink:0;border:none;border-radius:50%;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.55);font-size:12px;cursor:pointer;line-height:1;">✕</button>
       </div>
 
-      <!-- Logo di tengah (tanpa card) -->
       <div class="logo-center">
         <div class="logo-wrap">
           <img src="get.png" alt="Logo Get Car" class="logo-big"
@@ -555,37 +249,21 @@
         </div>
       </div>
 
-      <!-- Konten Utama -->
       <div class="content">
         <div class="eyebrow">Mitra Driver Get Car</div>
         <h1>Halo Mitra <span>Get Car</span></h1>
-        <p>Udah siap beraksi?
-        Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
+        <p>Udah siap beraksi? Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-        <!-- Panel Tombol -->
         <div class="actions">
-          <a href="login.html" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            Masuk sebagai Mitra Driver
-          </a>
+          <a href="login.html" class="btn btn-primary">Masuk sebagai Mitra Driver</a>
 
-          <a href="pendaftaran.html" class="btn btn-ghost">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-            Daftar / Cek Status Pendaftaran
-          </a>
+          <a href="pendaftaran.html" class="btn btn-ghost">Daftar / Cek Status Pendaftaran</a>
 
-          <!-- 📥 TOMBOL DOWNLOAD APK — hijau berdenyut, klik = langsung unduh -->
-          <button type="button" id="btnUnduh" class="btn btn-download">
-            <svg class="ic-play" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3.6 1.81 13.79 12 3.6 22.19a1.5 1.5 0 0 1-.44-1.06V2.87c0-.41.17-.79.44-1.06Z" fill="#00A0FF"/>
-              <path d="M17.09 8.38 13.79 12l3.3 3.62 3.78-2.16a1.49 1.49 0 0 0 0-2.93L17.09 8.38Z" fill="#FFBC00"/>
-              <path d="M3.6 1.81c.24-.24.55-.39.9-.39.3 0 .67.14 1.06.36l11.53 6.6-3.3 3.62L3.6 1.81Z" fill="#00E170"/>
-              <path d="M3.8 22.19c.23.24.55.39.9.39.3 0 .67-.14 1.06-.36l11.53-6.6-3.3-3.62L3.8 22.19Z" fill="#FF3A44"/>
-            </svg>
-            <span id="btnUnduhTeks">Unduh Aplikasi (APK)</span>
+          <!-- 📲 TOMBOL INSTALL — klik = dialog install Chrome langsung muncul -->
+          <button type="button" id="btnInstall" class="btn btn-install" onclick="pasangAplikasi()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span id="btnInstallTeks">📲 Pasang Aplikasi</span>
           </button>
-
-          <button type="button" class="cara-install-link" onclick="bukaPanduan()">📖 Cara install aplikasi di HP</button>
 
           <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
         </div>
@@ -594,196 +272,77 @@
     </div>
   </div>
 
-  <!-- 🔔 Toast notifikasi -->
   <div id="toast" class="toast"></div>
-
-  <!-- 📋 MODAL PANDUAN INSTALASI -->
-  <div class="modal-overlay" id="panduanModal">
-    <div class="modal-sheet">
-      <div class="modal-head">
-        <div style="width:32px"></div>
-        <div class="modal-title">Cara Install Aplikasi</div>
-        <button class="modal-close" onclick="tutupPanduan()">✕</button>
-      </div>
-      <p class="modal-intro">Ikuti 4 langkah mudah berikut untuk memasang aplikasi <b>Get Car Mitra</b> di HP Android kamu:</p>
-
-      <div class="langkah">
-        <div class="no">1</div>
-        <div class="isi">
-          <b>Unduh file APK</b>
-          <p>Tekan tombol <b style="color:#7ee2a8">Unduh Aplikasi (APK)</b> di atas, tunggu sampai unduhan selesai. File tersimpan di folder <b>Downloads</b> HP kamu.</p>
-        </div>
-      </div>
-
-      <div class="langkah">
-        <div class="no">2</div>
-        <div class="isi">
-          <b>Buka file APK</b>
-          <p>Buka aplikasi <b>File Manager / Files</b> → folder <b>Downloads</b> → ketuk file <code>GetCar-Mitra.apk</code>.</p>
-        </div>
-      </div>
-
-      <div class="langkah">
-        <div class="no">3</div>
-        <div class="isi">
-          <b>Izinkan instal dari sumber tidak dikenal</b>
-          <p>Jika muncul peringatan keamanan, ketuk <b>Settings / Pengaturan</b> → aktifkan <b>"Izinkan dari sumber ini"</b> → kembali → tekan <b>Install</b>.</p>
-        </div>
-      </div>
-
-      <div class="langkah">
-        <div class="no">4</div>
-        <div class="isi">
-          <b>Selesai — buka aplikasinya!</b>
-          <p>Setelah terpasang, icon <b>GetCar</b> muncul di layar utama. Login dengan akun mitra kamu dan mulai bekerja! 🎉</p>
-        </div>
-      </div>
-
-      <div class="modal-aksi">
-        <button type="button" class="btn btn-download" onclick="tutupPanduan(); mulaiUnduh()">
-          <svg class="ic-play" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3.6 1.81 13.79 12 3.6 22.19a1.5 1.5 0 0 1-.44-1.06V2.87c0-.41.17-.79.44-1.06Z" fill="#00A0FF"/>
-            <path d="M17.09 8.38 13.79 12l3.3 3.62 3.78-2.16a1.49 1.49 0 0 0 0-2.93L17.09 8.38Z" fill="#FFBC00"/>
-            <path d="M3.6 1.81c.24-.24.55-.39.9-.39.3 0 .67.14 1.06.36l11.53 6.6-3.3 3.62L3.6 1.81Z" fill="#00E170"/>
-            <path d="M3.8 22.19c.23.24.55.39.9.39.3 0 .67-.14 1.06-.36l11.53-6.6-3.3-3.62L3.8 22.19Z" fill="#FF3A44"/>
-          </svg>
-          <span id="btnUnduhTeks2">Unduh Sekarang</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
 <script>
   // ============================================================
-  // 📥 UNDUH APK — klik tombol = langsung unduh + progress
+  // 📲 INSTALL PWA — persis seperti RentRide!
+  // Chrome otomatis menyiapkan dialog "Install aplikasi"
+  // karena manifest.json + sw.js + HTTPS sudah lengkap.
   // ============================================================
-  const APK_URL  = "getcar.apk";          // 👈 LOKASI FILE APK (folder sama)
-  const APK_NAME = "GetCar-Mitra.apk";    // 👈 Nama file saat tersimpan di HP
+  let promptInstall = null;
+  const btnInstall  = document.getElementById("btnInstall");
+  const teksInstall = document.getElementById("btnInstallTeks");
 
-  const btnUnduh = document.getElementById("btnUnduh");
-  const teksBtn  = document.getElementById("btnUnduhTeks");
-  const teksBtn2 = document.getElementById("btnUnduhTeks2");
-  const isAndroid = /android/i.test(navigator.userAgent);
-
-  let sedangUnduh = false;
-  let toastTimer  = null;
-
-  function tampilkanToast(pesan, tipe) {
+  let toastTimer = null;
+  function tampilkanToast(pesan) {
     const t = document.getElementById("toast");
     t.textContent = pesan;
-    t.className = "toast show" + (tipe ? " " + tipe : "");
+    t.className = "toast show";
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
   }
 
-  // 🔔 Tutup banner pemberitahuan
-  function tutupNotif() {
-    document.getElementById("noticeBar").classList.add("ditutup");
-  }
-
-  // 📖 Buka / tutup panduan instalasi
-  function bukaPanduan() {
-    document.getElementById("panduanModal").classList.add("active");
-  }
-  function tutupPanduan() {
-    document.getElementById("panduanModal").classList.remove("active");
-  }
-  document.getElementById("panduanModal").addEventListener("click", (e) => {
-    if (e.target === e.currentTarget) tutupPanduan();
+  // Chrome memberi sinyal: "aplikasi ini bisa diinstall!"
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();               // cegah dialog muncul sendiri
+    promptInstall = e;                // simpan, tampilkan saat tombol diklik
+    btnInstall.classList.remove("hidden");
   });
 
-  // 📥 Fungsi unduh utama (dipakai banner, tombol, dan panduan)
-  async function mulaiUnduh() {
-    if (sedangUnduh) return;
-    sedangUnduh = true;
-    btnUnduh.disabled = true;
-
-    try {
-      teksBtn.textContent = "Menyiapkan unduhan...";
-      teksBtn2.textContent = "Mengunduh...";
-      tampilkanToast("Menyiapkan unduhan...");
-
-      const res = await fetch(APK_URL);
-      if (!res.ok) throw new Error("File tidak ditemukan (" + res.status + ")");
-
-      const total  = parseInt(res.headers.get("Content-Length") || "0", 10);
-      const reader = res.body.getReader();
-      const chunks = [];
-      let diterima = 0;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        diterima += value.length;
-        const teks = total
-          ? "Mengunduh... " + Math.round(diterima / total * 100) + "%"
-          : "Mengunduh... " + Math.round(diterima / 1048576) + " MB";
-        teksBtn.textContent  = teks;
-        teksBtn2.textContent = teks;
-      }
-
-      // 💾 Simpan file ke HP
-      const blob = new Blob(chunks);
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href = url;
-      a.download = APK_NAME;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-
-      teksBtn.textContent  = "✅ Selesai! Buka file untuk instal";
-      teksBtn2.textContent = "✅ Unduh Selesai";
-      tampilkanToast("✅ Unduhan selesai! Buka file APK untuk menginstal.", "sukses");
-
-      // 📋 Otomatis tampilkan PANDUAN INSTALASI setelah unduhan selesai
-      setTimeout(() => {
-        bukaPanduan();
-      }, 1200);
-
-      if (!isAndroid) {
-        setTimeout(() => tampilkanToast("⚠️ APK hanya bisa diinstal di HP Android.", "error"), 4000);
-      }
-
-    } catch (err) {
-      // 🔄 Cadangan: unduhan langsung oleh browser
-      console.warn("Fetch gagal, pakai unduhan langsung:", err);
-      const a = document.createElement("a");
-      a.href = APK_URL;
-      a.download = APK_NAME;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      teksBtn.textContent = "Unduhan dimulai...";
-      tampilkanToast("Unduhan dimulai — cek folder Downloads.");
-      setTimeout(bukaPanduan, 1200);
+  // 👇 Dipanggil saat banner / tombol diklik
+  async function pasangAplikasi() {
+    // Sudah terpasang? Kasih tahu saja
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      tampilkanToast("✅ Aplikasi sudah terpasang di HP kamu!");
+      return;
     }
 
-    // 🔁 Kembalikan tombol setelah 5 detik
-    setTimeout(() => {
-      teksBtn.textContent  = "Unduh Aplikasi (APK)";
-      teksBtn2.textContent = "Unduh Sekarang";
-      btnUnduh.disabled = false;
-      sedangUnduh = false;
-    }, 5000);
+    if (!promptInstall) {
+      // Dialog belum siap → ajarkan cara manual (2 ketukan)
+      tampilkanToast("📱 Buka menu ⋮ di Chrome → 'Instal aplikasi' / 'Tambahkan ke layar utama'");
+      return;
+    }
+
+    // 🎯 Munculkan dialog install asli Chrome (seperti di RentRide!)
+    promptInstall.prompt();
+    const { outcome } = await promptInstall.userChoice;
+    promptInstall = null;
+
+    if (outcome === "accepted") {
+      teksInstall.textContent = "✅ Berhasil dipasang!";
+      tampilkanToast("🎉 Aplikasi Get Car terpasang! Cek layar utama HP kamu.", "sukses");
+      setTimeout(() => btnInstall.classList.add("hidden"), 2500);
+    }
   }
 
-  btnUnduh.addEventListener("click", mulaiUnduh);
-
-  // Tekan ESC = tutup modal
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") tutupPanduan();
+  // Deteksi: user baru saja selesai install → sembunyikan tombol
+  window.addEventListener("appinstalled", () => {
+    btnInstall.classList.add("hidden");
+    document.getElementById("noticeBar").style.display = "none";
   });
 
-  // ============================================================
-  // 📱 REGISTRASI SERVICE WORKER (agar bisa offline & jadi PWA)
-  // ============================================================
+  // Kalau aplikasi sudah pernah dipasang → sembunyikan banner & tombol
+  if (window.matchMedia("(display-mode: standalone)").matches) {
+    btnInstall.classList.add("hidden");
+    document.getElementById("noticeBar").style.display = "none";
+  }
+
+  // 📱 Registrasi Service Worker (wajib untuk install)
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
-      .then(() => console.log("✅ Service Worker aktif — aplikasi siap offline"))
-      .catch((err) => console.warn("SW gagal didaftarkan:", err));
+      .then(() => console.log("✅ Service Worker aktif"))
+      .catch(() => {});
   }
 </script>
 
