@@ -1,219 +1,858 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0a1628" />
-<title>Get Car — Masuk Driver</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  :root { --accent:#2f7bff; --green:#2ecc71; --merah:#ff6b6b; }
-  body {
-    font-family:'Plus Jakarta Sans',sans-serif;
-    background:linear-gradient(160deg,#0d1f3c,#0a1628 55%,#060d1a);
-    color:#fff; min-height:100dvh; display:flex; justify-content:center; align-items:center;
-    padding:20px;
-  }
-  .box { width:100%; max-width:400px; }
-  .card {
-    background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22);
-    backdrop-filter:blur(20px); border-radius:24px; padding:28px 24px;
-  }
-  .logo { text-align:center; font-size:22px; font-weight:800; margin-bottom:4px; }
-  .logo span { color:var(--accent); }
-  .sub { text-align:center; font-size:12.5px; color:rgba(255,255,255,0.6); margin-bottom:22px; }
-  label { display:block; font-size:10.5px; font-weight:700; letter-spacing:1.2px;
-    text-transform:uppercase; color:rgba(255,255,255,0.55); margin:14px 0 6px; }
-  input {
-    width:100%; background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.22);
-    border-radius:13px; padding:13px 15px; color:#fff;
-    font-family:inherit; font-size:15px; font-weight:600; outline:none;
-  }
-  input:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(47,123,255,0.2); }
-  input.salah { border-color:var(--merah); }
-  .err { font-size:12px; color:#ff9b9b; font-weight:700; margin-top:8px; display:none; text-align:center; line-height:1.5; }
-  .btn {
-    width:100%; border:none; border-radius:15px; padding:15px; margin-top:22px;
-    font-family:inherit; font-size:15px; font-weight:800; cursor:pointer;
-    background:linear-gradient(135deg,var(--accent),#0f5ae0); color:#fff;
-    box-shadow:0 10px 26px rgba(47,123,255,0.4); transition:transform .15s ease;
-    display:flex; align-items:center; justify-content:center; gap:9px;
-  }
-  .btn:active { transform:scale(.97); }
-  .btn:disabled { opacity:.5; cursor:not-allowed; }
-  .btn svg { width:17px; height:17px; }
-  .link { text-align:center; margin-top:16px; font-size:12px; color:rgba(255,255,255,0.5); }
-  .link a { color:#6db3ff; font-weight:700; text-decoration:none; }
-  .sukses { text-align:center; display:none; }
-  .sukses .ikon {
-    width:86px; height:86px; margin:0 auto 16px; border-radius:50%;
-    background:rgba(46,204,113,0.14); border:2.5px solid var(--green);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 34px rgba(46,204,113,0.45);
-  }
-  .sukses .ikon svg { width:40px; height:40px; color:var(--green); }
-  .sukses h2 { font-size:19px; font-weight:800; margin-bottom:8px; }
-  .sukses p { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6; }
-  .sukses p b { color:#fff; }
-  .muat { font-size:12px; color:rgba(255,255,255,0.5); margin-top:12px; font-weight:600; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a1628" />
+  <title>Get Car Mitra — Login</title>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Firebase (versi 8 — sama seperti halaman lain) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- Cek foto latar -->
+  <script>
+    const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
+    const bg = new Image();
+    bg.onload = () => document.body.classList.add("has-photo");
+    bg.src = BG_URL;
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0a1628;
+      --accent: #2f7bff;
+      --accent-deep: #0f5ae0;
+      --white: #ffffff;
+      --glass: rgba(255, 255, 255, 0.10);
+      --glass-border: rgba(255, 255, 255, 0.22);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .phone { width: 100%; max-width: 430px; height: 100dvh; overflow: hidden; }
+
+    .hero {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
+      overflow: hidden;
+    }
+
+    body.has-photo .hero {
+      background-image:
+        linear-gradient(180deg, rgba(6,13,26,0.80) 0%, rgba(6,13,26,0.85) 50%, rgba(6,13,26,0.95) 100%),
+        url("https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .glow { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+    .glow-1 { width: 320px; height: 320px; background: rgba(47,123,255,0.28); top: -100px; right: -100px; }
+    .glow-2 { width: 280px; height: 280px; background: rgba(47,123,255,0.16); bottom: 60px; left: -120px; }
+
+    .navbar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+      z-index: 10;
+    }
+
+    .back-btn {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--white);
+      text-decoration: none;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+    .back-btn:hover  { background: rgba(255,255,255,0.18); }
+    .back-btn:active { transform: scale(0.92); }
+    .back-btn svg { width: 18px; height: 18px; }
+
+    .brand {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      color: var(--white);
+    }
+    .brand span { color: var(--accent); }
+
+    .version {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 6px 26px calc(20px + env(safe-area-inset-bottom));
+      overflow-y: auto;
+    }
+
+    .logo-small {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 20px rgba(0,0,0,0.45));
+      animation: pop 0.7s 0.1s ease both, float 4s 1s ease-in-out infinite;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      margin: 14px 0 10px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 6.5vw, 30px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+    }
+    h1 span {
+      background: linear-gradient(90deg, #6db3ff, #2f7bff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.75);
+      max-width: 320px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border-radius: 24px;
+      padding: 24px 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 2px; }
+
+    .label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.22);
+      border-radius: 14px;
+      padding: 13px 16px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .input-group:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(47,123,255,0.22);
+    }
+    .input-group.error-shake {
+      animation: shake 0.4s ease;
+      border-color: #ff6b6b;
+    }
+    .input-group svg {
+      width: 17px; height: 17px;
+      flex-shrink: 0;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .input::placeholder { color: rgba(255,255,255,0.35); font-weight: 500; letter-spacing: 0.3px; }
+
+    .toggle-pass {
+      background: none;
+      border: none;
+      padding: 0;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .toggle-pass svg { width: 19px; height: 19px; }
+
+    .hint {
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Badge nomor + sapaan */
+    .badge-nomor {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 6px;
+    }
+    .badge-nomor b {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--white);
+      background: rgba(47,123,255,0.18);
+      border: 1px solid rgba(47,123,255,0.35);
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+    .halo-nama {
+      text-align: center;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #7ee2a8;
+      margin-bottom: 18px;
+      min-height: 17px;
+    }
+
+    /* Tombol */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      color: var(--white);
+      box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+    }
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .link-bantuan {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      background: none;
+      border: none;
+      padding: 6px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .link-bantuan:hover:not(:disabled) { color: #6db3ff; }
+    .link-bantuan:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .hidden { display: none !important; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.35);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .status {
+      min-height: 20px;
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.55;
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+    }
+    .status.sukses { color: #7ee2a8; }
+    .status.error  { color: #ff9b9b; }
+
+    .copyright {
+      margin-top: auto;
+      padding-top: 20px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      user-select: none;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pop {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .navbar    { animation: fadeUp 0.6s ease both; }
+    .eyebrow   { animation: fadeUp 0.7s 0.2s ease both; }
+    h1         { animation: fadeUp 0.7s 0.3s ease both; }
+    .desc      { animation: fadeUp 0.7s 0.4s ease both; }
+    .card      { animation: fadeUp 0.7s 0.5s ease both; }
+    .copyright { animation: fadeUp 0.7s 0.65s ease both; }
+
+    @media (max-width: 360px) {
+      .content { padding-left: 20px; padding-right: 20px; }
+      .card { padding: 20px 16px; }
+    }
+  </style>
 </head>
 <body>
-<div class="box">
-  <div class="card">
 
-    <div id="formLogin">
-      <div class="logo">Get <span>Car</span> Driver</div>
-      <p class="sub">Masuk dengan akun yang telah disetujui admin</p>
+  <div class="phone">
+    <div class="hero">
 
-      <label>Nomor Telepon</label>
-      <input type="tel" id="inTel" placeholder="08xxxxxxxxxx" autocomplete="tel" />
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
 
-      <label>Password</label>
-      <input type="password" id="inPass" placeholder="Password dari admin" autocomplete="current-password" />
+      <!-- Navbar -->
+      <nav class="navbar">
+        <a href="index.html" class="back-btn" aria-label="Kembali">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
 
-      <p class="err" id="errMsg"></p>
+      <!-- Konten -->
+      <div class="content">
+        <img src="get.png" alt="Logo Get Car" class="logo-small" onerror="this.style.display='none'" />
 
-      <button class="btn" id="btnLogin">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span id="btnLoginTeks">Masuk</span>
-      </button>
+        <div class="eyebrow">Masuk Mitra</div>
+        <h1>Login Akun <span>Mitra</span></h1>
+        <p class="desc">Masukkan nomor telepon terdaftar Anda, lalu minta password ke admin. Password akan dikirim admin ke nomor Anda.</p>
 
-      <p class="link">Belum disetujui? <a href="status.html">Periksa status pendaftaran</a></p>
-    </div>
+        <!-- Panel Login -->
+        <div class="card">
 
-    <div class="sukses" id="layarSukses">
-      <div class="ikon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <!-- LANGKAH 1: nomor telepon + minta password -->
+          <div id="langkah1">
+            <div class="field">
+              <label class="label" for="teleponInput">Nomor Telepon Terdaftar</label>
+              <div class="input-group" id="groupTelepon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <input type="tel" id="teleponInput" class="input" inputmode="numeric" maxlength="14" placeholder="Cth: 081234567890" />
+              </div>
+              <p class="hint">Gunakan nomor yang Anda daftarkan saat pendaftaran.</p>
+            </div>
+
+            <button id="btnMinta" class="btn btn-primary">
+              <svg id="btnMintaIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              <span id="btnMintaSpinner" class="spinner" style="display:none"></span>
+              <span id="btnMintaText">Minta Password Login</span>
+            </button>
+            <p class="hint" style="text-align:center;">Admin akan mengirim password ke nomor Anda setelah permintaan dikirim.</p>
+          </div>
+
+          <!-- LANGKAH 2: masukkan password -->
+          <div id="langkah2" class="hidden">
+            <div class="badge-nomor">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <b id="badgeNomor">-</b>
+            </div>
+            <div class="halo-nama" id="haloNama"></div>
+
+            <div class="field">
+              <label class="label" for="passwordInput">Password dari Admin</label>
+              <div class="input-group" id="groupPassword">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="passwordInput" class="input" placeholder="Masukkan password" autocomplete="off" />
+                <button type="button" class="toggle-pass" id="togglePass" aria-label="Tampilkan password"></button>
+              </div>
+              <p class="hint">Salin password yang dikirim admin persis seperti aslinya.</p>
+            </div>
+
+            <button id="btnMasuk" class="btn btn-primary">
+              <svg id="btnMasukIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <span id="btnMasukSpinner" class="spinner" style="display:none"></span>
+              <span id="btnMasukText">Masuk</span>
+            </button>
+
+            <button id="mintaUlangLink" class="link-bantuan">Belum menerima password? Minta ulang</button>
+            <button id="gantiNomorLink" class="link-bantuan">Ganti nomor telepon</button>
+          </div>
+
+          <p id="status" class="status">Masukkan nomor telepon terdaftar untuk memulai.</p>
+        </div>
+
+        <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
       </div>
-      <h2>Login Berhasil</h2>
-      <p>Selamat datang, <b id="sNama">Driver</b>.<br>Mengalihkan ke aplikasi...</p>
-      <p class="muat" id="muatTeks"></p>
-    </div>
 
+    </div>
   </div>
-</div>
 
 <script>
-  firebase.initializeApp({
+  /* ================================================================
+     KONFIGURASI
+     ================================================================ */
+
+  const TELEGRAM_CONFIG = {
+    enabled: true,
+    botToken: "GANTI_DENGAN_TOKEN_BOT",
+    chatId:   "GANTI_DENGAN_CHAT_ID"
+  };
+
+  const REDIRECT_SETelah_LOGIN = "beranda.html"; // GANTI: halaman utama driver setelah login
+  const DURASI_COOLDOWN_REQ  = 30;   // detik jeda antar permintaan password
+  const MAKS_PASSWORD_SALAH  = 3;    // batas password salah
+  const DURASI_LOCK_PASSWORD = 300;  // detik terkunci setelah batas (5 menit)
+
+  const firebaseConfig = {
     apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
     authDomain: "kadek-ed34e.firebaseapp.com",
     databaseURL: "https://kadek-ed34e-default-rtdb.firebaseio.com",
     projectId: "kadek-ed34e",
+    storageBucket: "kadek-ed34e.firebasestorage.app",
     messagingSenderId: "65756136303",
     appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a"
-  });
+  };
+  firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  const IKON_MASUK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+  // ================= ELEMEN =================
+  const teleponInput   = document.getElementById("teleponInput");
+  const btnMinta       = document.getElementById("btnMinta");
+  const btnMintaText   = document.getElementById("btnMintaText");
+  const btnMintaIcon   = document.getElementById("btnMintaIcon");
+  const btnMintaSpinner= document.getElementById("btnMintaSpinner");
+  const langkah1       = document.getElementById("langkah1");
+  const langkah2       = document.getElementById("langkah2");
+  const badgeNomor     = document.getElementById("badgeNomor");
+  const haloNama       = document.getElementById("haloNama");
+  const passwordInput  = document.getElementById("passwordInput");
+  const btnMasuk       = document.getElementById("btnMasuk");
+  const btnMasukText   = document.getElementById("btnMasukText");
+  const btnMasukIcon   = document.getElementById("btnMasukIcon");
+  const btnMasukSpinner= document.getElementById("btnMasukSpinner");
+  const mintaUlangLink = document.getElementById("mintaUlangLink");
+  const gantiNomorLink = document.getElementById("gantiNomorLink");
+  const togglePass     = document.getElementById("togglePass");
+  const statusEl       = document.getElementById("status");
+  const groupTelepon   = document.getElementById("groupTelepon");
+  const groupPassword  = document.getElementById("groupPassword");
 
-  // Nomor dari URL (dikirim halaman status) → isi otomatis
-  const params = new URLSearchParams(location.search);
-  const telDariUrl = (params.get("telepon") || "").trim();
-  if (telDariUrl) document.getElementById("inTel").value = telDariUrl;
+  const IKON_MATA_BUKA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const IKON_MATA_TUTUP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 
-  // Sudah pernah login & sesi masih ada → langsung ke driver.html
-  const sesiLama = localStorage.getItem("gc_driver_login");
-  if (sesiLama) {
-    try {
-      const s = JSON.parse(sesiLama);
-      // Sesi berlaku 30 hari
-      if (s.telepon && (Date.now() - (s.waktu || 0)) < 30 * 86400000) {
-        location.replace("driver.html?telepon=" + encodeURIComponent(s.telepon));
-      }
-    } catch (e) { localStorage.removeItem("gc_driver_login"); }
+  // ================= STATE =================
+  let teleponFinal  = "";
+  let namaTersimpan = "";
+  let cooldownTimer = null;
+  let lockTimer     = null;
+
+  // ================= UTIL =================
+  function setStatus(pesan, tipe) {
+    statusEl.textContent = pesan;
+    statusEl.className = "status" + (tipe ? " " + tipe : "");
   }
 
-  function normalisasi(t) {
-    t = t.trim();
-    if (t.startsWith("0"))  return "+62" + t.slice(1);
-    if (t.startsWith("62")) return "+" + t;
-    if (t.startsWith("8"))  return "+62" + t;
-    return t;
+  function gagal(groupEl, pesan) {
+    setStatus(pesan, "error");
+    groupEl.classList.remove("error-shake");
+    void groupEl.offsetWidth;
+    groupEl.classList.add("error-shake");
+    const input = groupEl.querySelector(".input");
+    if (input) input.focus();
   }
 
-  // ⭐ Kunci dibuat dalam beberapa format — nomor di database bisa
-  // tersimpan sebagai 0812... / 62812... / +62812...
-  function kandidatKunci(tel) {
-    const bersih = s => String(s).replace(/[^a-zA-Z0-9_-]/g, "");
-    const lokal  = tel.replace("+62", "0");   // 081234567890
-    const intl   = tel.replace("+", "");      // 6281234567890
-    return [...new Set([bersih(tel), bersih(lokal), bersih(intl)])].filter(Boolean);
+  function normalisasiNomor(nomor) {
+    if (nomor.startsWith("0")) return "+62" + nomor.slice(1);
+    if (nomor.startsWith("62")) return "+" + nomor;
+    if (nomor.startsWith("8")) return "+62" + nomor;
+    return nomor;
   }
 
-  // Cari driver dengan mencoba semua format kunci
-  async function cariDriver(tel) {
-    for (const k of kandidatKunci(tel)) {
-      const snap = await db.ref("drivers/" + k).once("value");
-      if (snap.exists()) return snap.val();
-    }
-    return null;
+  // Filter input: hanya angka
+  teleponInput.addEventListener("input", () => {
+    teleponInput.value = teleponInput.value.replace(/\D/g, "");
+    groupTelepon.classList.remove("error-shake");
+  });
+
+  // Toggle tampil/sembunyi password
+  togglePass.innerHTML = IKON_MATA_BUKA;
+  togglePass.addEventListener("click", () => {
+    const tersembunyi = passwordInput.type === "password";
+    passwordInput.type = tersembunyi ? "text" : "password";
+    togglePass.innerHTML = tersembunyi ? IKON_MATA_TUTUP : IKON_MATA_BUKA;
+  });
+
+  // ================================================================
+  // LANGKAH 1 — MINTA PASSWORD
+  // ================================================================
+  function setLoadingMinta(aktif) {
+    btnMinta.disabled = aktif;
+    btnMintaText.textContent = aktif ? "Memproses..." : "Minta Password Login";
+    btnMintaIcon.style.display = aktif ? "none" : "block";
+    btnMintaSpinner.style.display = aktif ? "block" : "none";
   }
 
-  document.getElementById("btnLogin").onclick = async () => {
-    const tel  = normalisasi(document.getElementById("inTel").value);
-    const pass = document.getElementById("inPass").value;
-    const err  = document.getElementById("errMsg");
+  btnMinta.addEventListener("click", mintaPassword);
 
-    if (tel.length < 10 || !pass) {
-      err.textContent = "Isi nomor telepon dan password dengan benar.";
-      err.style.display = "block";
+  async function mintaPassword() {
+    const nomor = teleponInput.value.trim();
+
+    if (nomor.length < 9) {
+      gagal(groupTelepon, "Masukkan nomor telepon yang valid (minimal 9 digit).");
       return;
     }
 
-    const btn  = document.getElementById("btnLogin");
-    const teks = document.getElementById("btnLoginTeks");
-    btn.disabled = true;
-    teks.textContent = "Memeriksa...";
-    err.style.display = "none";
+    teleponFinal = normalisasiNomor(nomor);
+    setLoadingMinta(true);
+    setStatus("Memeriksa nomor di database...");
 
     try {
-      const d = await cariDriver(tel);
+      const snap = await db.ref("pendaftaran")
+        .orderByChild("telepon")
+        .equalTo(teleponFinal)
+        .once("value");
 
-      if (!d) throw new Error("Akun tidak ditemukan. Pastikan pendaftaran Anda telah disetujui admin.");
-
-      // ⭐ Hanya driver berstatus aktif yang boleh masuk
-      if (d.status && d.status !== "aktif") {
-        throw new Error("Akun Anda sedang tidak aktif. Silakan hubungi admin.");
+      if (!snap.exists()) {
+        setLoadingMinta(false);
+        gagal(groupTelepon, "Nomor belum terdaftar. Silakan gunakan menu Daftar terlebih dahulu.");
+        return;
       }
 
-      // ⭐ Password diberikan admin → tersimpan di node drivers/
-      if ((d.password || "") !== pass) {
-        throw new Error("Password salah. Silakan coba lagi.");
-      }
+      snap.forEach(child => {
+        const d = child.val();
+        namaTersimpan = d.nama || d.nama_lengkap || d.nama_pemilik || d.name || "";
+      });
 
-      // ===== SUKSES: simpan sesi + alihkan ke driver.html =====
-      localStorage.setItem("gc_driver_login", JSON.stringify({
-        telepon: d.telepon || tel,
-        nama: d.nama || "",
-        kunci_pendaftaran: d.kunci_pendaftaran || "",
-        waktu: Date.now()
-      }));
+      await kirimPermintaanKeAdmin(namaTersimpan);
 
-      document.getElementById("sNama").textContent = d.nama || "Driver";
-      document.getElementById("formLogin").style.display = "none";
-      document.getElementById("layarSukses").style.display = "block";
+      // Pindah ke langkah 2
+      badgeNomor.textContent = teleponFinal;
+      haloNama.textContent = namaTersimpan ? "Halo, " + namaTersimpan : "";
+      langkah1.classList.add("hidden");
+      langkah2.classList.remove("hidden");
+      setStatus("Permintaan terkirim. Tunggu admin mengirim password, lalu masukkan di bawah.", "sukses");
 
-      // Kirim nomor ke driver.html supaya langsung tahu siapa yang login
-      setTimeout(() => {
-        location.href = "driver.html?telepon=" + encodeURIComponent(d.telepon || tel);
-      }, 1200);
+      jalankanCooldown(DURASI_COOLDOWN_REQ);
+      setTimeout(() => passwordInput.focus(), 300);
 
-    } catch (e) {
-      err.textContent = e.message;
-      err.style.display = "block";
-      btn.disabled = false;
-      teks.textContent = "Masuk";
+    } catch (err) {
+      console.error("Gagal memeriksa nomor:", err);
+      setLoadingMinta(false);
+      setStatus("Gagal memeriksa nomor: " + err.message, "error");
     }
-  };
+  }
 
-  // Enter = login
-  document.getElementById("inPass").addEventListener("keydown", e => {
-    if (e.key === "Enter") document.getElementById("btnLogin").click();
+  async function kirimPermintaanKeAdmin(nama) {
+    const waktu = new Date().toLocaleString("id-ID");
+    const teleponSafe = teleponFinal.replace(/[^0-9]/g, "");
+
+    // Tulis permintaan ke node permintaanPassword (jumlah otomatis bertambah)
+    try {
+      await db.ref("permintaanPassword/" + teleponSafe).transaction(cur => {
+        const jumlah = (cur && cur.jumlah ? cur.jumlah : 0) + 1;
+        return {
+          telepon: teleponFinal,
+          nama: nama || "-",
+          waktu: waktu,
+          jumlah: jumlah
+        };
+      });
+    } catch (e) {
+      console.warn("Gagal menulis permintaan:", e.message);
+    }
+
+    await notifTelegram(
+      "PERMINTAAN PASSWORD LOGIN\n\n" +
+      "Nomor: " + teleponFinal + "\n" +
+      (nama ? "Nama: " + nama + "\n" : "") +
+      "Waktu: " + waktu + "\n\n" +
+      "Mohon kirim password login ke mitra tersebut."
+    );
+  }
+
+  // ================================================================
+  // COOLDOWN PERMINTAAN (30 DETIK)
+  // ================================================================
+  function jalankanCooldown(detik) {
+    const until = Date.now() + detik * 1000;
+    clearInterval(cooldownTimer);
+    const teksDefaultLink = "Belum menerima password? Minta ulang";
+
+    cooldownTimer = setInterval(() => {
+      const sisa = Math.ceil((until - Date.now()) / 1000);
+      if (sisa > 0) {
+        btnMinta.disabled = true;
+        btnMintaText.textContent = "Tunggu " + sisa + " detik";
+        mintaUlangLink.disabled = true;
+        mintaUlangLink.textContent = "Tunggu " + sisa + " detik untuk minta ulang";
+      } else {
+        clearInterval(cooldownTimer);
+        btnMinta.disabled = false;
+        btnMintaText.textContent = "Minta Password Login";
+        mintaUlangLink.disabled = false;
+        mintaUlangLink.textContent = teksDefaultLink;
+      }
+    }, 1000);
+  }
+
+  mintaUlangLink.addEventListener("click", async () => {
+    if (mintaUlangLink.disabled) return;
+    setStatus("Meminta password baru...", "sukses");
+    await kirimPermintaanKeAdmin(namaTersimpan);
+    setStatus("Permintaan terkirim. Tunggu admin mengirim password.", "sukses");
+    jalankanCooldown(DURASI_COOLDOWN_REQ);
   });
+
+  gantiNomorLink.addEventListener("click", () => {
+    langkah2.classList.add("hidden");
+    langkah1.classList.remove("hidden");
+    passwordInput.value = "";
+    setStatus("Masukkan nomor telepon terdaftar Anda.");
+  });
+
+  // ================================================================
+  // LANGKAH 2 — LOGIN DENGAN PASSWORD
+  // ================================================================
+  function setLoadingMasuk(aktif) {
+    btnMasuk.disabled = aktif;
+    btnMasukText.textContent = aktif ? "Memeriksa..." : "Masuk";
+    btnMasukIcon.style.display = aktif ? "none" : "block";
+    btnMasukSpinner.style.display = aktif ? "block" : "none";
+  }
+
+  btnMasuk.addEventListener("click", prosesLogin);
+  passwordInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") prosesLogin();
+  });
+
+  async function prosesLogin() {
+    const password = passwordInput.value.trim();
+
+    if (!password) {
+      gagal(groupPassword, "Masukkan password yang dikirim admin.");
+      return;
+    }
+
+    // Cek apakah sedang terkunci (tersimpan di localStorage, tahan refresh)
+    const LS_LOCK  = "loginLock_" + teleponFinal;
+    const LS_SALAH = "loginSalah_" + teleponFinal;
+    const lockTersimpan = parseInt(localStorage.getItem(LS_LOCK) || "0", 10);
+    if (lockTersimpan > Date.now()) {
+      mulaiLock(LS_LOCK, lockTersimpan);
+      return;
+    }
+
+    setLoadingMasuk(true);
+    setStatus("Memeriksa password...");
+
+    try {
+      // Baca ulang data terbaru (admin mungkin baru saja mengirim password)
+      const snap = await db.ref("pendaftaran")
+        .orderByChild("telepon")
+        .equalTo(teleponFinal)
+        .once("value");
+
+      let cocok = false;
+      let key = null;
+
+      snap.forEach(child => {
+        const d = child.val();
+        if (String(d.password || "").trim() === password) {
+          cocok = true;
+          key = child.key;
+        }
+      });
+
+      if (cocok) {
+        // Reset hitungan salah
+        localStorage.removeItem(LS_SALAH);
+        localStorage.removeItem(LS_LOCK);
+
+        // Catat waktu login terakhir
+        db.ref("pendaftaran/" + key)
+          .update({ last_login: new Date().toLocaleString("id-ID") })
+          .catch(() => {});
+
+        setStatus("Login berhasil! Mengalihkan...", "sukses");
+        setTimeout(() => {
+          window.location.href = REDIRECT_SETelah_LOGIN +
+            "?telepon=" + encodeURIComponent(teleponFinal);
+        }, 1200);
+
+      } else {
+        let salah = parseInt(localStorage.getItem(LS_SALAH) || "0", 10) + 1;
+        localStorage.setItem(LS_SALAH, String(salah));
+        setLoadingMasuk(false);
+
+        if (salah >= MAKS_PASSWORD_SALAH) {
+          const lockUntil = Date.now() + DURASI_LOCK_PASSWORD * 1000;
+          localStorage.setItem(LS_LOCK, String(lockUntil));
+          mulaiLock(LS_LOCK, lockUntil);
+        } else {
+          gagal(groupPassword,
+            "Password salah. Percobaan " + salah + "/" + MAKS_PASSWORD_SALAH + ".");
+        }
+      }
+
+    } catch (err) {
+      console.error("Gagal memeriksa password:", err);
+      setLoadingMasuk(false);
+      setStatus("Gagal memeriksa password: " + err.message, "error");
+    }
+  }
+
+  // Kunci halaman sementara setelah 3x password salah
+  function mulaiLock(LS_LOCK, lockUntil) {
+    clearInterval(lockTimer);
+    setLoadingMasuk(false);
+    btnMasuk.disabled = true;
+    passwordInput.disabled = true;
+    mintaUlangLink.disabled = true;
+
+    lockTimer = setInterval(() => {
+      const sisa = Math.ceil((lockUntil - Date.now()) / 1000);
+      if (sisa > 0) {
+        setStatus(
+          "Terlalu banyak percobaan. Silakan coba lagi dalam " +
+          Math.floor(sisa / 60) + " menit " + (sisa % 60) + " detik.", "error"
+        );
+      } else {
+        clearInterval(lockTimer);
+        localStorage.removeItem(LS_LOCK);
+        localStorage.removeItem("loginSalah_" + teleponFinal);
+        btnMasuk.disabled = false;
+        passwordInput.disabled = false;
+        mintaUlangLink.disabled = false;
+        setStatus("Batas percobaan direset. Silakan coba login kembali.", "sukses");
+      }
+    }, 1000);
+  }
+
+  // ================================================================
+  // NOTIFIKASI TELEGRAM KE ADMIN
+  // ================================================================
+  async function notifTelegram(pesan) {
+    if (!TELEGRAM_CONFIG.enabled) return;
+    if (TELEGRAM_CONFIG.botToken === "GANTI_DENGAN_TOKEN_BOT" ||
+        TELEGRAM_CONFIG.chatId === "GANTI_DENGAN_CHAT_ID") {
+      console.warn("Telegram belum dikonfigurasi — notifikasi dilewati.");
+      return;
+    }
+    try {
+      const response = await fetch(
+        "https://api.telegram.org/bot" + TELEGRAM_CONFIG.botToken + "/sendMessage",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: TELEGRAM_CONFIG.chatId, text: pesan })
+        }
+      );
+      const result = await response.json();
+      if (result.ok) console.log("Notifikasi admin terkirim");
+      else console.error("Telegram error:", result.description);
+    } catch (err) {
+      console.warn("Gagal kirim Telegram:", err);
+    }
+  }
 </script>
+
 </body>
 </html>
