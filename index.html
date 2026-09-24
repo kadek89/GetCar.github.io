@@ -53,8 +53,6 @@
       --accent: #2f7bff;
       --accent-deep: #0f5ae0;
       --white: #ffffff;
-      --glass: rgba(255, 255, 255, 0.10);
-      --glass-border: rgba(255, 255, 255, 0.22);
     }
 
     html, body { height: 100%; }
@@ -105,13 +103,13 @@
       letter-spacing: 0.5px;
       color: var(--white);
     }
-    .brand span { color: var(--accent); }
+    .brand span { color: var(--white); }
 
     .version {
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.4px;
-      color: rgba(255,255,255,0.85);
+      color: var(--white);
       background: rgba(255,255,255,0.12);
       border: 1px solid rgba(255,255,255,0.18);
       backdrop-filter: blur(10px);
@@ -170,7 +168,7 @@
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.75);
+      color: var(--white);
       margin-bottom: 14px;
     }
 
@@ -188,34 +186,26 @@
       line-height: 1.2;
       letter-spacing: -0.5px;
       margin-bottom: 10px;
+      color: var(--white);
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
     }
 
     .content h1 span {
-      background: linear-gradient(90deg, #6db3ff, #2f7bff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--white);
     }
 
     .content p {
       font-size: 14.5px;
       font-weight: 400;
       line-height: 1.65;
-      color: rgba(255,255,255,0.78);
+      color: var(--white);
       max-width: 300px;
       margin-bottom: 26px;
     }
 
+    /* ❌ CARD DIHAPUS — tombol langsung di atas latar */
     .actions {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px) saturate(140%);
-      -webkit-backdrop-filter: blur(20px) saturate(140%);
-      border-radius: 24px 24px 0 0;
-      padding: 22px 20px calc(18px + env(safe-area-inset-bottom));
-      margin: 0 -26px;
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.25);
+      padding: 0 0 calc(6px + env(safe-area-inset-bottom));
     }
 
     .btn {
@@ -239,15 +229,6 @@
     .btn:active { transform: scale(0.97); }
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
-    /* ✅ Tombol Install */
-    .btn-install {
-      background: rgba(47, 255, 136, 0.12);
-      border: 1px solid rgba(47, 255, 136, 0.45);
-      color: #4dff9d;
-      margin-bottom: 12px;
-    }
-    .btn-install:hover { background: rgba(47, 255, 136, 0.2); }
-
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
       color: var(--white);
@@ -260,13 +241,23 @@
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.25);
       color: var(--white);
+      margin-bottom: 12px;
     }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+
+    /* ✅ Tombol Install — putih netral (tanpa hijau) */
+    .btn-install {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: var(--white);
+      margin-bottom: 0;
+    }
+    .btn-install:hover { background: rgba(255,255,255,0.15); }
 
     .copyright {
       text-align: center;
       font-size: 11px;
-      color: rgba(255,255,255,0.45);
+      color: var(--white);
       margin-top: 16px;
       user-select: none;
     }
@@ -287,10 +278,10 @@
     .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
     .content h1  { animation: fadeUp 0.7s 0.3s ease both; }
     .content p   { animation: fadeUp 0.7s 0.4s ease both; }
-    .btn-install { animation: fadeUp 0.7s 0.5s ease both; }
     .btn-primary { animation: fadeUp 0.7s 0.55s ease both; }
     .btn-ghost   { animation: fadeUp 0.7s 0.65s ease both; }
-    .copyright   { animation: fadeUp 0.7s 0.75s ease both; }
+    .btn-install { animation: fadeUp 0.7s 0.75s ease both; }
+    .copyright   { animation: fadeUp 0.7s 0.85s ease both; }
 
     @media (max-width: 360px) {
       .content { padding: 0 22px; }
@@ -326,23 +317,30 @@
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-        <!-- 🔹 Tombol -->
+        <!-- 🔹 Tombol (tanpa card) -->
         <div class="actions">
-
-          <!-- ✅ TOMBOL INSTALL (selalu tampil) -->
-          <button id="btnInstall" class="btn btn-install" style="display:flex;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Install Aplikasi Get Car
-          </button>
 
           <a href="login.html" class="btn btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
             Masuk sebagai Mitra Driver
           </a>
+
           <a href="pendaftaran.html" class="btn btn-ghost">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
             Daftar / Cek Status Pendaftaran
           </a>
+
+          <!-- ✅ TOMBOL INSTALL (putih netral + logo Play Store) -->
+          <button id="btnInstall" class="btn btn-install" style="display:flex;">
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#00d2ff" d="M3.6 1.8 L13.8 12 L3.6 22.2 Z"/>
+              <path fill="#00e676" d="M3.6 1.8 L16.8 9.1 L13.8 12 Z"/>
+              <path fill="#ffd400" d="M16.8 9.1 L21.2 11.5 L21.2 12.5 L16.8 14.9 L13.8 12 Z"/>
+              <path fill="#ff3a44" d="M3.6 22.2 L16.8 14.9 L13.8 12 Z"/>
+            </svg>
+            Install Aplikasi Get Car
+          </button>
+
           <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
         </div>
       </div>
