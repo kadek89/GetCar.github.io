@@ -654,7 +654,7 @@
   .cam-pill.oranye span.teks { color: var(--orange); }
   .cam-pill.hijau .pi { background: var(--green); color: #06240f; }
   .cam-pill.hijau span.teks { color: var(--green); }
-  .cam-pill span.teks { font-size: 15px; font-weight: 600; white-space: nowrap; }
+  .cam-pill span.teks { font-size: 15px; font-weight: 600; white-space: normal; line-height: 1.45; }
 
   .cam-bottom {
     position: absolute;
@@ -862,7 +862,7 @@
 
     <div class="cam-pill oranye" id="camPill">
       <span class="pi" id="pillIcon">i</span>
-      <span class="teks" id="pillText">Dokumen belum pas di kotak</span>
+      <span class="teks" id="pillText">Posisikan dokumen di dalam kotak</span>
     </div>
 
     <div class="cam-bottom">
@@ -918,8 +918,6 @@
   const foto = { skck: null, koprasi: null };
   let kameraStream  = null;
   let kameraTarget  = null;
-  let detektorTimer = null;
-  let pasSejak      = null;
   let sedangJepret  = false;
 
   const params  = new URLSearchParams(window.location.search);
@@ -1077,24 +1075,23 @@
   }
 
   // ============================================================
-  // 📷 KAMERA LAYAR PENUH
+  // 📷 KAMERA LAYAR PENUH — MANUAL (TANPA AUTO-JEPRET)
   // ============================================================
   const CAM_TITLE = {
     skck:    "SKCK-mu harus muat di kotak",
     koprasi: "Kartu koperasi harus muat di kotak"
   };
-  const PILL_BELUM = {
-    skck:    "SKCK-mu belum pas di kotak",
-    koprasi: "Kartu koperasi belum pas di kotak"
+  const PILL_MANUAL = {
+    skck:    "Posisikan SKCK di dalam kotak, lalu tekan tombol jepret",
+    koprasi: "Posisikan kartu koperasi di dalam kotak, lalu tekan tombol jepret"
   };
 
   async function bukaKamera(tipe) {
     kameraTarget = tipe;
-    pasSejak = null;
     sedangJepret = false;
 
     camTitle.textContent = CAM_TITLE[tipe];
-    setPill("oranye", PILL_BELUM[tipe]);
+    setPill("oranye", PILL_MANUAL[tipe]);
 
     const jumlah = Object.values(foto).filter(Boolean).length;
     camSegs.forEach((seg, i) => seg.classList.toggle("isi", i < jumlah));
@@ -1106,11 +1103,11 @@
 
     try {
       kameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 1280 } }
+        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1440 } }
       });
       camVideo.srcObject = kameraStream;
       camFull.classList.add("active");
-      mulaiDeteksi();
+      // 🚫 Auto-jepret dihapus — foto hanya diambil lewat tombol jepret manual
     } catch (err) {
       console.error("Gagal akses kamera:", err);
       setStatus("Tidak bisa membuka kamera: " + err.message + ". Gunakan galeri.", "error");
@@ -1119,7 +1116,6 @@
 
   function tutupKamera() {
     camFull.classList.remove("active");
-    hentikanDeteksi();
     if (kameraStream) {
       kameraStream.getTracks().forEach(track => track.stop());
       kameraStream = null;
@@ -1134,52 +1130,10 @@
     pillText.textContent = teks;
   }
 
-  // 🤖 Deteksi dokumen terang → jepret otomatis
-  function mulaiDeteksi() {
-    hentikanDeteksi();
-    const sampel = document.createElement("canvas");
-    sampel.width = 80; sampel.height = 50;
-    const ctx = sampel.getContext("2d", { willReadFrequently: true });
-
-    detektorTimer = setInterval(() => {
-      if (!camFull.classList.contains("active")) return;
-      if (sedangJepret || !camVideo.videoWidth) return;
-
-      ctx.drawImage(camVideo, 0, 0, 80, 50);
-      const data = ctx.getImageData(18, 10, 44, 30).data;
-      let total = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        total += (data[i] + data[i+1] + data[i+2]) / 3;
-      }
-      const rataTerang = total / (data.length / 4);
-      const TERDETEKSI = rataTerang > 80; // ⚙️ naikkan ke 100 jika terlalu sensitif
-
-      if (TERDETEKSI) {
-        if (!pasSejak) {
-          pasSejak = Date.now();
-          setPill("hijau", "Posisi pas! Tetap tahan...");
-        } else if (Date.now() - pasSejak > 1200) {
-          sedangJepret = true;
-          setPill("hijau", "Bagus! Mengambil foto...");
-          hentikanDeteksi();
-          setTimeout(jepret, 400);
-        }
-      } else {
-        pasSejak = null;
-        setPill("oranye", PILL_BELUM[kameraTarget]);
-      }
-    }, 250);
-  }
-
-  function hentikanDeteksi() {
-    if (detektorTimer) { clearInterval(detektorTimer); detektorTimer = null; }
-  }
-
-  // ================= JEPRET =================
+  // ================= JEPRET MANUAL =================
   function jepret() {
-    if (!camFull.classList.contains("active")) return;
+    if (!camFull.classList.contains("active") || sedangJepret) return;
     sedangJepret = true;
-    hentikanDeteksi();
 
     const canvas = document.createElement("canvas");
     canvas.width  = camVideo.videoWidth  || 1080;
@@ -1210,15 +1164,21 @@
         (sisa < 2 ? " Lanjutkan dokumen berikutnya." : " Semua lengkap — silakan kirim!"),
         "sukses"
       );
-
-      // 🔗 Langsung buka dokumen berikutnya jika belum ada
-      const urutan = ["skck", "koprasi"];
-      const idx = urutan.indexOf(tipe);
-      if (idx < 1 && !foto[urutan[idx + 1]]) {
-        setTimeout(() => bukaKamera(urutan[idx + 1]), 900);
-      }
     }, "image/jpeg", 0.9);
   }
+
+  // 👆 Ketuk layar kamera untuk fokus ulang (agar gambar lebih jelas)
+  camVideo.addEventListener("click", async () => {
+    if (!kameraStream) return;
+    const track = kameraStream.getVideoTracks()[0];
+    if (!track || !track.getCapabilities) return;
+    try {
+      const caps = track.getCapabilities();
+      if (caps.focusMode && caps.focusMode.includes("single-shot")) {
+        await track.applyConstraints({ advanced: [{ focusMode: "single-shot" }] });
+      }
+    } catch (e) { /* diabaikan jika tidak didukung */ }
+  });
 
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") {
@@ -1278,7 +1238,7 @@
       setStatus("Semua dokumen terkirim! Pendaftaran selesai — admin akan memverifikasi. ✅", "sukses");
       btnText.textContent = "Terkirim ✅";
 
-      // 🎉 Sekarang BENAR-BENAR selesai → selesai.html
+      // 🎉 Sekarang BENAR-BENAR selesai → status.html
       setTimeout(() => {
         window.location.href = "status.html" +
           (telepon ? "?telepon=" + encodeURIComponent(telepon) : "");
