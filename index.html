@@ -6,12 +6,13 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
+  <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-  }
-</script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 
   <!-- 🔤 Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,10 +35,9 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    // Tambahkan logic Firebase lainnya di sini
   </script>
 
-  <!-- 📷 Cek foto latar — jika gagal dimuat, tetap pakai gradasi gelap elegan -->
+  <!-- 📷 Cek foto latar -->
   <script>
     const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
     const bg = new Image();
@@ -68,7 +68,6 @@
       overflow: hidden;
     }
 
-    /* 🔹 Ukuran handphone (430px), di komputer tetap di tengah */
     .phone {
       width: 100%;
       max-width: 430px;
@@ -76,7 +75,6 @@
       overflow: hidden;
     }
 
-    /* 🔹 Hero Full Screen */
     .hero {
       position: relative;
       height: 100%;
@@ -93,7 +91,6 @@
       background-position: center;
     }
 
-    /* 🔹 Navbar transparan */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -123,7 +120,6 @@
       border-radius: 20px;
     }
 
-    /* 🔹 LOGO DI TENGAH-TENGAH (tanpa card) */
     .logo-center {
       flex: 1;
       display: flex;
@@ -133,7 +129,6 @@
       padding: 10px 0;
     }
 
-    /* Card dihapus — hanya wadah animasi */
     .logo-wrap {
       display: flex;
       align-items: center;
@@ -145,11 +140,9 @@
       width: 110px;
       height: 110px;
       object-fit: contain;
-      /* Bayangan halus agar logo tetap terlihat di atas foto latar */
       filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
     }
 
-    /* Fallback jika get.png tidak ditemukan */
     .logo-fallback {
       display: none;
       width: 96px;
@@ -164,7 +157,6 @@
       justify-content: center;
     }
 
-    /* 🔹 Konten — menempel ke bawah seperti onboarding asli */
     .content {
       padding: 0 26px;
       z-index: 10;
@@ -215,7 +207,6 @@
       margin-bottom: 26px;
     }
 
-    /* 🔹 Panel aksi — kaca buram */
     .actions {
       background: var(--glass);
       border: 1px solid var(--glass-border);
@@ -241,11 +232,21 @@
       letter-spacing: 0.2px;
       text-decoration: none;
       cursor: pointer;
+      border: none;
       transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
 
     .btn:active { transform: scale(0.97); }
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ✅ Tombol Install */
+    .btn-install {
+      background: rgba(47, 255, 136, 0.12);
+      border: 1px solid rgba(47, 255, 136, 0.45);
+      color: #4dff9d;
+      margin-bottom: 12px;
+    }
+    .btn-install:hover { background: rgba(47, 255, 136, 0.2); }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
@@ -262,7 +263,6 @@
     }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
-    /* 🔹 Footer */
     .copyright {
       text-align: center;
       font-size: 11px;
@@ -271,7 +271,6 @@
       user-select: none;
     }
 
-    /* 🔹 Animasi */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -288,6 +287,7 @@
     .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
     .content h1  { animation: fadeUp 0.7s 0.3s ease both; }
     .content p   { animation: fadeUp 0.7s 0.4s ease both; }
+    .btn-install { animation: fadeUp 0.7s 0.5s ease both; }
     .btn-primary { animation: fadeUp 0.7s 0.55s ease both; }
     .btn-ghost   { animation: fadeUp 0.7s 0.65s ease both; }
     .copyright   { animation: fadeUp 0.7s 0.75s ease both; }
@@ -310,7 +310,7 @@
         <div class="version">V1.103.1</div>
       </nav>
 
-      <!-- 🔹 LOGO DI TENGAH (tanpa card) -->
+      <!-- 🔹 Logo -->
       <div class="logo-center">
         <div class="logo-wrap">
           <img src="get.png" alt="Logo Get Car" class="logo-big"
@@ -319,15 +319,22 @@
         </div>
       </div>
 
-      <!-- 🔹 Konten Utama -->
+      <!-- 🔹 Konten -->
       <div class="content">
         <div class="eyebrow">Mitra Driver Get Car</div>
         <h1>Halo Mitra <span>Get Car</span></h1>
-        <p>Udah siap beraksi? 
+        <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-        <!-- 🔹 Panel Tombol -->
+        <!-- 🔹 Tombol -->
         <div class="actions">
+
+          <!-- ✅ TOMBOL INSTALL (selalu tampil) -->
+          <button id="btnInstall" class="btn btn-install" style="display:flex;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Install Aplikasi Get Car
+          </button>
+
           <a href="login.html" class="btn btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
             Masuk sebagai Mitra Driver
@@ -342,6 +349,72 @@
 
     </div>
   </div>
+
+  <!-- ✅ Modal Panduan Install Manual -->
+  <div id="installModal" style="
+    display:none; position:fixed; inset:0; z-index:999;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center; padding:24px;">
+    <div style="
+      background:#0d1f3c; border:1px solid rgba(255,255,255,0.2);
+      border-radius:20px; padding:24px; max-width:340px; width:100%;">
+      <h3 style="font-size:17px; font-weight:800; margin-bottom:14px;">📲 Pasang Aplikasi</h3>
+      <p id="installSteps" style="font-size:13.5px; line-height:1.8; color:rgba(255,255,255,0.8);"></p>
+      <button onclick="document.getElementById('installModal').style.display='none'" style="
+        margin-top:18px; width:100%; padding:13px; border:none; border-radius:12px;
+        background:linear-gradient(135deg,#2f7bff,#0f5ae0); color:#fff;
+        font-family:inherit; font-weight:700; font-size:14px; cursor:pointer;">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ Logika Install -->
+  <script>
+    let deferredPrompt = null;
+    const btnInstall = document.getElementById("btnInstall");
+    const modal = document.getElementById("installModal");
+    const steps = document.getElementById("installSteps");
+
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+                      || window.navigator.standalone === true;
+
+    if (isStandalone) btnInstall.style.display = "none";
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      btnInstall.style.display = "none";
+    });
+
+    btnInstall.addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") btnInstall.style.display = "none";
+        deferredPrompt = null;
+        return;
+      }
+
+      if (isIOS) {
+        steps.innerHTML =
+          "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
+          "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
+          "3. Tekan <b>Tambah</b> — selesai! ✅";
+      } else {
+        steps.innerHTML =
+          "1. Buka website ini di <b>Chrome</b><br>" +
+          "2. Tekan menu <b>⋮</b> di pojok kanan atas<br>" +
+          "3. Pilih <b>“Tambahkan ke layar utama”</b> atau <b>“Instal aplikasi”</b><br>" +
+          "4. Tekan <b>Instal</b> — selesai! ✅";
+      }
+      modal.style.display = "flex";
+    });
+  </script>
 
 </body>
 </html>
