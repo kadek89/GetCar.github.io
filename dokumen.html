@@ -10,9 +10,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-<!-- 🔥 Firebase — hanya Realtime Database -->
+<!-- Firebase — hanya Realtime Database -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<!-- OCR Tesseract.js — pembaca plat nomor dari foto -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 
 <script>
   const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
@@ -202,7 +205,7 @@
   }
 
   /* ============================================================
-     🟩 DROPZONE GAYA GOJEK — kotak putus-putus + tombol Ambil Foto
+     DROPZONE
      ============================================================ */
   .upload-list { display: flex; flex-direction: column; gap: 22px; }
 
@@ -216,7 +219,6 @@
 
   .upload-title { font-size: 16.5px; font-weight: 800; letter-spacing: -0.2px; line-height: 1.35; }
 
-  /* Tombol (i) */
   .info-btn {
     width: 26px; height: 26px;
     flex-shrink: 0;
@@ -240,7 +242,6 @@
     color: var(--white);
   }
 
-  /* Kotak putus-putus */
   .dropzone {
     position: relative;
     width: 100%;
@@ -266,7 +267,6 @@
     gap: 14px;
   }
 
-  /* Tombol Ambil Foto — pill biru dengan ikon kamera */
   .ambil-foto-btn {
     display: inline-flex;
     align-items: center;
@@ -288,7 +288,6 @@
   }
   .ambil-foto-btn svg { width: 18px; height: 18px; }
 
-  /* Foto terisi di dalam zone */
   .dropzone img {
     position: absolute;
     inset: 0;
@@ -336,7 +335,6 @@
   .dropzone.terisi .dz-ganti,
   .dropzone.terisi .dz-hapus { display: flex; }
 
-  /* Teks ketentuan format di bawah kotak */
   .format-hint {
     font-size: 12.5px;
     line-height: 1.55;
@@ -356,6 +354,75 @@
     cursor: pointer;
   }
   .galeri-link:hover { color: #6db3ff; }
+
+  /* ============================================================
+     KOLOM NOMOR PLAT (auto-isi via OCR)
+     ============================================================ */
+  .field-nopol { margin-top: 14px; }
+  .nopol-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 8px;
+  }
+  .nopol-label .req { color: #ff7b7b; }
+  .nopol-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    padding: 12px 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .nopol-group:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(47,123,255,0.22);
+  }
+  .nopol-group.error-shake {
+    animation: shake 0.4s ease;
+    border-color: #ff6b6b;
+  }
+  .nopol-group svg {
+    width: 17px; height: 17px;
+    flex-shrink: 0;
+    color: rgba(255,255,255,0.45);
+  }
+  .nopol-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .nopol-input::placeholder { color: rgba(255,255,255,0.30); font-weight: 600; letter-spacing: 1px; }
+  .nopol-auto {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #06240f;
+    background: var(--green);
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .nopol-hint {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .nopol-hint.ok  { color: #7ee2a8; }
+  .nopol-hint.err { color: #ff9b9b; }
 
   .hidden { display: none !important; }
 
@@ -431,7 +498,7 @@
   }
 
   /* ============================================================
-     📋 MODAL KETENTUAN FOTO — contoh Benar / Salah
+     MODAL KETENTUAN — GAYA POSTER "TIPS"
      ============================================================ */
   .modal-overlay {
     position: fixed;
@@ -470,13 +537,13 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .ketentuan-title {
     flex: 1;
     text-align: center;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 800;
     letter-spacing: -0.3px;
   }
@@ -492,72 +559,148 @@
     line-height: 1;
   }
 
-  .ketentuan-intro {
-    text-align: center;
-    font-size: 14px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.8);
-    margin-bottom: 14px;
-  }
+  .tips-poster { text-align: center; }
 
-  .ketentuan-divider {
-    width: 90px;
-    height: 5px;
-    border-radius: 5px;
-    background: var(--accent);
-    margin: 0 auto 22px;
-  }
-
-  .aturan-item { margin-bottom: 20px; }
-
-  .aturan-num {
-    font-size: 14.5px;
+  .tips-brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10.5px;
     font-weight: 700;
-    line-height: 1.5;
-    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 18px;
   }
-  .aturan-num b { color: #6db3ff; }
+  .tips-brand .tb-kanan span { color: var(--accent); }
 
-  .contoh-row {
+  .tips-title-wrap {
+    position: relative;
+    display: inline-block;
+    padding: 8px 22px;
+  }
+  .tips-title {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 7px;
+    line-height: 1;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.4);
+  }
+  .tips-title-wrap::before,
+  .tips-title-wrap::after {
+    content: "";
+    position: absolute;
+    width: 16px; height: 16px;
+  }
+  .tips-title-wrap::before {
+    top: 0; left: 0;
+    border-top: 3px solid var(--accent);
+    border-left: 3px solid var(--accent);
+  }
+  .tips-title-wrap::after {
+    bottom: 0; right: 0;
+    border-bottom: 3px solid var(--accent);
+    border-right: 3px solid var(--accent);
+  }
+
+  .tips-sub {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.4;
+    margin-top: 12px;
+    letter-spacing: -0.2px;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .tips-cell {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-  }
-
-  .contoh-box {
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.05);
-  }
-  .contoh-box svg { display: block; width: 100%; height: auto; }
-
-  .contoh-label {
-    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: 700;
   }
-  .contoh-box.benar .contoh-label { color: var(--green); }
-  .contoh-box.salah .contoh-label { color: #ff7b7b; }
+  .tips-card { position: relative; width: 100%; }
+  .tips-photo {
+    border: 3px solid rgba(255,255,255,0.92);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #0d1a2e;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.40);
+  }
+  .tips-photo svg,
+  .tips-photo img { display: block; width: 100%; height: auto; }
 
-  .cek-bulat {
-    width: 26px; height: 26px;
+  .tips-badge {
+    position: absolute;
+    bottom: -13px;
+    left: -8px;
+    width: 38px; height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+  }
+  .tips-cell.salah .tips-badge { left: auto; right: -8px; }
+  .tips-badge.bnr { background: var(--green); color: #06240f; }
+  .tips-badge.slh { background: #ff5a5a; color: #2a0606; }
+
+  .tips-caption {
+    margin-top: 21px;
+    font-size: 16px;
     font-weight: 800;
   }
-  .contoh-box.benar .cek-bulat { background: var(--green); color: #06240f; }
-  .contoh-box.salah .cek-bulat { background: #ff5a5a; color: #2a0606; }
+  .tips-caption.bnr { color: var(--green); }
+  .tips-caption.slh { color: #ff7b7b; }
+
+  .tips-note {
+    margin-top: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.85);
+    text-align: center;
+  }
+  .tips-note b { color: #7ee2a8; }
+
+  .aturan-item { margin-bottom: 16px; }
+
+  .aturan-num {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .aturan-num b { color: #6db3ff; }
+
+  .tips-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.8);
+  }
+  .tips-list b { color: #7ee2a8; }
+
+  .bagian-judul {
+    margin: 26px 0 12px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(255,255,255,0.18);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+  }
 
   /* ============================================================
-     📷 KAMERA LAYAR PENUH
+     KAMERA LAYAR PENUH
      ============================================================ */
   .cam-full {
     position: fixed;
@@ -611,16 +754,6 @@
     text-shadow: 0 1px 8px rgba(0,0,0,0.6);
   }
 
-  .cam-progress { display: flex; gap: 8px; margin-top: 16px; }
-  .cam-progress > div {
-    flex: 1;
-    height: 5px;
-    border-radius: 5px;
-    background: rgba(255,255,255,0.35);
-    transition: background 0.4s ease;
-  }
-  .cam-progress > div.isi { background: var(--green); }
-
   .cam-title {
     position: absolute;
     top: calc(120px + env(safe-area-inset-top));
@@ -634,7 +767,7 @@
     padding: 0 24px;
   }
 
-  /* Bingkai dokumen (SIM & STNK) — rasio kartu */
+  /* Bingkai dokumen (SIM & STNK) */
   .card-guide {
     position: absolute;
     top: 50%;
@@ -646,15 +779,16 @@
     box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.75);
   }
 
-  /* Bingkai mobil — lebih besar, rasio 4:3 */
+  /* Bingkai mobil — polos */
   .mobil-guide {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -56%);
-    width: min(88vw, 380px);
-    aspect-ratio: 1.33;
+    width: min(82vw, 350px);
+    aspect-ratio: 1.48;
     border-radius: 14px;
+    border: 2px dashed rgba(255,255,255,0.55);
     box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.75);
   }
 
@@ -677,7 +811,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    max-width: 88vw;
+    max-width: 92vw;
     background: rgba(20, 20, 20, 0.85);
     border-radius: 40px;
     padding: 14px 22px;
@@ -692,15 +826,14 @@
     font-size: 15px;
     font-weight: 800;
     font-style: italic;
+    background: var(--orange);
+    color: #1a1a1a;
   }
-  .cam-pill.oranye .pi { background: var(--orange); color: #1a1a1a; }
-  .cam-pill.oranye span.teks { color: var(--orange); }
-  .cam-pill.hijau .pi { background: var(--green); color: #06240f; }
-  .cam-pill.hijau span.teks { color: var(--green); }
   .cam-pill span.teks {
     font-size: 15px;
     font-weight: 600;
     white-space: nowrap;
+    color: var(--orange);
   }
 
   .cam-bottom {
@@ -718,9 +851,10 @@
     background: var(--white);
     box-shadow: 0 0 0 4px rgba(255,255,255,0.25), 0 10px 30px rgba(0,0,0,0.5);
     cursor: pointer;
-    transition: transform 0.12s ease, background 0.2s ease;
+    transition: transform 0.12s ease, background 0.2s ease, opacity 0.2s ease;
   }
   .cam-shutter:active { transform: scale(0.86); background: var(--orange); }
+  .cam-shutter:disabled { opacity: 0.4; cursor: wait; }
 
   .cam-flash {
     position: absolute;
@@ -746,6 +880,13 @@
     from { opacity: 0; transform: scale(0.85); }
     to   { opacity: 1; transform: scale(1); }
   }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
 
   .navbar   { animation: fadeUp 0.6s ease both; }
   .eyebrow  { animation: fadeUp 0.7s 0.2s ease both; }
@@ -762,6 +903,8 @@
     .content { padding-left: 20px; padding-right: 20px; }
     .dropzone { height: 150px; }
     .cam-pill span.teks { font-size: 14px; }
+    .tips-title { font-size: 30px; letter-spacing: 5px; }
+    .tips-sub { font-size: 15px; }
   }
 </style>
 </head>
@@ -802,7 +945,7 @@
 
         <div class="upload-list">
 
-          <!-- ================= SIM ================= -->
+          <!-- SIM -->
           <div class="upload-card-anim">
             <div class="upload-head">
               <div class="upload-title">Foto SIM</div>
@@ -824,7 +967,7 @@
             <input type="file" id="fileSIM" accept="image/*" class="hidden" onchange="dariGaleri(event, 'sim')" />
           </div>
 
-          <!-- ================= STNK ================= -->
+          <!-- STNK -->
           <div class="upload-card-anim">
             <div class="upload-head">
               <div class="upload-title">Foto STNK (Tampak Depan)</div>
@@ -846,10 +989,10 @@
             <input type="file" id="fileSTNK" accept="image/*" class="hidden" onchange="dariGaleri(event, 'stnk')" />
           </div>
 
-          <!-- ================= MOBIL ================= -->
+          <!-- MOBIL + NOMOR PLAT OTOMATIS -->
           <div class="upload-card-anim">
             <div class="upload-head">
-              <div class="upload-title">Foto Kendaraan dengan Nopol</div>
+              <div class="upload-title">Foto Kendaraan (Tampak Depan)</div>
               <button type="button" class="info-btn" onclick="bukaKetentuan('mobil')" aria-label="Ketentuan foto kendaraan">i</button>
             </div>
             <div class="dropzone" id="zoneMobil" onclick="klikZone(event, 'mobil')">
@@ -863,7 +1006,19 @@
               <button type="button" class="dz-ganti" onclick="event.stopPropagation(); bukaKamera('mobil')">Ganti Foto</button>
               <button type="button" class="dz-hapus" onclick="event.stopPropagation(); hapusFoto('mobil')" aria-label="Hapus">✕</button>
             </div>
-            <p class="format-hint">Ukuran foto maksimal 30MB dengan format file .JPG .JPEG atau .PNG</p>
+
+            <!-- Kolom nomor plat: terisi otomatis dari OCR, bisa dikoreksi -->
+            <div class="field-nopol">
+              <label class="nopol-label" for="nopolInput">Nomor Plat Kendaraan <span class="req">*</span></label>
+              <div class="nopol-group" id="groupNopol">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/></svg>
+                <input type="text" id="nopolInput" class="nopol-input" maxlength="12" placeholder="DK 1234 AB" autocomplete="off" />
+                <span class="nopol-auto" id="nopolAuto" style="display:none">otomatis</span>
+              </div>
+              <p class="nopol-hint" id="nopolHint">Terisi otomatis setelah foto diambil. Wajib diperiksa dan dikoreksi bila salah.</p>
+            </div>
+
+            <p class="format-hint">Pastikan plat nomor terlihat jelas dan tidak terpotong</p>
             <button type="button" class="galeri-link" onclick="document.getElementById('fileMobil').click()">atau pilih dari galeri</button>
             <input type="file" id="fileMobil" accept="image/*" class="hidden" onchange="dariGaleri(event, 'mobil')" />
           </div>
@@ -891,21 +1046,19 @@
     </div>
   </div>
 
-  <!-- 🔹 MODAL KETENTUAN FOTO -->
+  <!-- MODAL KETENTUAN — GAYA POSTER TIPS -->
   <div id="ketentuanModal" class="modal-overlay">
     <div class="ketentuan-modal">
       <div class="ketentuan-head">
         <div style="width:32px"></div>
-        <div class="ketentuan-title" id="ketJudul">Ketentuan Foto</div>
+        <div class="ketentuan-title" id="ketJudul">Tips Foto</div>
         <button class="ketentuan-close" onclick="tutupKetentuan()">✕</button>
       </div>
-      <p class="ketentuan-intro">Pastikan Anda mengupload foto sesuai dengan ketentuan berikut:</p>
-      <div class="ketentuan-divider"></div>
       <div id="ketIsi"></div>
     </div>
   </div>
 
-  <!-- 🔹 KAMERA LAYAR PENUH -->
+  <!-- KAMERA LAYAR PENUH (MANUAL) -->
   <div id="camFull" class="cam-full">
     <video id="camVideo" autoplay playsinline muted></video>
 
@@ -917,7 +1070,7 @@
       <span class="kf-corner kf-br"></span>
     </div>
 
-    <!-- Bingkai mobil -->
+    <!-- Bingkai mobil polos -->
     <div class="mobil-guide" id="guideMobil" style="display:none">
       <span class="kf-corner kf-tl"></span>
       <span class="kf-corner kf-tr"></span>
@@ -930,31 +1083,35 @@
         <button class="cam-back" onclick="tutupKamera()" aria-label="Kembali">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
-        <button class="cam-tutorial" onclick="bukaKetentuan(kameraTarget)">Lihat ketentuan</button>
-      </div>
-      <div class="cam-progress">
-        <div id="camSeg0"></div>
-        <div id="camSeg1"></div>
-        <div id="camSeg2"></div>
+        <button class="cam-tutorial" onclick="bukaKetentuan(kameraTarget || 'sim')">Lihat ketentuan</button>
       </div>
     </div>
 
     <h2 class="cam-title" id="camTitle">Posisikan dokumen di dalam kotak</h2>
 
-    <div class="cam-pill oranye" id="camPill">
+    <div class="cam-pill" id="camPill">
       <span class="pi" id="pillIcon">i</span>
-      <span class="teks" id="pillText">Posisikan dokumen di dalam kotak</span>
+      <span class="teks" id="pillText">Posisikan dokumen, lalu tekan tombol foto</span>
     </div>
 
     <div class="cam-bottom">
-      <button class="cam-shutter" onclick="jepret()" aria-label="Jepret"></button>
+      <button class="cam-shutter" id="camShutter" onclick="jepret()" aria-label="Jepret"></button>
     </div>
 
     <div class="cam-flash" id="camFlash"></div>
   </div>
 
 <script>
-  // ================= KONFIGURASI FIREBASE — TANPA STORAGE =================
+  /* ================================================================
+     KONFIGURASI GAMBAR KETENTUAN — GANTI NAMA FILE DI SINI
+     ================================================================ */
+  const GAMBAR_KETENTUAN = {
+    sim:   { benar: "sim-benar.jpg",   salah: "sim-salah.jpg" },
+    stnk:  { benar: "stnk-benar.jpg",  salah: "stnk-salah.jpg" },
+    mobil: { benar: "mobil-benar.jpg", salah: "mobil-salah.jpg" }
+  };
+
+  // ================= KONFIGURASI FIREBASE =================
   const firebaseConfig = {
     apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
     authDomain: "kadek-ed34e.firebaseapp.com",
@@ -984,34 +1141,31 @@
     document.getElementById("pseg2")
   ];
 
-  const camFull     = document.getElementById("camFull");
-  const camVideo    = document.getElementById("camVideo");
-  const camTitle    = document.getElementById("camTitle");
-  const camPill     = document.getElementById("camPill");
-  const pillText    = document.getElementById("pillText");
-  const pillIcon    = document.getElementById("pillIcon");
-  const guideCard   = document.getElementById("guideCard");
-  const guideMobil  = document.getElementById("guideMobil");
-  const camSegs     = [
-    document.getElementById("camSeg0"),
-    document.getElementById("camSeg1"),
-    document.getElementById("camSeg2")
-  ];
-  const camFlash    = document.getElementById("camFlash");
+  const nopolInput = document.getElementById("nopolInput");
+  const nopolGroup = document.getElementById("groupNopol");
+  const nopolHint  = document.getElementById("nopolHint");
+  const nopolAuto  = document.getElementById("nopolAuto");
+
+  const camFull    = document.getElementById("camFull");
+  const camVideo   = document.getElementById("camVideo");
+  const camTitle   = document.getElementById("camTitle");
+  const pillText   = document.getElementById("pillText");
+  const guideCard  = document.getElementById("guideCard");
+  const guideMobil = document.getElementById("guideMobil");
+  const camFlash   = document.getElementById("camFlash");
+  const camShutter = document.getElementById("camShutter");
   const ketentuanModal = document.getElementById("ketentuanModal");
 
   // ================= STATE =================
   const foto = { sim: null, stnk: null, mobil: null };
-  let kameraStream  = null;
-  let kameraTarget  = null;
-  let detektorTimer = null;
-  let pasSejak      = null;
-  let sedangJepret  = false;
+  let kameraStream = null;
+  let kameraTarget = null;
+  let sedangJepret = false;
 
   const params  = new URLSearchParams(window.location.search);
   const telepon = params.get("telepon");
 
-  console.log("📱 Telepon dari URL:", telepon);
+  console.log("Telepon dari URL:", telepon);
 
   function setStatus(pesan, tipe) {
     statusEl.textContent = pesan;
@@ -1026,76 +1180,124 @@
   }
 
   // ============================================================
-  // 📋 KETENTUAN FOTO — konten per dokumen + contoh Benar/Salah
+  // FALLBACK SVG — hanya dipakai jika gambar JPG tidak ditemukan
   // ============================================================
-  const KETENTUAN = {
-    sim: {
-      judul: "Ketentuan Foto SIM",
-      aturan: [
-        "Foto SIM harus <b>landscape / mendatar</b>",
-        "Gunakan <b>SIM asli</b>, bukan fotokopi atau gambar",
-        "Semua tulisan terbaca jelas — tidak blur & tidak terpotong"
-      ]
-    },
-    stnk: {
-      judul: "Ketentuan Foto STNK",
-      aturan: [
-        "Foto STNK harus <b>landscape / mendatar</b>",
-        "Tampak <b>depan</b> STNK terlihat penuh",
-        "Nama pemilik & nomor kendaraan terbaca jelas"
-      ]
-    },
-    mobil: {
-      judul: "Ketentuan Foto Kendaraan",
-      aturan: [
-        "Foto kendaraan dari <b>tampak depan</b>",
-        "<b>Nomor polisi</b> terlihat jelas",
-        "Seluruh bodi kendaraan masuk dalam foto"
-      ]
-    }
-  };
-
-  // Contoh visual Benar / Salah (SVG sederhana)
   function svgDokumen(benar) {
     const miring = benar ? "" : ' transform="rotate(-12 100 60)"';
-    const kecil  = benar ? "" : ' transform="scale(0.62) translate(60 30)"';
     return `
     <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
       <rect width="200" height="120" fill="#1b2a44"/>
       <g${miring}>
-        <rect x="25" y="30" width="150" height="60" rx="6" fill="${benar ? "#e8eef7" : "#9fb0c7"}"${kecil}/>
-        <rect x="33" y="40" width="60" height="7" rx="3" fill="${benar ? "#3b5a86" : "#6b7f9c"}"${kecil}/>
-        <rect x="33" y="52" width="85" height="5" rx="2.5" fill="${benar ? "#7d95b5" : "#8b9db8"}"${kecil}/>
-        <rect x="33" y="62" width="70" height="5" rx="2.5" fill="${benar ? "#7d95b5" : "#8b9db8"}"${kecil}/>
-        <rect x="135" y="40" width="30" height="38" rx="4" fill="none" stroke="${benar ? "#3b5a86" : "#6b7f9c"}" stroke-width="2" stroke-dasharray="4 3"${kecil}/>
-        <circle cx="150" cy="53" r="7" fill="${benar ? "#3b5a86" : "#6b7f9c"}"${kecil}/>
-        <path d="M141 72c2-6 5-8 9-8s7 2 9 8" fill="${benar ? "#3b5a86" : "#6b7f9c"}"${kecil}/>
+        <rect x="25" y="30" width="150" height="60" rx="6" fill="${benar ? "#e8eef7" : "#9fb0c7"}"/>
+        <rect x="33" y="40" width="60" height="7" rx="3" fill="${benar ? "#3b5a86" : "#6b7f9c"}"/>
+        <rect x="33" y="52" width="85" height="5" rx="2.5" fill="${benar ? "#7d95b5" : "#8b9db8"}"/>
+        <rect x="33" y="62" width="70" height="5" rx="2.5" fill="${benar ? "#7d95b5" : "#8b9db8"}"/>
+        <rect x="135" y="40" width="30" height="38" rx="4" fill="none" stroke="${benar ? "#3b5a86" : "#6b7f9c"}" stroke-width="2" stroke-dasharray="4 3"/>
+        <circle cx="150" cy="53" r="7" fill="${benar ? "#3b5a86" : "#6b7f9c"}"/>
+        <path d="M141 72c2-6 5-8 9-8s7 2 9 8" fill="${benar ? "#3b5a86" : "#6b7f9c"}"/>
       </g>
       ${benar
-        ? '<path d="M18 22l5 5 9-11" stroke="#2ecc71" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
-        : '<path d="M18 18l10 10M28 18L18 28" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round"/>'}
+        ? '<path d="M18 22l5 5 9-11" stroke="#2ecc71" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="100" y="112" font-size="9" text-anchor="middle" fill="#7ee2a8">Lurus, terang, semua sudut masuk</text>'
+        : '<path d="M18 18l10 10M28 18L18 28" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round"/><text x="100" y="112" font-size="9" text-anchor="middle" fill="#ff9b9b">Miring & terpotong — akan ditolak</text>'}
     </svg>`;
   }
 
   function svgMobil(benar) {
+    const warnaBodi   = benar ? "#e8eef7" : "#9fb0c7";
+    const warnaDetail = benar ? "#3b5a86" : "#6b7f9c";
+    const geser = benar ? "" : ' transform="translate(0 32) scale(1.12)"';
     return `
     <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
       <rect width="200" height="120" fill="#1b2a44"/>
-      <rect x="30" y="42" width="140" height="40" rx="12" fill="${benar ? "#e8eef7" : "#9fb0c7"}"/>
-      <path d="M52 44l8-12h80l8 12" fill="${benar ? "#c9d7ea" : "#8b9db8"}"/>
-      <rect x="88" y="28" width="24" height="16" rx="3" fill="${benar ? "#9fb8d8" : "#7d92b0"}"/>
-      <circle cx="62" cy="84" r="10" fill="#22344f"/>
-      <circle cx="138" cy="84" r="10" fill="#22344f"/>
-      <rect x="${benar ? "118" : "170"}" y="66" width="30" height="11" rx="2"
-            fill="#fff" stroke="#3b5a86" stroke-width="1.5"
-            ${benar ? "" : 'opacity="0.35"'}/>
-      <text x="${benar ? "133" : "185"}" y="74.5" font-size="7" font-weight="bold"
-            text-anchor="middle" fill="#1b2a44"${benar ? "" : ' opacity="0.35"'}>DK 1234 AB</text>
+      <line x1="14" y1="104" x2="186" y2="104" stroke="#4a5f80" stroke-width="2" stroke-dasharray="6 5"/>
+      <g${geser}>
+        <path d="M40 96 L40 58 Q40 44 58 42 L72 40 Q82 22 100 22 Q118 22 128 40 L142 42 Q160 44 160 58 L160 96 Z"
+              fill="${warnaBodi}"/>
+        <path d="M76 38 Q84 26 100 26 Q116 26 124 38 Z" fill="${warnaDetail}"/>
+        <rect x="48" y="60" width="20" height="9" rx="3" fill="${warnaDetail}"/>
+        <rect x="132" y="60" width="20" height="9" rx="3" fill="${warnaDetail}"/>
+        <circle cx="62" cy="96" r="11" fill="#22344f"/>
+        <circle cx="62" cy="96" r="4" fill="${benar ? "#7d95b5" : "#8b9db8"}"/>
+        <circle cx="138" cy="96" r="11" fill="#22344f"/>
+        <circle cx="138" cy="96" r="4" fill="${benar ? "#7d95b5" : "#8b9db8"}"/>
+        <rect x="80" y="78" width="40" height="13" rx="2" fill="#fff" stroke="${warnaDetail}" stroke-width="1.5"/>
+        <text x="100" y="87.5" font-size="6" font-weight="bold" text-anchor="middle" fill="#1b2a44">DK 1234 AB</text>
+      </g>
+      ${benar ? '' : '<rect width="200" height="120" fill="rgba(0,0,0,0.32)"/>'}
       ${benar
-        ? '<path d="M18 22l5 5 9-11" stroke="#2ecc71" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
-        : '<path d="M18 18l10 10M28 18L18 28" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round"/><text x="100" y="112" font-size="9" text-anchor="middle" fill="#ff9b9b">Nopol terpotong!</text>'}
+        ? '<path d="M18 18l5 5 9-11" stroke="#2ecc71" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="100" y="114" font-size="9" text-anchor="middle" fill="#7ee2a8">Plat nomor terlihat penuh & terang</text>'
+        : '<path d="M18 12l9 9M27 12l-9 9" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round"/><text x="100" y="114" font-size="9" text-anchor="middle" fill="#ff9b9b">Terlalu dekat & tertutup bayangan!</text>'}
     </svg>`;
   }
+
+  function gambarKetentuan(tipe, benar) {
+    const cfg = GAMBAR_KETENTUAN[tipe];
+    const src = benar ? cfg.benar : cfg.salah;
+    const fallback = tipe === "mobil"
+      ? svgMobil(benar)
+      : svgDokumen(benar);
+
+    return `
+    <img src="${src}"
+         data-fallback="${encodeURIComponent(fallback)}"
+         alt="${benar ? "Contoh foto benar" : "Contoh foto salah"}"
+         onerror="if(this.dataset.fallback){this.outerHTML = decodeURIComponent(this.dataset.fallback);}" />`;
+  }
+
+  // ============================================================
+  // MODAL KETENTUAN — GAYA POSTER "TIPS"
+  // ============================================================
+  const SVG_CHECK = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  const SVG_X     = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+  const KETENTUAN = {
+    sim: {
+      judul: "Tips Foto SIM",
+      subjudul: "Foto Dokumen<br>SIM Tepat",
+      catatan: "Pastikan <b>pencahayaan terang</b> dan seluruh tulisan SIM <b>terbaca jelas</b>",
+      aturan: [
+        "Foto SIM harus <b>landscape / mendatar</b>",
+        "Gunakan <b>SIM asli</b>, bukan fotokopi atau gambar",
+        "Semua tulisan terbaca jelas — tidak blur & tidak terpotong"
+      ],
+      tips: [
+        "Letakkan SIM di tempat terang, hindari bayangan tangan",
+        "Tahan HP stabil 1-2 detik sebelum menekan tombol foto",
+        "Hindari pantulan lampu di permukaan plastik SIM"
+      ]
+    },
+    stnk: {
+      judul: "Tips Foto STNK",
+      subjudul: "Foto Dokumen<br>STNK Tepat",
+      catatan: "Pastikan <b>pencahayaan terang</b> dan STNK <b>tidak tertutup bayangan</b>",
+      aturan: [
+        "Foto STNK harus <b>landscape / mendatar</b>",
+        "Tampak <b>depan</b> STNK terlihat penuh",
+        "Nama pemilik & nomor kendaraan terbaca jelas"
+      ],
+      tips: [
+        "Letakkan STNK di tempat terang, hindari bayangan tangan",
+        "Tahan HP stabil 1-2 detik sebelum menekan tombol foto",
+        "Pastikan semua sudut STNK masuk kotak oranye"
+      ]
+    },
+    mobil: {
+      judul: "Tips Foto Kendaraan",
+      subjudul: "Foto Dokumen<br>Kendaraan Tepat",
+      catatan: "Pastikan <b>pencahayaan terang</b> dan kendaraan <b>tidak tertutup bayangan</b>",
+      aturan: [
+        "Foto dari <b>tampak depan</b> — mobil menghadap kamera",
+        "<b>Plat nomor</b> terlihat penuh dan tidak terpotong",
+        "Nomor plat akan <b>dibaca otomatis</b> dari foto — periksa hasilnya"
+      ],
+      tips: [
+        "Ambil foto pada siang hari atau tempat terang",
+        "Dekati mobil secukupnya agar plat nomor besar & jelas",
+        "Plat yang lebih besar = pembacaan otomatis lebih akurat",
+        "Jangan memotret saat mobil berada di dalam bayangan"
+      ]
+    }
+  };
 
   function bukaKetentuan(tipe) {
     const k = KETENTUAN[tipe];
@@ -1104,23 +1306,56 @@
     document.getElementById("ketJudul").textContent = k.judul;
 
     const isi = document.getElementById("ketIsi");
-    isi.innerHTML = k.aturan.map((a, i) => `
+
+    const poster = `
+    <div class="tips-poster">
+      <div class="tips-brand">
+        <div class="tb-kiri">PT Bali Global Trans</div>
+        <div class="tb-kanan">Get <span>Car</span></div>
+      </div>
+
+      <div class="tips-title-wrap">
+        <div class="tips-title">TIPS</div>
+      </div>
+
+      <div class="tips-sub">${k.subjudul}</div>
+
+      <div class="tips-grid">
+        <div class="tips-cell benar">
+          <div class="tips-card">
+            <div class="tips-photo">${gambarKetentuan(tipe, true)}</div>
+            <div class="tips-badge bnr">${SVG_CHECK}</div>
+          </div>
+          <div class="tips-caption bnr">Benar</div>
+        </div>
+
+        <div class="tips-cell salah">
+          <div class="tips-card">
+            <div class="tips-photo">${gambarKetentuan(tipe, false)}</div>
+            <div class="tips-badge slh">${SVG_X}</div>
+          </div>
+          <div class="tips-caption slh">Salah</div>
+        </div>
+      </div>
+
+      <div class="tips-note">${k.catatan}</div>
+    </div>`;
+
+    const daftar = `
+    <div class="bagian-judul">Ketentuan Lengkap</div>
+    ${k.aturan.map((a, i) => `
       <div class="aturan-item">
         <div class="aturan-num"><b>${i + 1}.</b> ${a}</div>
-        ${i === 0 ? `
-        <div class="contoh-row">
-          <div class="contoh-box benar">
-            ${tipe === "mobil" ? svgMobil(true) : svgDokumen(true)}
-            <div class="contoh-label"><span class="cek-bulat">✓</span> Benar</div>
-          </div>
-          <div class="contoh-box salah">
-            ${tipe === "mobil" ? svgMobil(false) : svgDokumen(false)}
-            <div class="contoh-label"><span class="cek-bulat">✕</span> Salah</div>
-          </div>
-        </div>` : ""}
       </div>
-    `).join("");
+    `).join("")}
+    <div class="aturan-item">
+      <div class="aturan-num"><b>${k.aturan.length + 1}.</b> Tips agar hasil tajam:</div>
+      <ul class="tips-list">
+        ${k.tips.map(t => `<li>${t}</li>`).join("")}
+      </ul>
+    </div>`;
 
+    isi.innerHTML = poster + daftar;
     ketentuanModal.classList.add("active");
   }
 
@@ -1133,10 +1368,9 @@
   });
 
   // ============================================================
-  // 🟩 DROPZONE — klik = kamera, ✕ = hapus
+  // DROPZONE
   // ============================================================
   function klikZone(event, tipe) {
-    // Klik pada area zone (bukan tombol ✕ / ganti yang sudah stopPropagation)
     if (!foto[tipe]) bukaKamera(tipe);
   }
 
@@ -1148,27 +1382,34 @@
     img.src = "";
     zone.classList.remove("terisi");
     updateProgress();
+
+    if (tipe === "mobil") {
+      nopolInput.value = "";
+      nopolAuto.style.display = "none";
+      nopolHint.textContent = "Terisi otomatis setelah foto diambil. Wajib diperiksa dan dikoreksi bila salah.";
+      nopolHint.className = "nopol-hint";
+    }
+
     setStatus("Foto " + tipe.toUpperCase() + " dihapus.");
   }
 
   // ================= KOMPRES → BASE64 =================
-  function kompresJadiBase64(source) {
+  function kompresJadiBase64(source, maxSisi, kualitas) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(source);
 
       img.onload = () => {
         URL.revokeObjectURL(url);
-        const MAX = 900;
         let w = img.width, h = img.height;
-        if (w > MAX || h > MAX) {
-          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-          else       { w = Math.round(w * MAX / h); h = MAX; }
+        if (w > maxSisi || h > maxSisi) {
+          if (w > h) { h = Math.round(h * maxSisi / w); w = maxSisi; }
+          else       { w = Math.round(w * maxSisi / h); h = maxSisi; }
         }
         const canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
         canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.55));
+        resolve(canvas.toDataURL("image/jpeg", kualitas));
       };
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Foto tidak bisa dibaca")); };
       img.src = url;
@@ -1193,40 +1434,148 @@
     foto[tipe] = file;
     tampilkanPreview(tipe, file);
     updateProgress();
+    event.target.value = "";
     setStatus("Foto " + tipe.toUpperCase() + " siap." +
               (Object.values(foto).every(Boolean) ? " Semua dokumen lengkap — silakan kirim!" : ""));
+
+    if (tipe === "mobil") {
+      jalankanOCR(file);
+    }
   }
 
   // ============================================================
-  // 📷 KAMERA LAYAR PENUH
+  // OCR PLAT NOMOR — Tesseract.js
+  // ============================================================
+  let ocrWorker      = null;   // worker dipakai berulang agar cepat
+  let ocrWorkerSiap  = false;
+  let ocrAntrean     = Promise.resolve();
+  let ocrToken       = 0;      // penanda: hasil OCR foto lama dibuang bila ada foto baru
+
+  function setNopolHint(pesan, tipe) {
+    nopolHint.textContent = pesan;
+    nopolHint.className = "nopol-hint" + (tipe ? " " + tipe : "");
+  }
+
+  async function dapatkanWorker() {
+    if (ocrWorkerSiap) return ocrWorker;
+
+    setStatus("Menyiapkan pembaca plat nomor (unduhan sekali saja)...");
+    setNopolHint("Menyiapkan pembaca plat (unduhan sekali saja, ±beberapa detik)...");
+
+    ocrWorker = await Tesseract.createWorker("eng", 1, {
+      logger: m => {
+        if (m.status === "recognizing text") {
+          const persen = Math.round(m.progress * 100);
+          setNopolHint("Membaca plat nomor... " + persen + "%");
+        }
+      }
+    });
+
+    // Hanya huruf, angka, spasi — plat nomor tidak punya karakter lain
+    await ocrWorker.setParameters({
+      tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
+    });
+
+    ocrWorkerSiap = true;
+    return ocrWorker;
+  }
+
+  // Cari pola plat Indonesia di dalam teks hasil OCR:
+  // 1-2 huruf + 1-4 angka + 1-3 huruf (contoh: DK 1234 AB, B 123 XYZ, L 1 A)
+  function ekstrakNopol(teks) {
+    const bersih = teks.toUpperCase().replace(/[^A-Z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+    if (!bersih) return null;
+
+    const kandidat = bersih.match(/\b[A-Z]{1,2}\s?\d{1,4}(?:\s?[A-Z]{1,3})?\b/g) || [];
+    if (!kandidat.length) return null;
+
+    // Pilih kandidat terpanjang (paling lengkap: huruf + angka + huruf)
+    kandidat.sort((a, b) => b.replace(/ /g, "").length - a.replace(/ /g, "").length);
+    return kandidat[0].replace(/\s+/g, " ").trim();
+  }
+
+  function jalankanOCR(blob) {
+    const token = ++ocrToken; // foto terbaru yang berlaku
+    ocrAntrean = ocrAntrean
+      .then(() => prosesOCR(blob, token))
+      .catch(err => {
+        if (token !== ocrToken) return;
+        console.warn("OCR gagal:", err);
+        setNopolHint("Plat tidak terbaca otomatis. Silakan ketik nomor plat secara manual.", "err");
+      });
+  }
+
+  async function prosesOCR(blob, token) {
+    if (token !== ocrToken) return; // sudah ada foto lebih baru
+
+    nopolAuto.style.display = "none";
+    setNopolHint("Membaca plat nomor dari foto...");
+
+    try {
+      const worker = await dapatkanWorker();
+      if (token !== ocrToken) return;
+
+      // Perkecil dulu agar OCR lebih cepat (plat tetap terbaca pada 1000px)
+      const kecil = await kompresJadiBase64(blob, 1000, 0.85);
+      if (token !== ocrToken) return;
+
+      const hasil = await worker.recognize(kecil);
+      if (token !== ocrToken) return;
+
+      const nopol = ekstrakNopol(hasil.data.text || "");
+
+      if (nopol) {
+        nopolInput.value = nopol;
+        nopolAuto.style.display = "inline-block";
+        setNopolHint("Terbaca otomatis: " + nopol + " — WAJIB diperiksa dan dikoreksi bila salah.", "ok");
+        setStatus("Nomor plat terbaca: " + nopol + ". Periksa kebenarannya sebelum kirim.", "sukses");
+      } else {
+        nopolAuto.style.display = "none";
+        setNopolHint("Plat tidak terbaca otomatis. Silakan ketik nomor plat secara manual.", "err");
+      }
+
+    } catch (err) {
+      console.warn("OCR gagal:", err);
+      setNopolHint("Pembaca otomatis gagal (mungkin koneksi). Silakan ketik nomor plat manual.", "err");
+    }
+  }
+
+  // Input plat: otomatis huruf besar, hanya A-Z 0-9 dan spasi
+  nopolInput.addEventListener("input", () => {
+    const pos = nopolInput.value.length;
+    nopolInput.value = nopolInput.value.toUpperCase().replace(/[^A-Z0-9 ]/g, "");
+    nopolGroup.classList.remove("error-shake");
+    // Jika user mengetik manual setelah OCR, hapus badge "otomatis"
+    if (document.activeElement === nopolInput) {
+      nopolAuto.style.display = "none";
+    }
+  });
+
+  // ============================================================
+  // KAMERA LAYAR PENUH — 100% MANUAL
   // ============================================================
   const CAM_TITLE = {
     sim:   "SIM-mu harus muat di kotak",
     stnk:  "STNK-mu harus muat di kotak",
-    mobil: "Foto kendaraan, nopol terlihat jelas"
+    mobil: "Plat nomor harus terlihat penuh di dalam kotak"
   };
-  const PILL_BELUM = {
-    sim:   "SIM-mu belum pas di kotak",
-    stnk:  "STNK-mu belum pas di kotak",
-    mobil: "Pastikan nopol terlihat jelas"
+  const PILL_TEKS = {
+    sim:   "Posisikan SIM, lalu tekan tombol foto",
+    stnk:  "Posisikan STNK, lalu tekan tombol foto",
+    mobil: "Hadapkan depan mobil ke kamera, lalu tekan tombol foto"
   };
 
   async function bukaKamera(tipe) {
     kameraTarget = tipe;
-    pasSejak = null;
     sedangJepret = false;
+    camShutter.disabled = false;
 
-    // Bingkai: dokumen = rasio kartu, mobil = 4:3
     const dokumen = (tipe === "sim" || tipe === "stnk");
     guideCard.style.display  = dokumen ? "block" : "none";
     guideMobil.style.display = dokumen ? "none"  : "block";
 
     camTitle.textContent = CAM_TITLE[tipe];
-    setPill("oranye", PILL_BELUM[tipe]);
-
-    // Progress kamera = berapa dokumen yang sudah ada
-    const jumlah = Object.values(foto).filter(Boolean).length;
-    camSegs.forEach((seg, i) => seg.classList.toggle("isi", i < jumlah));
+    pillText.textContent = PILL_TEKS[tipe];
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus("Kamera tidak tersedia. Gunakan galeri.", "error");
@@ -1235,14 +1584,10 @@
 
     try {
       kameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 1280 } }
+        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1440 } }
       });
       camVideo.srcObject = kameraStream;
       camFull.classList.add("active");
-
-      // Deteksi otomatis hanya untuk dokumen (SIM & STNK)
-      if (dokumen) mulaiDeteksi();
-      else hentikanDeteksi();
 
     } catch (err) {
       console.error("Gagal akses kamera:", err);
@@ -1252,7 +1597,6 @@
 
   function tutupKamera() {
     camFull.classList.remove("active");
-    hentikanDeteksi();
     if (kameraStream) {
       kameraStream.getTracks().forEach(track => track.stop());
       kameraStream = null;
@@ -1260,68 +1604,22 @@
     camVideo.srcObject = null;
   }
 
-  function setPill(warna, teks) {
-    camPill.classList.remove("oranye", "hijau");
-    camPill.classList.add(warna);
-    pillIcon.textContent = warna === "hijau" ? "✓" : "i";
-    pillText.textContent = teks;
-  }
-
-  // 🤖 Deteksi dokumen terang di area tengah → jepret otomatis
-  function mulaiDeteksi() {
-    hentikanDeteksi();
-
-    const sampel = document.createElement("canvas");
-    sampel.width = 80; sampel.height = 50;
-    const ctx = sampel.getContext("2d", { willReadFrequently: true });
-
-    detektorTimer = setInterval(() => {
-      if (!camFull.classList.contains("active")) return;
-      if (sedangJepret || !camVideo.videoWidth) return;
-
-      ctx.drawImage(camVideo, 0, 0, 80, 50);
-      const data = ctx.getImageData(18, 10, 44, 30).data;
-
-      let total = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        total += (data[i] + data[i+1] + data[i+2]) / 3;
-      }
-      const rataTerang = total / (data.length / 4);
-      const TERDETEKSI = rataTerang > 80; // ⚙️ naikkan ke 100 jika terlalu sensitif
-
-      if (TERDETEKSI) {
-        if (!pasSejak) {
-          pasSejak = Date.now();
-          setPill("hijau", "Posisi pas! Tetap tahan...");
-        } else if (Date.now() - pasSejak > 1200) {
-          sedangJepret = true;
-          setPill("hijau", "Bagus! Mengambil foto...");
-          hentikanDeteksi();
-          setTimeout(jepret, 400);
-        }
-      } else {
-        pasSejak = null;
-        setPill("oranye", PILL_BELUM[kameraTarget]);
-      }
-    }, 250);
-  }
-
-  function hentikanDeteksi() {
-    if (detektorTimer) {
-      clearInterval(detektorTimer);
-      detektorTimer = null;
-    }
-  }
-
-  // ================= JEPRET =================
+  // ================= JEPRET — hanya lewat tombol shutter =================
   function jepret() {
     if (!camFull.classList.contains("active")) return;
+    if (sedangJepret) return;
+
+    if (!camVideo.videoWidth) {
+      setStatus("Kamera belum siap. Tunggu sebentar lalu coba lagi.", "error");
+      return;
+    }
+
     sedangJepret = true;
-    hentikanDeteksi();
+    camShutter.disabled = true;
 
     const canvas = document.createElement("canvas");
-    canvas.width  = camVideo.videoWidth  || 1080;
-    canvas.height = camVideo.videoHeight || 1440;
+    canvas.width  = camVideo.videoWidth;
+    canvas.height = camVideo.videoHeight;
     canvas.getContext("2d").drawImage(camVideo, 0, 0, canvas.width, canvas.height);
 
     camFlash.classList.remove("kilat");
@@ -1329,9 +1627,11 @@
     camFlash.classList.add("kilat");
 
     canvas.toBlob(blob => {
+      camShutter.disabled = false;
+      sedangJepret = false;
+
       if (!blob) {
-        sedangJepret = false;
-        setPill("oranye", "Gagal mengambil foto. Coba lagi");
+        setStatus("Gagal mengambil foto. Coba lagi.", "error");
         return;
       }
 
@@ -1349,13 +1649,11 @@
         "sukses"
       );
 
-      // 🔗 Opsional: langsung buka dokumen berikutnya
-      const urutan = ["sim", "stnk", "mobil"];
-      const idx = urutan.indexOf(tipe);
-      if (idx < 2 && !foto[urutan[idx + 1]]) {
-        setTimeout(() => bukaKamera(urutan[idx + 1]), 900);
+      // Setelah foto mobil → baca plat nomor otomatis
+      if (tipe === "mobil") {
+        jalankanOCR(blob);
       }
-    }, "image/jpeg", 0.9);
+    }, "image/jpeg", 0.92);
   }
 
   document.addEventListener("keydown", e => {
@@ -1373,16 +1671,31 @@
     btnSpinner.style.display = aktif ? "block" : "none";
   }
 
+  function gagalNopol(pesan) {
+    setStatus(pesan, "error");
+    nopolGroup.classList.remove("error-shake");
+    void nopolGroup.offsetWidth;
+    nopolGroup.classList.add("error-shake");
+    nopolInput.focus();
+  }
+
   btnKirim.addEventListener("click", async () => {
     if (Object.values(foto).some(f => !f) || btnKirim.disabled) return;
+
+    // Validasi nomor plat — wajib terisi (hasil OCR atau ketikan manual)
+    const nopol = nopolInput.value.trim().replace(/\s+/g, " ").toUpperCase();
+    if (nopol.replace(/ /g, "").length < 5) {
+      gagalNopol("Nomor plat belum terisi / terlalu pendek. Periksa atau ketik manual (contoh: DK 1234 AB).");
+      return;
+    }
 
     setLoading(true);
     setStatus("Menyiapkan 3 dokumen (kompres otomatis)...");
 
     try {
-      const simB64   = await kompresJadiBase64(foto.sim);
-      const stnkB64  = await kompresJadiBase64(foto.stnk);
-      const mobilB64 = await kompresJadiBase64(foto.mobil);
+      const simB64   = await kompresJadiBase64(foto.sim,   1200, 0.75);
+      const stnkB64  = await kompresJadiBase64(foto.stnk,  1200, 0.75);
+      const mobilB64 = await kompresJadiBase64(foto.mobil, 1200, 0.7);
 
       console.log("Ukuran — SIM:", Math.round(simB64.length/1024), "KB | STNK:", Math.round(stnkB64.length/1024), "KB | Mobil:", Math.round(mobilB64.length/1024), "KB");
 
@@ -1390,32 +1703,38 @@
 
       let recordKey = null;
       if (telepon) {
-        const snap = await db.ref("pendaftaran")
-          .orderByChild("telepon")
-          .equalTo(telepon)
-          .once("value");
-        snap.forEach(child => { recordKey = child.key; });
+        try {
+          const snap = await db.ref("pendaftaran")
+            .orderByChild("telepon")
+            .equalTo(telepon)
+            .once("value");
+          snap.forEach(child => { recordKey = child.key; });
+        } catch (queryErr) {
+          console.warn("Query gagal (cek rules/index):", queryErr.message);
+        }
       }
 
       const dataDokumen = {
         sim: simB64,
         stnk: stnkB64,
         mobil: mobilB64,
+        nopol: nopol,                     // nomor plat terkirim ke admin
+        nopol_sumber: nopolAuto.style.display !== "none" ? "ocr" : "manual",
         status: "dokumen_lengkap",
         waktuDokumen: new Date().toLocaleString("id-ID")
       };
 
       if (recordKey) {
         await db.ref("pendaftaran/" + recordKey).update(dataDokumen);
-        console.log("✅ Dokumen tersimpan di pendaftaran/" + recordKey);
+        console.log("Dokumen tersimpan di pendaftaran/" + recordKey);
       } else {
-        const teleponSafe = (telepon || "tanpa-nomor").replace(/[^0-9]/g, "");
+        const teleponSafe = (telepon || "tanpa-nomor").replace(/[^0-9]/g, "") || Date.now().toString();
         await db.ref("verifikasi/" + teleponSafe).update(dataDokumen);
-        console.log("⚠️ Record tidak ditemukan — disimpan di verifikasi/" + teleponSafe);
+        console.log("Record tidak ditemukan — disimpan di verifikasi/" + teleponSafe);
       }
 
-      setStatus("Semua dokumen terkirim! Pendaftaran selesai — admin akan memverifikasi. ✅", "sukses");
-      btnText.textContent = "Terkirim ✅";
+      setStatus("Semua dokumen terkirim! Pendaftaran selesai — admin akan memverifikasi.", "sukses");
+      btnText.textContent = "Terkirim";
 
       setTimeout(() => {
         window.location.href = "bank.html" +
