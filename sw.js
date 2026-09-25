@@ -13,7 +13,7 @@ const ASSETS = [
   "./driver.html",
   "./pendaftaran.html",
   "./manifest.json",
-  "./get.png"
+  "./awal.png"
 ];
 
 // 🔧 INSTALL — simpan semua file inti ke cache
