@@ -6,24 +6,27 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
+  <!-- ✅ FAVICON (menghilangkan error 404 favicon.ico) -->
   <link rel="icon" type="image/png" href="get.png" />
   <link rel="apple-touch-icon" href="get.png" />
 
+  <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").catch(() => {
-        console.warn("Service Worker tidak didaftarkan.");
-      });
+      navigator.serviceWorker.register("sw.js");
     }
   </script>
 
+  <!-- 🔤 Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
+  <!-- 🔥 Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
       authDomain: "kadek-ed34e.firebaseapp.com",
@@ -34,9 +37,11 @@
       appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a",
       measurementId: "G-5WSR57JC7V"
     };
-    initializeApp(firebaseConfig);
+
+    const app = initializeApp(firebaseConfig);
   </script>
 
+  <!-- 📷 Cek foto latar -->
   <script>
     const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
     const bg = new Image();
@@ -62,22 +67,19 @@
       color: var(--white);
       display: flex;
       justify-content: center;
-      /* ✅ FIX 1: TANPA overflow:hidden di body */
+      overflow: hidden;
     }
 
     .phone {
       width: 100%;
       max-width: 430px;
-      height: 100vh;        /* fallback Firefox lama */
-      height: 100dvh;       /* browser modern */
-      overflow-y: auto;     /* ✅ FIX 2: BISA DI-SCROLL jika layar pendek */
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
+      height: 100dvh;
+      overflow: hidden;
     }
 
     .hero {
       position: relative;
-      min-height: 100%;     /* ✅ FIX 3: min-height, bukan height */
+      height: 100%;
       display: flex;
       flex-direction: column;
       background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
@@ -192,7 +194,9 @@
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
     }
 
-    .content h1 span { color: var(--white); }
+    .content h1 span {
+      color: var(--white);
+    }
 
     .content p {
       font-size: 14.5px;
@@ -203,6 +207,7 @@
       margin-bottom: 26px;
     }
 
+    /* ❌ CARD DIHAPUS — tombol langsung di atas latar */
     .actions {
       padding: 0 0 calc(6px + env(safe-area-inset-bottom));
     }
@@ -244,6 +249,7 @@
     }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
+    /* ✅ Tombol Install — putih netral */
     .btn-install {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.25);
@@ -273,6 +279,7 @@
       50%      { transform: translateY(-8px); }
     }
     .navbar      { animation: fadeUp 0.6s ease both; }
+    .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
     .content h1  { animation: fadeUp 0.7s 0.3s ease both; }
     .content p   { animation: fadeUp 0.7s 0.4s ease both; }
     .btn-primary { animation: fadeUp 0.7s 0.55s ease both; }
@@ -282,16 +289,8 @@
 
     @media (max-width: 360px) {
       .content { padding: 0 22px; }
-      .content h1 { font-size: 26px; }
       .btn { font-size: 14px; padding: 15px; }
       .logo-big { width: 96px; height: 96px; }
-    }
-
-    /* ✅ FIX 4: layar sangat pendek — kecilkan logo agar semua muat */
-    @media (max-height: 600px) {
-      .logo-center { min-height: 70px; padding: 4px 0; }
-      .logo-big { width: 70px; height: 70px; }
-      .content p { margin-bottom: 16px; }
     }
   </style>
 </head>
@@ -300,24 +299,28 @@
   <div class="phone">
     <div class="hero">
 
+      <!-- 🔹 Navbar -->
       <nav class="navbar">
         <div class="brand">Get <span>Car</span></div>
         <div class="version">V1.103.1</div>
       </nav>
 
+      <!-- 🔹 Logo -->
       <div class="logo-center">
         <div class="logo-wrap">
-          <img src="get.png" alt="Logo Get Car" class="logo-big"
+          <img src="logoGC.png" alt="Logo Get Car" class="logo-big"
                onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';" />
           <div id="logoFallback" class="logo-fallback">GC</div>
         </div>
       </div>
 
+      <!-- 🔹 Konten -->
       <div class="content">
         <h1>Halo Mitra <span>Get Car</span></h1>
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
+        <!-- 🔹 Tombol (tanpa card) -->
         <div class="actions">
 
           <a href="login.html" class="btn btn-primary">
@@ -330,6 +333,7 @@
             Daftar / Cek Status Pendaftaran
           </a>
 
+          <!-- ✅ TOMBOL INSTALL (putih netral + logo Play Store) -->
           <button id="btnInstall" class="btn btn-install" style="display:flex;">
             <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
               <path fill="#00d2ff" d="M3.6 1.8 L13.8 12 L3.6 22.2 Z"/>
@@ -347,6 +351,7 @@
     </div>
   </div>
 
+  <!-- ✅ Modal Panduan Install Manual -->
   <div id="installModal" style="
     display:none; position:fixed; inset:0; z-index:999;
     background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
@@ -365,17 +370,14 @@
     </div>
   </div>
 
+  <!-- ✅ Logika Install -->
   <script>
     let deferredPrompt = null;
     const btnInstall = document.getElementById("btnInstall");
     const modal = document.getElementById("installModal");
     const steps = document.getElementById("installSteps");
 
-    const isIOS      = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isFirefox  = /firefox|fxios/i.test(navigator.userAgent);
-    const isSamsung  = /samsungbrowser/i.test(navigator.userAgent);
-    const isEdge     = /edg\//i.test(navigator.userAgent);
-
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
 
@@ -401,29 +403,14 @@
 
       if (isIOS) {
         steps.innerHTML =
-          "1. Tekan tombol <b>Bagikan</b> ⬆️ di Safari<br>" +
+          "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
           "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
           "3. Tekan <b>Tambah</b> — selesai! ✅";
-      } else if (isFirefox) {
-        steps.innerHTML =
-          "1. Tekan menu <b>⋮</b> di pojok kanan atas Firefox<br>" +
-          "2. Pilih <b>“Install”</b> atau <b>“Tambahkan ke layar utama”</b><br>" +
-          "3. Tekan <b>Tambah / Instal</b> — selesai! ✅";
-      } else if (isSamsung) {
-        steps.innerHTML =
-          "1. Tekan menu <b>☰</b> di pojok kanan bawah<br>" +
-          "2. Pilih <b>“Tambahkan ke layar utama”</b><br>" +
-          "3. Tekan <b>Install</b> — selesai! ✅";
-      } else if (isEdge) {
-        steps.innerHTML =
-          "1. Tekan menu <b>···</b> di pojok kanan atas<br>" +
-          "2. Pilih <b>“Aplikasi” → “Instal situs ini”</b><br>" +
-          "3. Tekan <b>Instal</b> — selesai! ✅";
       } else {
         steps.innerHTML =
           "1. Buka website ini di <b>Chrome</b><br>" +
           "2. Tekan menu <b>⋮</b> di pojok kanan atas<br>" +
-          "3. Pilih <b>“Tambahkan ke layar utama”</b><br>" +
+          "3. Pilih <b>“Tambahkan ke layar utama”</b> atau <b>“Instal aplikasi”</b><br>" +
           "4. Tekan <b>Instal</b> — selesai! ✅";
       }
       modal.style.display = "flex";
