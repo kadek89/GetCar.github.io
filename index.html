@@ -222,6 +222,7 @@
     }
 
     .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.7; cursor: wait; }
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     .btn-primary {
@@ -298,7 +299,7 @@
       margin-top: 14px;
     }
 
-    /* ✅ Spinner MERAH — mengikuti warna logo */
+    /* ✅ Spinner MERAH */
     .spinner {
       margin-top: 28px;
       width: 30px;
@@ -409,15 +410,13 @@
     </div>
   </div>
 
-  <!-- ✅ LOGIKA INSTALL — TANPA NOTIFIKASI, langsung aksi -->
+  <!-- ✅ LOGIKA INSTALL — tombol tidak pernah diam, selalu ada aksi -->
   <script>
     let deferredPrompt = null;
     const btnInstall = document.getElementById("btnInstall");
 
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
-
-    // Sudah berjalan sebagai aplikasi ter-install → tombol disembunyikan
     if (isStandalone) btnInstall.style.display = "none";
 
     window.addEventListener("beforeinstallprompt", (e) => {
@@ -429,36 +428,66 @@
       btnInstall.style.display = "none";
     });
 
+    async function tampilkanDialogInstal() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") btnInstall.style.display = "none";
+      deferredPrompt = null;
+    }
+
     btnInstall.addEventListener("click", async () => {
-      // 1) Chrome/Edge siap → DIALOG INSTAL LANGSUNG MUNCUL
+
+      // 1) Chrome sudah siap → DIALOG INSTAL LANGSUNG MUNCUL
       if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") btnInstall.style.display = "none";
-        deferredPrompt = null;
+        await tampilkanDialogInstal();
         return;
       }
 
+      // 2) Chrome belum siap → tunggu maksimal 4 detik.
+      //    (Chrome kadang baru siap beberapa detik setelah halaman terbuka)
+      const teksAsli = btnInstall.innerHTML;
+      btnInstall.disabled = true;
+      btnInstall.innerHTML = "⏳ Menyiapkan instalasi...";
+
+      const siap = await new Promise((resolve) => {
+        let t = 0;
+        const iv = setInterval(() => {
+          t += 200;
+          if (deferredPrompt) { clearInterval(iv); resolve(true); }
+          else if (t >= 4000)  { clearInterval(iv); resolve(false); }
+        }, 200);
+      });
+
+      btnInstall.disabled = false;
+      btnInstall.innerHTML = teksAsli;
+
+      if (siap) {
+        await tampilkanDialogInstal();
+        return;
+      }
+
+      // 3) Android dengan browser selain Chrome (Vivo/UC/dll)
+      //    → OTOMATIS PINDAH KE CHROME, dialog instal muncul di sana
       const ua = navigator.userAgent;
       const isIOS = /iphone|ipad|ipod/i.test(ua);
       const isChromium = /chrome|crios|edg\//i.test(ua);
 
-      // 2) Android dengan browser selain Chrome/Edge (Vivo Browser, UC, dll)
-      //    → OTOMATIS PINDAH KE CHROME, di sana dialog instal muncul
       if (!isIOS && !isChromium && /android/i.test(ua)) {
         const target = location.host + location.pathname + location.search + location.hash;
         window.location.href = "intent://" + target + "#Intent;scheme=https;package=com.android.chrome;end";
         return;
       }
 
-      // 3) iPhone/iPad → sistem Apple tidak mengizinkan instal otomatis.
-      //    Satu-satunya pintu resmi adalah menu Bagikan Safari.
+      // 4) iPhone → satu-satunya pintu resmi Apple
       if (isIOS) {
-        alert("Di iPhone, instal dilakukan lewat Safari:\n\n1. Tekan tombol Bagikan ⬆️\n2. Pilih \"Tambahkan ke Layar Utama\"\n3. Tekan Tambah");
+        alert("Di iPhone, instal lewat Safari:\n\n1. Tekan Bagikan ⬆️\n2. \"Tambahkan ke Layar Utama\"\n3. Tambah");
         return;
       }
 
-      // 4) Kondisi lain (mis. sudah ter-install di desktop) → diam, tanpa notifikasi
+      // 5) Terakhir (desktop): Chrome menolak instal — biasanya aplikasi
+      //    masih terpasang. HAPUS 2 BARIS DI BAWAH jika ingin benar-benar diam.
+      alert("Instal belum tersedia.\n\nKemungkinan aplikasi masih terpasang — buka chrome://apps, hapus Get Car Mitra, lalu muat ulang halaman.");
     });
   </script>
 
