@@ -1,11 +1,10 @@
-const CACHE_NAME = "getcar-v6";
+const CACHE_NAME = "getcar-v7";
 
 const ASSETS = [
   "index.html",
   "login.html",
   "pendaftaran.html",
   "gc.png",
-  "gc-192.png",
   "get.png",
   "logoGC.png",
   "awal.png",
