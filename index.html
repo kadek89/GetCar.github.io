@@ -13,9 +13,7 @@
   <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
 
-  <!-- ✅ SERVICE WORKER
-       true  = PRODUKSI (aplikasi jadi, siap dipakai driver)
-       false = DEVELOPMENT (masih sering edit kode, agar perubahan langsung terlihat) -->
+  <!-- ✅ SERVICE WORKER — WAJIB true agar install berfungsi -->
   <script>
     const ENABLE_SW = true;
 
@@ -24,7 +22,7 @@
     }
   </script>
 
-  <!-- ✅ CEK SESI — dipasang di <head> agar splash tidak "kedip" saat sudah tampil -->
+  <!-- ✅ CEK SESI — splash hanya 1x per sesi tab -->
   <script>
     if (sessionStorage.getItem("gcSplashShown") === "1") {
       document.documentElement.classList.add("no-splash");
@@ -83,7 +81,6 @@
       overflow: hidden;
     }
 
-    /* ✅ Sembunyikan splash jika sudah tampil di sesi ini */
     html.no-splash #splash { display: none !important; }
 
     .phone {
@@ -293,26 +290,20 @@
       justify-content: center;
       animation: pop 0.8s ease both;
     }
-    .splash-title {
-      color: var(--white);
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      margin: 18px 0 4px;
-    }
     .splash-sub {
       color: rgba(255,255,255,0.6);
       font-size: 13px;
       letter-spacing: 1px;
+      margin-top: 14px;
     }
 
-    /* ✅ Spinner MERAH — mengikuti warna logo */
+    /* ✅ Spinner MERAH */
     .spinner {
       margin-top: 28px;
       width: 30px;
       height: 30px;
-      border: 3px solid rgba(255, 0, 0, 0.2);   /* jalur merah redup */
-      border-top-color: #ff3a44;                 /* bagian berputar merah */
+      border: 3px solid rgba(255, 0, 0, 0.2);
+      border-top-color: #ff3a44;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -348,7 +339,7 @@
 </head>
 <body>
 
-  <!-- ✅ SPLASH SCREEN (logo: splash-logo.png — boleh berbeda dari icon PWA) -->
+  <!-- ✅ SPLASH SCREEN -->
   <div id="splash">
     <img src="awal.png" alt="Get Car" class="splash-logo"
          onerror="this.style.display='none'; document.getElementById('splashFallback').style.display='flex';" />
@@ -357,7 +348,7 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- ✅ Tandai splash sudah tampil di sesi ini (muncul 1x per sesi tab) -->
+  <!-- ✅ Tandai splash sudah tampil (1x per sesi) -->
   <script>
     sessionStorage.setItem("gcSplashShown", "1");
   </script>
@@ -386,7 +377,6 @@
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-        <!-- 🔹 Tombol -->
         <div class="actions">
 
           <a href="login.html" class="btn btn-primary">
@@ -417,48 +407,99 @@
     </div>
   </div>
 
-  <!-- ✅ Modal Panduan Install Manual -->
+  <!-- ✅ Modal Diagnosa Install (menampilkan penyebab SEBENARNYA) -->
   <div id="installModal" style="
     display:none; position:fixed; inset:0; z-index:999;
     background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
     align-items:center; justify-content:center; padding:24px;">
     <div style="
       background:#0d1f3c; border:1px solid rgba(255,255,255,0.2);
-      border-radius:20px; padding:24px; max-width:340px; width:100%;">
-      <h3 style="font-size:17px; font-weight:800; margin-bottom:14px;">📲 Pasang Aplikasi</h3>
-      <p id="installSteps" style="font-size:13.5px; line-height:1.8; color:rgba(255,255,255,0.8);"></p>
-      <button onclick="document.getElementById('installModal').style.display='none'" style="
-        margin-top:18px; width:100%; padding:13px; border:none; border-radius:12px;
-        background:linear-gradient(135deg,#2f7bff,#0f5ae0); color:#fff;
-        font-family:inherit; font-weight:700; font-size:14px; cursor:pointer;">
-        Mengerti
-      </button>
+      border-radius:20px; padding:24px; max-width:340px; width:100%;
+      max-height:85vh; overflow-y:auto;">
+      <h3 style="font-size:17px; font-weight:800; margin-bottom:14px;">📲 Status Instalasi</h3>
+      <p id="installSteps" style="font-size:13.5px; line-height:1.8; color:rgba(255,255,255,0.85);"></p>
+      <div style="display:flex; gap:10px; margin-top:18px;">
+        <button id="btnRetryInstall" style="
+          flex:1; padding:13px; border:1px solid rgba(255,255,255,0.3); border-radius:12px;
+          background:rgba(255,255,255,0.08); color:#fff;
+          font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">
+          🔄 Coba Lagi
+        </button>
+        <button id="btnCloseModal" style="
+          flex:1; padding:13px; border:none; border-radius:12px;
+          background:linear-gradient(135deg,#2f7bff,#0f5ae0); color:#fff;
+          font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">
+          Mengerti
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- ✅ Logika Install -->
+  <!-- ✅ LOGIKA INSTALL + DIAGNOSA OTOMATIS -->
   <script>
     let deferredPrompt = null;
+
     const btnInstall = document.getElementById("btnInstall");
-    const modal = document.getElementById("installModal");
-    const steps = document.getElementById("installSteps");
+    const modal      = document.getElementById("installModal");
+    const steps      = document.getElementById("installSteps");
+    const btnRetry   = document.getElementById("btnRetryInstall");
+    const btnClose   = document.getElementById("btnCloseModal");
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
 
+    // Deteksi browser yang dipakai
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      if (/firefox|fxios/i.test(ua)) return "firefox";
+      if (/edg\//i.test(ua))         return "edge";
+      if (/opr\//i.test(ua))         return "opera";
+      if (/chrome|crios/i.test(ua))  return "chrome";
+      if (/safari/i.test(ua))        return "safari";
+      return "unknown";
+    }
+
+    // Cek status Service Worker
+    async function cekSW() {
+      if (!("serviceWorker" in navigator)) return "❌ Tidak didukung browser ini";
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) return "❌ Belum terdaftar (ENABLE_SW harus true)";
+      if (!reg.active) return "⏳ Belum aktif (tekan F5 sekali lagi)";
+      return "✅ Aktif";
+    }
+
     if (isStandalone) btnInstall.style.display = "none";
 
+    // Chrome menyiapkan dialog instal → tombol jadi fungsional
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
+      console.log("✅ SIAP! Klik tombol Install → dialog Chrome muncul → klik Instal");
     });
 
     window.addEventListener("appinstalled", () => {
       btnInstall.style.display = "none";
+      console.log("🎉 Aplikasi berhasil ter-install!");
     });
 
+    // Diagnosa saat halaman terbuka lama tapi event tidak datang
+    setTimeout(() => {
+      if (!deferredPrompt && !isStandalone) {
+        const b = detectBrowser();
+        console.log("ℹ️ beforeinstallprompt belum muncul. Browser: " + b);
+        console.log("   Penyebab umum: 1) Aplikasi SUDAH ter-install, 2) Browser Firefox,");
+        console.log("   3) ENABLE_SW=false, 4) Baru membuka (tunggu 5 detik)");
+      }
+    }, 4000);
+
+    function showDiagnosa(html) {
+      steps.innerHTML = html;
+      modal.style.display = "flex";
+    }
+
     btnInstall.addEventListener("click", async () => {
+      // === KASUS 1: Dialog Chrome tersedia → LANGSUNG INSTAL ===
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -467,30 +508,68 @@
         return;
       }
 
-      if (isIOS) {
-        steps.innerHTML =
+      // === KASUS 2: Diagnosa kenapa dialog tidak muncul ===
+      const browser = detectBrowser();
+      const sw = await cekSW();
+      console.log("🔍 Diagnosa install:", { browser, serviceWorker: sw });
+
+      if (browser === "firefox") {
+        showDiagnosa(
+          "⚠️ Anda membuka di <b>Firefox</b>.<br><br>" +
+          "Firefox <b>tidak mendukung</b> instal aplikasi PWA.<br><br>" +
+          "✅ <b>Solusi:</b> salin alamat website ini, buka di " +
+          "<b>Google Chrome</b> atau <b>Microsoft Edge</b>, lalu klik tombol Install lagi."
+        );
+        return;
+      }
+
+      if (isIOS || browser === "safari") {
+        showDiagnosa(
+          "iPhone/iPad (Safari) tidak punya dialog instal otomatis.<br><br>" +
           "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
           "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
-          "3. Tekan <b>Tambah</b> — selesai! ✅";
-      } else {
-        steps.innerHTML =
-          "1. Buka website ini di <b>Chrome</b><br>" +
-          "2. Tekan menu <b>⋮</b> di pojok kanan atas<br>" +
-          "3. Pilih <b>“Tambahkan ke layar utama”</b> atau <b>“Instal aplikasi”</b><br>" +
-          "4. Tekan <b>Instal</b> — selesai! ✅";
+          "3. Tekan <b>Tambah</b> — selesai! ✅"
+        );
+        return;
       }
-      modal.style.display = "flex";
+
+      // Chrome / Edge — tapi dialog tidak tersedia
+      const appsPage = (browser === "edge") ? "edge://apps" : "chrome://apps";
+      const namaBrowser = (browser === "edge") ? "Microsoft Edge" : "Google Chrome";
+
+      showDiagnosa(
+        "🔍 <b>Hasil pemeriksaan:</b><br>" +
+        "• Browser: " + namaBrowser + " ✔️<br>" +
+        "• Service Worker: " + sw + "<br>" +
+        "• Dialog instal Chrome: ❌ Tidak tersedia<br><br>" +
+        "<b>Penyebab paling mungkin:</b><br>" +
+        "Aplikasi <b>sudah ter-install</b> sebelumnya. " +
+        "Chrome tidak menawarkan instal ulang untuk aplikasi yang sama.<br><br>" +
+        "<b>Cara menghapus aplikasi lama:</b><br>" +
+        "1. Ketik <b>" + appsPage + "</b> di address bar<br>" +
+        "2. Cari <b>Get Car Mitra</b> → klik kanan → <b>Hapus / Uninstall</b><br>" +
+        "3. Tekan <b>F5</b>, tunggu 5 detik, klik Install lagi ✅"
+      );
+    });
+
+    // Tombol Coba Lagi — reload halaman agar event install dicek ulang
+    btnRetry.addEventListener("click", () => {
+      modal.style.display = "none";
+      location.reload();
+    });
+
+    btnClose.addEventListener("click", () => {
+      modal.style.display = "none";
     });
   </script>
 
-  <!-- ✅ Logika Splash Screen -->
+  <!-- ✅ LOGIKA SPLASH SCREEN -->
   <script>
     (function () {
       const DURATION = 2000; // ⏱️ durasi splash (2000 = 2 detik)
       const splash = document.getElementById("splash");
       if (!splash) return;
 
-      // Jika sesi sudah pernah tampil → langsung selesai
       if (document.documentElement.classList.contains("no-splash")) return;
 
       let done = false;
@@ -502,10 +581,9 @@
         setTimeout(() => (splash.style.display = "none"), 600);
       }
 
-      // Tampil setelah halaman siap, selama DURATION
       window.addEventListener("load", () => setTimeout(hideSplash, DURATION));
 
-      // 🛡️ Failsafe: maksimal 5 detik, splash pasti hilang
+      // 🛡️ Failsafe: maksimal 5 detik splash pasti hilang
       setTimeout(hideSplash, 5000);
     })();
   </script>
