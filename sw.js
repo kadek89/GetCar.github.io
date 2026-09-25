@@ -3,7 +3,7 @@ const ASSETS = [
   "index.html",
   "login.html",
   "pendaftaran.html",
-  "F.png",
+  "gc.png",
   "manifest.json"
 ];
 
