@@ -13,7 +13,7 @@
   <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
 
-  <!-- ✅ SERVICE WORKER — WAJIB true agar tombol INSTALL berfungsi -->
+  <!-- ✅ SERVICE WORKER — WAJIB agar tombol INSTALL berfungsi -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js");
@@ -85,7 +85,8 @@
     .phone {
       width: 100%;
       max-width: 430px;
-      height: 100dvh;
+      height: 100vh;      /* fallback browser lama */
+      height: 100dvh;     /* browser modern */
       overflow: hidden;
     }
 
@@ -109,7 +110,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+      padding: 14px 20px;                                        /* fallback browser lama */
+      padding: calc(14px + env(safe-area-inset-top)) 20px 14px;  /* iPhone notch */
       z-index: 10;
     }
 
@@ -198,7 +200,8 @@
     }
 
     .actions {
-      padding: 0 0 calc(6px + env(safe-area-inset-bottom));
+      padding: 0 0 6px;                                  /* fallback browser lama */
+      padding: 0 0 calc(6px + env(safe-area-inset-bottom)); /* iPhone home bar */
     }
 
     .btn {
@@ -257,7 +260,7 @@
     /* ✅ SPLASH SCREEN */
     #splash {
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;   /* kompatibel semua browser */
       background: var(--navy);
       display: flex;
       flex-direction: column;
@@ -465,7 +468,7 @@
       } else if (/firefox/i.test(navigator.userAgent)) {
         showToast("🦊 Firefox tidak mendukung instal. Buka di <b>Chrome/Edge</b> ya!", 6000);
       } else {
-        showToast("✅ Aplikasi sudah ter-install di Chrome Anda.<br>Untuk install ulang, hapus dulu lewat <b>chrome://apps</b>", 6000);
+        showToast("📱 Untuk instal: buka link ini di <b>Google Chrome</b>.<br>Jika sudah terpasang: cek <b>chrome://apps</b>", 6000);
       }
     });
   </script>
