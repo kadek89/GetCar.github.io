@@ -1,16 +1,17 @@
 // ============================================
 // SERVICE WORKER — Get Car Mitra
-// ⚠️ Naikkan versi (v2 → v3 → v4...) SETIAP KALI
+// ⚠️ Naikkan versi (v3 → v4 → v5...) SETIAP KALI
 // memperbarui file aplikasi, agar driver
 // mendapat versi terbaru!
 // ============================================
-const CACHE_NAME = "getcar-v2";
+const CACHE_NAME = "getcar-v3";
 
 const ASSETS = [
   "index.html",
   "login.html",
   "pendaftaran.html",
   "gc.png",
+  "gc-192.png",
   "get.png",
   "logoGC.png",
   "awal.png",
