@@ -14,7 +14,10 @@
   <link rel="manifest" href="manifest.json" />
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
+      navigator.serviceWorker.register("sw.js").catch(() => {
+        // ✅ FIX FIREFOX: hindari error console saat dibuka via file:// atau tanpa HTTPS
+        console.warn("Service Worker tidak didaftarkan (butuh HTTPS).");
+      });
     }
   </script>
 
@@ -73,7 +76,8 @@
     .phone {
       width: 100%;
       max-width: 430px;
-      height: 100dvh;
+      height: 100vh;   /* ✅ FIX FIREFOX: fallback untuk Firefox lama */
+      height: 100dvh;  /* browser modern */
       overflow: hidden;
     }
 
@@ -116,6 +120,7 @@
       color: var(--white);
       background: rgba(255,255,255,0.12);
       border: 1px solid rgba(255,255,255,0.18);
+      /* ✅ FIX FIREFOX: -webkit- diabaikan, property standar dipakai Firefox 103+ */
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       padding: 5px 12px;
@@ -207,7 +212,6 @@
       margin-bottom: 26px;
     }
 
-    /* ❌ CARD DIHAPUS — tombol langsung di atas latar */
     .actions {
       padding: 0 0 calc(6px + env(safe-area-inset-bottom));
     }
@@ -287,8 +291,10 @@
     .btn-install { animation: fadeUp 0.7s 0.75s ease both; }
     .copyright   { animation: fadeUp 0.7s 0.85s ease both; }
 
+    /* ✅ FIX FIREFOX: fallback jika clamp() tidak didukung (browser sangat lama) */
     @media (max-width: 360px) {
       .content { padding: 0 22px; }
+      .content h1 { font-size: 26px; }
       .btn { font-size: 14px; padding: 15px; }
       .logo-big { width: 96px; height: 96px; }
     }
@@ -316,7 +322,6 @@
 
       <!-- 🔹 Konten -->
       <div class="content">
-        <div class="eyebrow">Mitra Driver Get Car</div>
         <h1>Halo Mitra <span>Get Car</span></h1>
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
@@ -378,7 +383,12 @@
     const modal = document.getElementById("installModal");
     const steps = document.getElementById("installSteps");
 
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    // ✅ FIX FIREFOX: deteksi browser untuk panduan install yang akurat
+    const isIOS      = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isFirefox  = /firefox|fxios/i.test(navigator.userAgent);
+    const isSamsung  = /samsungbrowser/i.test(navigator.userAgent);
+    const isEdge     = /edg\//i.test(navigator.userAgent);
+
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
 
@@ -394,6 +404,7 @@
     });
 
     btnInstall.addEventListener("click", async () => {
+      // Chrome / Edge / Samsung → prompt native PWA tersedia
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -402,11 +413,33 @@
         return;
       }
 
-      if (isIOS) {
+      // ✅ FIX FIREFOX: panduan khusus Firefox (tidak mendukung beforeinstallprompt)
+      if (isIOS && isFirefox) {
+        steps.innerHTML =
+          "1. Tekan tombol <b>Bagikan</b> ⬆️ di Safari/Firefox<br>" +
+          "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
+          "3. Tekan <b>Tambah</b> — selesai! ✅";
+      } else if (isIOS) {
         steps.innerHTML =
           "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
           "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
           "3. Tekan <b>Tambah</b> — selesai! ✅";
+      } else if (isFirefox) {
+        steps.innerHTML =
+          "1. Tekan menu <b>⋮</b> (Android) atau <b>☰</b> di pojok kanan atas Firefox<br>" +
+          "2. Pilih <b>“Install”</b> atau <b>“Tambahkan ke layar utama”</b><br>" +
+          "3. Tekan <b>Tambah / Instal</b> — selesai! ✅<br><br>" +
+          "<i>Catatan: di Firefox desktop, buka menu ☉ → cari opsi install aplikasi.</i>";
+      } else if (isSamsung) {
+        steps.innerHTML =
+          "1. Tekan menu <b>☰</b> di pojok kanan bawah Samsung Internet<br>" +
+          "2. Pilih <b>“Tambahkan ke layar utama”</b><br>" +
+          "3. Tekan <b>Install</b> — selesai! ✅";
+      } else if (isEdge) {
+        steps.innerHTML =
+          "1. Tekan menu <b>···</b> di pojok kanan atas Edge<br>" +
+          "2. Pilih <b>“Aplikasi” → “Instal situs ini sebagai aplikasi”</b><br>" +
+          "3. Tekan <b>Instal</b> — selesai! ✅";
       } else {
         steps.innerHTML =
           "1. Buka website ini di <b>Chrome</b><br>" +
