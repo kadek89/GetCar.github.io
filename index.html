@@ -13,7 +13,7 @@
   <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
 
-  <!-- ✅ SERVICE WORKER — WAJIB true agar install berfungsi -->
+  <!-- ✅ SERVICE WORKER — WAJIB true agar tombol INSTALL berfungsi! -->
   <script>
     const ENABLE_SW = true;
 
@@ -22,7 +22,7 @@
     }
   </script>
 
-  <!-- ✅ CEK SESI — splash hanya 1x per sesi tab -->
+  <!-- ✅ CEK SESI — splash hanya tampil 1x per sesi tab -->
   <script>
     if (sessionStorage.getItem("gcSplashShown") === "1") {
       document.documentElement.classList.add("no-splash");
@@ -81,6 +81,7 @@
       overflow: hidden;
     }
 
+    /* ✅ Sembunyikan splash jika sudah tampil di sesi ini */
     html.no-splash #splash { display: none !important; }
 
     .phone {
@@ -297,7 +298,7 @@
       margin-top: 14px;
     }
 
-    /* ✅ Spinner MERAH */
+    /* ✅ Spinner MERAH — mengikuti warna logo */
     .spinner {
       margin-top: 28px;
       width: 30px;
@@ -339,7 +340,7 @@
 </head>
 <body>
 
-  <!-- ✅ SPLASH SCREEN -->
+  <!-- ✅ SPLASH SCREEN (logo: awal.png) -->
   <div id="splash">
     <img src="awal.png" alt="Get Car" class="splash-logo"
          onerror="this.style.display='none'; document.getElementById('splashFallback').style.display='flex';" />
@@ -348,68 +349,156 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- ✅ LOGIKA INSTALL + TOAST KECIL -->
-<script>
-  let deferredPrompt = null;
-  const btnInstall = document.getElementById("btnInstall");
+  <!-- ✅ Tandai splash sudah tampil (1x per sesi) -->
+  <script>
+    sessionStorage.setItem("gcSplashShown", "1");
+  </script>
 
-  // Toast kecil di bawah layar
-  const toast = document.createElement("div");
-  toast.style.cssText = `
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
-    background:#1e3a5f; color:#fff; padding:12px 18px; border-radius:12px;
-    border:1px solid rgba(255,255,255,0.25); font-size:13px; font-weight:600;
-    z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.5);
-    transition:transform 0.3s ease; max-width:90vw; text-align:center;`;
-  document.body.appendChild(toast);
+  <div class="phone">
+    <div class="hero">
 
-  function showToast(msg, durasi = 4000) {
-    toast.innerHTML = msg;
-    toast.style.transform = "translateX(-50%) translateY(0)";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => {
-      toast.style.transform = "translateX(-50%) translateY(100px)";
-    }, durasi);
-  }
+      <!-- 🔹 Navbar -->
+      <nav class="navbar">
+        <div class="brand">Get <span>Car</span></div>
+        <div class="version">V1.103.1</div>
+      </nav>
 
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches
-                    || window.navigator.standalone === true;
+      <!-- 🔹 Logo -->
+      <div class="logo-center">
+        <div class="logo-wrap">
+          <img src="logoGC.png" alt="Logo Get Car" class="logo-big"
+               onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';" />
+          <div id="logoFallback" class="logo-fallback">GC</div>
+        </div>
+      </div>
 
-  if (isStandalone) btnInstall.style.display = "none";
+      <!-- 🔹 Konten -->
+      <div class="content">
+        <h1>Halo Mitra <span>Get Car</span></h1>
+        <p>Udah siap beraksi?
+        Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    console.log("✅ Install siap!");
-  });
+        <!-- 🔹 Tombol -->
+        <div class="actions">
 
-  window.addEventListener("appinstalled", () => {
-    btnInstall.style.display = "none";
-    console.log("🎉 Aplikasi berhasil ter-install!");
-  });
+          <a href="login.html" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Masuk sebagai Mitra Driver
+          </a>
 
-  btnInstall.addEventListener("click", async () => {
-    // Dialog Chrome tersedia → langsung instal
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") btnInstall.style.display = "none";
-      deferredPrompt = null;
-      return;
+          <a href="pendaftaran.html" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            Daftar / Cek Status Pendaftaran
+          </a>
+
+          <!-- ✅ Tombol Install -->
+          <button id="btnInstall" class="btn btn-install" style="display:flex;">
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#00d2ff" d="M3.6 1.8 L13.8 12 L3.6 22.2 Z"/>
+              <path fill="#00e676" d="M3.6 1.8 L16.8 9.1 L13.8 12 Z"/>
+              <path fill="#ffd400" d="M16.8 9.1 L21.2 11.5 L21.2 12.5 L16.8 14.9 L13.8 12 Z"/>
+              <path fill="#ff3a44" d="M3.6 22.2 L16.8 14.9 L13.8 12 Z"/>
+            </svg>
+            Install Aplikasi Get Car
+          </button>
+
+          <div class="copyright">Hak Cipta © PT Bali Global Trans</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ✅ LOGIKA INSTALL — klik tombol → dialog Chrome langsung muncul -->
+  <script>
+    let deferredPrompt = null;
+    const btnInstall = document.getElementById("btnInstall");
+
+    // Toast kecil di bawah layar (hanya muncul jika instal tidak memungkinkan)
+    const toast = document.createElement("div");
+    toast.style.cssText = `
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
+      background:#1e3a5f; color:#fff; padding:12px 18px; border-radius:12px;
+      border:1px solid rgba(255,255,255,0.25); font-size:13px; font-weight:600;
+      z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.5);
+      transition:transform 0.3s ease; max-width:90vw; text-align:center;`;
+    document.body.appendChild(toast);
+
+    function showToast(msg, durasi = 5000) {
+      toast.innerHTML = msg;
+      toast.style.transform = "translateX(-50%) translateY(0)";
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => {
+        toast.style.transform = "translateX(-50%) translateY(100px)";
+      }, durasi);
     }
 
-    // Dialog tidak tersedia → toast kecil singkat
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+                      || window.navigator.standalone === true;
 
-    if (isIOS) {
-      showToast("📱 iPhone: tekan tombol Bagikan ⬆️ → “Tambahkan ke Layar Utama”", 5000);
-    } else if (/firefox/i.test(navigator.userAgent)) {
-      showToast("🦊 Firefox tidak mendukung instal. Buka di Chrome/Edge ya!", 5000);
-    } else {
-      showToast("✅ Aplikasi sudah ter-install di Chrome Anda. Untuk install ulang: hapus dulu lewat chrome://apps", 6000);
-    }
-  });
-</script>
+    // Jika aplikasi sudah dibuka dalam mode installed → sembunyikan tombol
+    if (isStandalone) btnInstall.style.display = "none";
+
+    // Chrome menyiapkan dialog instal → tombol jadi fungsional
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log("✅ Install siap! Klik tombol → dialog Chrome muncul → klik Instal");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      btnInstall.style.display = "none";
+      console.log("🎉 Aplikasi berhasil ter-install!");
+    });
+
+    btnInstall.addEventListener("click", async () => {
+      // Dialog Chrome tersedia → LANGSUNG TAMPILKAN INSTAL
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") btnInstall.style.display = "none";
+        deferredPrompt = null;
+        return;
+      }
+
+      // Dialog tidak tersedia → toast kecil singkat di bawah layar
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+      if (isIOS) {
+        showToast("📱 iPhone: tekan <b>Bagikan</b> ⬆️ → “Tambahkan ke Layar Utama”", 6000);
+      } else if (/firefox/i.test(navigator.userAgent)) {
+        showToast("🦊 Firefox tidak mendukung instal. Buka di <b>Chrome/Edge</b> ya!", 6000);
+      } else {
+        showToast("✅ Aplikasi sudah ter-install di Chrome Anda.<br>Hapus dulu lewat <b>chrome://apps</b> jika ingin install ulang.", 6000);
+      }
+    });
+  </script>
+
+  <!-- ✅ LOGIKA SPLASH SCREEN -->
+  <script>
+    (function () {
+      const DURATION = 2000; // ⏱️ durasi splash (2000 = 2 detik)
+      const splash = document.getElementById("splash");
+      if (!splash) return;
+
+      // Jika sesi sudah pernah tampil → jangan tampilkan lagi
+      if (document.documentElement.classList.contains("no-splash")) return;
+
+      let done = false;
+
+      function hideSplash() {
+        if (done) return;
+        done = true;
+        splash.classList.add("hide");
+        setTimeout(() => (splash.style.display = "none"), 600);
+      }
+
+      window.addEventListener("load", () => setTimeout(hideSplash, DURATION));
+
+      // 🛡️ Failsafe: maksimal 5 detik splash pasti hilang
+      setTimeout(hideSplash, 5000);
+    })();
+  </script>
 
 </body>
 </html>
