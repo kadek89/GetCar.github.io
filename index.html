@@ -79,14 +79,13 @@
       overflow: hidden;
     }
 
-    /* ✅ Sembunyikan splash jika sudah tampil di sesi ini */
     html.no-splash #splash { display: none !important; }
 
     .phone {
       width: 100%;
       max-width: 430px;
-      height: 100vh;      /* fallback browser lama */
-      height: 100dvh;     /* browser modern */
+      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
     }
 
@@ -110,8 +109,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;                                        /* fallback browser lama */
-      padding: calc(14px + env(safe-area-inset-top)) 20px 14px;  /* iPhone notch */
+      padding: 14px 20px;
+      padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
       z-index: 10;
     }
 
@@ -200,8 +199,8 @@
     }
 
     .actions {
-      padding: 0 0 6px;                                  /* fallback browser lama */
-      padding: 0 0 calc(6px + env(safe-area-inset-bottom)); /* iPhone home bar */
+      padding: 0 0 6px;
+      padding: 0 0 calc(6px + env(safe-area-inset-bottom));
     }
 
     .btn {
@@ -260,7 +259,7 @@
     /* ✅ SPLASH SCREEN */
     #splash {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;   /* kompatibel semua browser */
+      top: 0; left: 0; right: 0; bottom: 0;
       background: var(--navy);
       display: flex;
       flex-direction: column;
@@ -410,37 +409,17 @@
     </div>
   </div>
 
-  <!-- ✅ LOGIKA INSTALL — klik tombol → dialog Instal Chrome langsung muncul -->
+  <!-- ✅ LOGIKA INSTALL — TANPA NOTIFIKASI, langsung aksi -->
   <script>
     let deferredPrompt = null;
     const btnInstall = document.getElementById("btnInstall");
 
-    // Notifikasi kecil di bawah layar (hanya muncul jika instal tidak memungkinkan)
-    const toast = document.createElement("div");
-    toast.style.cssText = `
-      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120px);
-      background:#1e3a5f; color:#fff; padding:12px 18px; border-radius:12px;
-      border:1px solid rgba(255,255,255,0.25); font-size:13px; font-weight:600;
-      z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.5);
-      transition:transform 0.3s ease; max-width:90vw; text-align:center;`;
-    document.body.appendChild(toast);
-
-    function showToast(msg, durasi = 5000) {
-      toast.innerHTML = msg;
-      toast.style.transform = "translateX(-50%) translateY(0)";
-      clearTimeout(toast._t);
-      toast._t = setTimeout(() => {
-        toast.style.transform = "translateX(-50%) translateY(120px)";
-      }, durasi);
-    }
-
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
 
-    // Jika aplikasi sudah terbuka dalam mode ter-install → sembunyikan tombol
+    // Sudah berjalan sebagai aplikasi ter-install → tombol disembunyikan
     if (isStandalone) btnInstall.style.display = "none";
 
-    // Chrome menyiapkan dialog instal → tombol jadi fungsional
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -451,7 +430,7 @@
     });
 
     btnInstall.addEventListener("click", async () => {
-      // Dialog Chrome tersedia → LANGSUNG TAMPILKAN INSTAL
+      // 1) Chrome/Edge siap → DIALOG INSTAL LANGSUNG MUNCUL
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -460,16 +439,26 @@
         return;
       }
 
-      // Dialog tidak tersedia → notifikasi kecil singkat
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const ua = navigator.userAgent;
+      const isIOS = /iphone|ipad|ipod/i.test(ua);
+      const isChromium = /chrome|crios|edg\//i.test(ua);
 
-      if (isIOS) {
-        showToast("📱 iPhone: tekan <b>Bagikan</b> ⬆️ → “Tambahkan ke Layar Utama”", 6000);
-      } else if (/firefox/i.test(navigator.userAgent)) {
-        showToast("🦊 Firefox tidak mendukung instal. Buka di <b>Chrome/Edge</b> ya!", 6000);
-      } else {
-        showToast("📱 Untuk instal: buka link ini di <b>Google Chrome</b>.<br>Jika sudah terpasang: cek <b>chrome://apps</b>", 6000);
+      // 2) Android dengan browser selain Chrome/Edge (Vivo Browser, UC, dll)
+      //    → OTOMATIS PINDAH KE CHROME, di sana dialog instal muncul
+      if (!isIOS && !isChromium && /android/i.test(ua)) {
+        const target = location.host + location.pathname + location.search + location.hash;
+        window.location.href = "intent://" + target + "#Intent;scheme=https;package=com.android.chrome;end";
+        return;
       }
+
+      // 3) iPhone/iPad → sistem Apple tidak mengizinkan instal otomatis.
+      //    Satu-satunya pintu resmi adalah menu Bagikan Safari.
+      if (isIOS) {
+        alert("Di iPhone, instal dilakukan lewat Safari:\n\n1. Tekan tombol Bagikan ⬆️\n2. Pilih \"Tambahkan ke Layar Utama\"\n3. Tekan Tambah");
+        return;
+      }
+
+      // 4) Kondisi lain (mis. sudah ter-install di desktop) → diam, tanpa notifikasi
     });
   </script>
 
@@ -480,7 +469,6 @@
       const splash = document.getElementById("splash");
       if (!splash) return;
 
-      // Jika sesi sudah pernah tampil → jangan tampilkan lagi
       if (document.documentElement.classList.contains("no-splash")) return;
 
       let done = false;
