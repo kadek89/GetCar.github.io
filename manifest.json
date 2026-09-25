@@ -9,6 +9,11 @@
   "orientation": "portrait",
   "icons": [
     {
+      "src": "gc-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
       "src": "gc.png",
       "sizes": "512x512",
       "type": "image/png",
