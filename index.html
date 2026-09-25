@@ -6,26 +6,15 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
-  <!-- ✅ FAVICON -->
+  <!-- ✅ FAVICON (menghilangkan error 404 favicon.ico) -->
   <link rel="icon" type="image/png" href="get.png" />
   <link rel="apple-touch-icon" href="get.png" />
 
   <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
-
-  <!-- ✅ SERVICE WORKER — WAJIB true agar tombol INSTALL berfungsi! -->
   <script>
-    const ENABLE_SW = true;
-
-    if (ENABLE_SW && "serviceWorker" in navigator) {
+    if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js");
-    }
-  </script>
-
-  <!-- ✅ CEK SESI — splash hanya tampil 1x per sesi tab -->
-  <script>
-    if (sessionStorage.getItem("gcSplashShown") === "1") {
-      document.documentElement.classList.add("no-splash");
     }
   </script>
 
@@ -80,9 +69,6 @@
       justify-content: center;
       overflow: hidden;
     }
-
-    /* ✅ Sembunyikan splash jika sudah tampil di sesi ini */
-    html.no-splash #splash { display: none !important; }
 
     .phone {
       width: 100%;
@@ -178,6 +164,26 @@
       z-index: 10;
     }
 
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
     .content h1 {
       font-size: clamp(26px, 7vw, 34px);
       font-weight: 800;
@@ -188,7 +194,9 @@
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
     }
 
-    .content h1 span { color: var(--white); }
+    .content h1 span {
+      color: var(--white);
+    }
 
     .content p {
       font-size: 14.5px;
@@ -199,6 +207,7 @@
       margin-bottom: 26px;
     }
 
+    /* ❌ CARD DIHAPUS — tombol langsung di atas latar */
     .actions {
       padding: 0 0 calc(6px + env(safe-area-inset-bottom));
     }
@@ -240,6 +249,7 @@
     }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
+    /* ✅ Tombol Install — putih netral */
     .btn-install {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.25);
@@ -256,61 +266,6 @@
       user-select: none;
     }
 
-    /* ✅ SPLASH SCREEN */
-    #splash {
-      position: fixed;
-      inset: 0;
-      background: var(--navy);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-    #splash.hide {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .splash-logo {
-      width: 120px;
-      height: 120px;
-      object-fit: contain;
-      animation: pop 0.8s ease both;
-    }
-    .splash-fallback {
-      display: none;
-      width: 96px;
-      height: 96px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white);
-      font-size: 30px;
-      font-weight: 800;
-      align-items: center;
-      justify-content: center;
-      animation: pop 0.8s ease both;
-    }
-    .splash-sub {
-      color: rgba(255,255,255,0.6);
-      font-size: 13px;
-      letter-spacing: 1px;
-      margin-top: 14px;
-    }
-
-    /* ✅ Spinner MERAH — mengikuti warna logo */
-    .spinner {
-      margin-top: 28px;
-      width: 30px;
-      height: 30px;
-      border: 3px solid rgba(255, 0, 0, 0.2);
-      border-top-color: #ff3a44;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -324,6 +279,7 @@
       50%      { transform: translateY(-8px); }
     }
     .navbar      { animation: fadeUp 0.6s ease both; }
+    .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
     .content h1  { animation: fadeUp 0.7s 0.3s ease both; }
     .content p   { animation: fadeUp 0.7s 0.4s ease both; }
     .btn-primary { animation: fadeUp 0.7s 0.55s ease both; }
@@ -339,20 +295,6 @@
   </style>
 </head>
 <body>
-
-  <!-- ✅ SPLASH SCREEN (logo: awal.png) -->
-  <div id="splash">
-    <img src="awal.png" alt="Get Car" class="splash-logo"
-         onerror="this.style.display='none'; document.getElementById('splashFallback').style.display='flex';" />
-    <div id="splashFallback" class="splash-fallback">GC</div>
-    <p class="splash-sub">PT Bali Global Trans</p>
-    <div class="spinner"></div>
-  </div>
-
-  <!-- ✅ Tandai splash sudah tampil (1x per sesi) -->
-  <script>
-    sessionStorage.setItem("gcSplashShown", "1");
-  </script>
 
   <div class="phone">
     <div class="hero">
@@ -378,7 +320,7 @@
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-        <!-- 🔹 Tombol -->
+        <!-- 🔹 Tombol (tanpa card) -->
         <div class="actions">
 
           <a href="login.html" class="btn btn-primary">
@@ -391,7 +333,7 @@
             Daftar / Cek Status Pendaftaran
           </a>
 
-          <!-- ✅ Tombol Install -->
+          <!-- ✅ TOMBOL INSTALL (putih netral + logo Play Store) -->
           <button id="btnInstall" class="btn btn-install" style="display:flex;">
             <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
               <path fill="#00d2ff" d="M3.6 1.8 L13.8 12 L3.6 22.2 Z"/>
@@ -409,50 +351,48 @@
     </div>
   </div>
 
-  <!-- ✅ LOGIKA INSTALL — klik tombol → dialog Chrome langsung muncul -->
+  <!-- ✅ Modal Panduan Install Manual -->
+  <div id="installModal" style="
+    display:none; position:fixed; inset:0; z-index:999;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center; padding:24px;">
+    <div style="
+      background:#0d1f3c; border:1px solid rgba(255,255,255,0.2);
+      border-radius:20px; padding:24px; max-width:340px; width:100%;">
+      <h3 style="font-size:17px; font-weight:800; margin-bottom:14px;">📲 Pasang Aplikasi</h3>
+      <p id="installSteps" style="font-size:13.5px; line-height:1.8; color:rgba(255,255,255,0.8);"></p>
+      <button onclick="document.getElementById('installModal').style.display='none'" style="
+        margin-top:18px; width:100%; padding:13px; border:none; border-radius:12px;
+        background:linear-gradient(135deg,#2f7bff,#0f5ae0); color:#fff;
+        font-family:inherit; font-weight:700; font-size:14px; cursor:pointer;">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ Logika Install -->
   <script>
     let deferredPrompt = null;
     const btnInstall = document.getElementById("btnInstall");
+    const modal = document.getElementById("installModal");
+    const steps = document.getElementById("installSteps");
 
-    // Toast kecil di bawah layar (hanya muncul jika instal tidak memungkinkan)
-    const toast = document.createElement("div");
-    toast.style.cssText = `
-      position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
-      background:#1e3a5f; color:#fff; padding:12px 18px; border-radius:12px;
-      border:1px solid rgba(255,255,255,0.25); font-size:13px; font-weight:600;
-      z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.5);
-      transition:transform 0.3s ease; max-width:90vw; text-align:center;`;
-    document.body.appendChild(toast);
-
-    function showToast(msg, durasi = 5000) {
-      toast.innerHTML = msg;
-      toast.style.transform = "translateX(-50%) translateY(0)";
-      clearTimeout(toast._t);
-      toast._t = setTimeout(() => {
-        toast.style.transform = "translateX(-50%) translateY(100px)";
-      }, durasi);
-    }
-
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
 
-    // Jika aplikasi sudah dibuka dalam mode installed → sembunyikan tombol
     if (isStandalone) btnInstall.style.display = "none";
 
-    // Chrome menyiapkan dialog instal → tombol jadi fungsional
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      console.log("✅ Install siap! Klik tombol → dialog Chrome muncul → klik Instal");
     });
 
     window.addEventListener("appinstalled", () => {
       btnInstall.style.display = "none";
-      console.log("🎉 Aplikasi berhasil ter-install!");
     });
 
     btnInstall.addEventListener("click", async () => {
-      // Dialog Chrome tersedia → LANGSUNG TAMPILKAN INSTAL
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -461,43 +401,20 @@
         return;
       }
 
-      // Dialog tidak tersedia → toast kecil singkat di bawah layar
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
       if (isIOS) {
-        showToast("📱 iPhone: tekan <b>Bagikan</b> ⬆️ → “Tambahkan ke Layar Utama”", 6000);
-      } else if (/firefox/i.test(navigator.userAgent)) {
-        showToast("🦊 Firefox tidak mendukung instal. Buka di <b>Chrome/Edge</b> ya!", 6000);
+        steps.innerHTML =
+          "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
+          "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
+          "3. Tekan <b>Tambah</b> — selesai! ✅";
       } else {
-        showToast("✅ Aplikasi sudah ter-install di Chrome Anda.<br>Hapus dulu lewat <b>chrome://apps</b> jika ingin install ulang.", 6000);
+        steps.innerHTML =
+          "1. Buka website ini di <b>Chrome</b><br>" +
+          "2. Tekan menu <b>⋮</b> di pojok kanan atas<br>" +
+          "3. Pilih <b>“Tambahkan ke layar utama”</b> atau <b>“Instal aplikasi”</b><br>" +
+          "4. Tekan <b>Instal</b> — selesai! ✅";
       }
+      modal.style.display = "flex";
     });
-  </script>
-
-  <!-- ✅ LOGIKA SPLASH SCREEN -->
-  <script>
-    (function () {
-      const DURATION = 2000; // ⏱️ durasi splash (2000 = 2 detik)
-      const splash = document.getElementById("splash");
-      if (!splash) return;
-
-      // Jika sesi sudah pernah tampil → jangan tampilkan lagi
-      if (document.documentElement.classList.contains("no-splash")) return;
-
-      let done = false;
-
-      function hideSplash() {
-        if (done) return;
-        done = true;
-        splash.classList.add("hide");
-        setTimeout(() => (splash.style.display = "none"), 600);
-      }
-
-      window.addEventListener("load", () => setTimeout(hideSplash, DURATION));
-
-      // 🛡️ Failsafe: maksimal 5 detik splash pasti hilang
-      setTimeout(hideSplash, 5000);
-    })();
   </script>
 
 </body>
