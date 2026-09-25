@@ -75,7 +75,6 @@
       max-width: 430px;
       height: 100dvh;
       overflow: hidden;
-      position: relative;
     }
 
     .hero {
@@ -94,84 +93,6 @@
       background-position: center;
     }
 
-    /* ============================================================
-       ✅ POPUP INSTALL DI ATAS (banner turun dari atas)
-       ============================================================ */
-    .install-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      max-width: 430px;
-      margin: 0 auto;
-      background: rgba(13, 31, 60, 0.97);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255,255,255,0.18);
-      padding: calc(10px + env(safe-area-inset-top)) 16px 12px;
-      display: none;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-      transform: translateY(-110%);
-      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .install-banner.show {
-      transform: translateY(0);
-    }
-
-    .install-banner .app-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      object-fit: contain;
-      background: rgba(255,255,255,0.1);
-      flex-shrink: 0;
-    }
-
-    .install-banner .app-text {
-      flex: 1;
-      min-width: 0;
-    }
-    .install-banner .app-text .t1 {
-      font-size: 13.5px;
-      font-weight: 800;
-      color: var(--white);
-      line-height: 1.3;
-    }
-    .install-banner .app-text .t2 {
-      font-size: 11.5px;
-      color: rgba(255,255,255,0.65);
-      margin-top: 2px;
-    }
-
-    .install-banner .btn-banner {
-      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white);
-      border: none;
-      font-family: inherit;
-      font-size: 12.5px;
-      font-weight: 700;
-      padding: 9px 16px;
-      border-radius: 11px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .install-banner .btn-banner:active { transform: scale(0.95); }
-
-    .install-banner .btn-close {
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.5);
-      font-size: 18px;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-
-    /* 🔹 Navbar */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -368,25 +289,10 @@
       .content { padding: 0 22px; }
       .btn { font-size: 14px; padding: 15px; }
       .logo-big { width: 96px; height: 96px; }
-      .install-banner .app-text .t1 { font-size: 12.5px; }
-      .install-banner .btn-banner { padding: 8px 12px; font-size: 11.5px; }
     }
   </style>
 </head>
 <body>
-
-  <!-- ==========================================================
-       ✅ POPUP INSTALL DI ATAS — muncul turun otomatis
-       ========================================================== -->
-  <div class="install-banner" id="installBanner">
-    <img src="get.png" alt="Get Car" class="app-icon" id="bannerIcon" />
-    <div class="app-text">
-      <div class="t1">Install Aplikasi Get Car</div>
-      <div class="t2">Gratis • Cepat • Hemat kuota</div>
-    </div>
-    <button class="btn-banner" id="btnBannerInstall">Install</button>
-    <button class="btn-close" id="btnBannerClose">✕</button>
-  </div>
 
   <div class="phone">
     <div class="hero">
@@ -463,33 +369,42 @@
     </div>
   </div>
 
-  <!-- ✅ LOGIKA INSTALL + POPUP ATAS -->
+  <!-- ✅ Logika Install -->
   <script>
     let deferredPrompt = null;
-    const banner       = document.getElementById("installBanner");
-    const btnBanner    = document.getElementById("btnBannerInstall");
-    const btnClose     = document.getElementById("btnBannerClose");
-    const btnInstall   = document.getElementById("btnInstall");
-    const modal        = document.getElementById("installModal");
-    const steps        = document.getElementById("installSteps");
+    const btnInstall = document.getElementById("btnInstall");
+    const modal = document.getElementById("installModal");
+    const steps = document.getElementById("installSteps");
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
-    const sudahDitutup = localStorage.getItem("getcar_banner_closed") === "1";
 
-    // 🎯 Fungsi: jalankan install otomatis ATAU tampilkan panduan
-    async function mulaiInstall() {
+    // Sudah dibuka sebagai aplikasi → sembunyikan tombol install
+    if (isStandalone) btnInstall.style.display = "none";
+
+    // Chrome mendeteksi bisa install otomatis
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    // Setelah terpasang → sembunyikan tombol
+    window.addEventListener("appinstalled", () => {
+      btnInstall.style.display = "none";
+    });
+
+    // Klik tombol install
+    btnInstall.addEventListener("click", async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") {
-          sembunyikanSemua();
-        }
+        if (outcome === "accepted") btnInstall.style.display = "none";
         deferredPrompt = null;
         return;
       }
-      // Tidak bisa otomatis → panduan manual
+
+      // Tidak bisa otomatis → tampilkan panduan manual
       if (isIOS) {
         steps.innerHTML =
           "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
@@ -503,60 +418,7 @@
           "4. Tekan <b>Instal</b> — selesai! ✅";
       }
       modal.style.display = "flex";
-    }
-
-    // 🎯 Fungsi: tampilkan banner atas
-    function tampilkanBanner() {
-      if (isStandalone || sudahDitutup) return;
-      banner.style.display = "flex";
-      setTimeout(() => banner.classList.add("show"), 1500); // muncul 1.5 detik setelah buka
-    }
-
-    // 🎯 Fungsi: sembunyikan banner + tombol
-    function sembunyikanSemua() {
-      banner.classList.remove("show");
-      setTimeout(() => banner.style.display = "none", 500);
-      btnInstall.style.display = "none";
-    }
-
-    // Browser mendeteksi bisa install otomatis
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      tampilkanBanner();
     });
-
-    // Aplikasi terpasang → sembunyikan semua
-    window.addEventListener("appinstalled", () => {
-      sembunyikanSemua();
-    });
-
-    // Sudah dibuka sebagai aplikasi → jangan tampilkan apa pun
-    if (isStandalone) {
-      btnInstall.style.display = "none";
-    } else {
-      // Fallback: kalau beforeinstallprompt tidak datang (misal Firefox),
-      // tetap tampilkan banner setelah 2.5 detik
-      setTimeout(() => {
-        if (!deferredPrompt) tampilkanBanner();
-      }, 2500);
-
-      // Juga tampilkan jika sebelumnya sudah terdeteksi
-      setTimeout(() => tampilkanBanner(), 100);
-    }
-
-    // Klik tombol Install di banner
-    btnBanner.addEventListener("click", mulaiInstall);
-
-    // Klik tombol X → tutup banner + simpan agar tidak muncul lagi
-    btnClose.addEventListener("click", () => {
-      localStorage.setItem("getcar_banner_closed", "1");
-      banner.classList.remove("show");
-      setTimeout(() => banner.style.display = "none", 500);
-    });
-
-    // Klik tombol Install di bawah (tombol putih)
-    btnInstall.addEventListener("click", mulaiInstall);
   </script>
 
 </body>
