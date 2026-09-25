@@ -6,28 +6,27 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
+  <!-- ✅ FAVICON -->
   <link rel="icon" type="image/png" href="get.png" />
   <link rel="apple-touch-icon" href="get.png" />
-  <link rel="manifest" href="manifest.json" />
 
+  <!-- ✅ PWA -->
+  <link rel="manifest" href="manifest.json" />
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js");
     }
   </script>
 
-  <script>
-    if (sessionStorage.getItem("gcSplashShown") === "1") {
-      document.documentElement.classList.add("no-splash");
-    }
-  </script>
-
+  <!-- 🔤 Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
+  <!-- 🔥 Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyD3FQbFF5a91MlASpqImTMmGkYvaTcdxm0",
       authDomain: "kadek-ed34e.firebaseapp.com",
@@ -38,9 +37,11 @@
       appId: "1:65756136303:web:6dbe5bc658fadb05ca1e9a",
       measurementId: "G-5WSR57JC7V"
     };
+
     const app = initializeApp(firebaseConfig);
   </script>
 
+  <!-- 📷 Cek foto latar -->
   <script>
     const BG_URL = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1600&q=80";
     const bg = new Image();
@@ -50,13 +51,16 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
       --navy: #0a1628;
       --accent: #2f7bff;
       --accent-deep: #0f5ae0;
       --white: #ffffff;
     }
+
     html, body { height: 100%; }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: var(--navy);
@@ -65,14 +69,15 @@
       justify-content: center;
       overflow: hidden;
     }
-    html.no-splash #splash { display: none !important; }
+
     .phone {
       width: 100%;
       max-width: 430px;
-      height: 100vh;
       height: 100dvh;
       overflow: hidden;
+      position: relative;
     }
+
     .hero {
       position: relative;
       height: 100%;
@@ -80,6 +85,7 @@
       flex-direction: column;
       background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 55%, #060d1a 100%);
     }
+
     body.has-photo .hero {
       background-image:
         linear-gradient(180deg, rgba(6,13,26,0.55) 0%, rgba(6,13,26,0.25) 35%, rgba(6,13,26,0.92) 100%),
@@ -87,151 +93,327 @@
       background-size: cover;
       background-position: center;
     }
+
+    /* ============================================================
+       ✅ POPUP INSTALL DI ATAS (banner turun dari atas)
+       ============================================================ */
+    .install-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      max-width: 430px;
+      margin: 0 auto;
+      background: rgba(13, 31, 60, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+      padding: calc(10px + env(safe-area-inset-top)) 16px 12px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+      transform: translateY(-110%);
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .install-banner.show {
+      transform: translateY(0);
+    }
+
+    .install-banner .app-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+
+    .install-banner .app-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .install-banner .app-text .t1 {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.3;
+    }
+    .install-banner .app-text .t2 {
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 2px;
+    }
+
+    .install-banner .btn-banner {
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      color: var(--white);
+      border: none;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .install-banner .btn-banner:active { transform: scale(0.95); }
+
+    .install-banner .btn-close {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    /* 🔹 Navbar */
     .navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
       padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
       z-index: 10;
     }
-    .brand { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: var(--white); }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--white);
+    }
     .brand span { color: var(--white); }
+
     .version {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.4px; color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: var(--white);
       background: rgba(255,255,255,0.12);
       border: 1px solid rgba(255,255,255,0.18);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      padding: 5px 12px; border-radius: 20px;
+      padding: 5px 12px;
+      border-radius: 20px;
     }
+
     .logo-center {
-      flex: 1; display: flex; align-items: center;
-      justify-content: center; min-height: 120px; padding: 10px 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 120px;
+      padding: 10px 0;
     }
+
     .logo-wrap {
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       animation: pop 0.8s 0.1s ease both, float 4s 1.2s ease-in-out infinite;
     }
+
     .logo-big {
-      width: 110px; height: 110px; object-fit: contain;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.45));
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
     }
+
     .logo-fallback {
-      display: none; width: 96px; height: 96px; border-radius: 24px;
+      display: none;
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white); font-size: 30px; font-weight: 800; letter-spacing: 1px;
-      align-items: center; justify-content: center;
+      color: var(--white);
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      align-items: center;
+      justify-content: center;
     }
-    .content { padding: 0 26px; z-index: 10; }
+
+    .content {
+      padding: 0 26px;
+      z-index: 10;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
     .content h1 {
-      font-size: clamp(26px, 7vw, 34px); font-weight: 800; line-height: 1.2;
-      letter-spacing: -0.5px; margin-bottom: 10px; color: var(--white);
+      font-size: clamp(26px, 7vw, 34px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      color: var(--white);
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
     }
-    .content h1 span { color: var(--white); }
-    .content p {
-      font-size: 14.5px; font-weight: 400; line-height: 1.65;
-      color: var(--white); max-width: 300px; margin-bottom: 26px;
+
+    .content h1 span {
+      color: var(--white);
     }
-    .actions { padding: 0 0 6px; padding: 0 0 calc(6px + env(safe-area-inset-bottom)); }
+
+    .content p {
+      font-size: 14.5px;
+      font-weight: 400;
+      line-height: 1.65;
+      color: var(--white);
+      max-width: 300px;
+      margin-bottom: 26px;
+    }
+
+    .actions {
+      padding: 0 0 calc(6px + env(safe-area-inset-bottom));
+    }
+
     .btn {
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      width: 100%; padding: 16px; border-radius: 16px; font-family: inherit;
-      font-size: 15px; font-weight: 700; letter-spacing: 0.2px;
-      text-decoration: none; cursor: pointer; border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
       transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
+
     .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.7; cursor: wait; }
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white); box-shadow: 0 8px 24px rgba(47,123,255,0.4); margin-bottom: 12px;
+      color: var(--white);
+      box-shadow: 0 8px 24px rgba(47,123,255,0.4);
+      margin-bottom: 12px;
     }
-    .btn-ghost {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
-      color: var(--white); margin-bottom: 12px;
-    }
-    .btn-install {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
-      color: var(--white); margin-bottom: 0;
-    }
-    .copyright { text-align: center; font-size: 11px; color: var(--white); margin-top: 16px; user-select: none; }
+    .btn-primary:hover { box-shadow: 0 10px 30px rgba(47,123,255,0.55); }
 
-    #splash {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--navy);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; transition: opacity 0.5s ease;
+    .btn-ghost {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: var(--white);
+      margin-bottom: 12px;
     }
-    #splash.hide { opacity: 0; pointer-events: none; }
-    .splash-logo { width: 120px; height: 120px; object-fit: contain; animation: pop 0.8s ease both; }
-    .splash-fallback {
-      display: none; width: 96px; height: 96px; border-radius: 24px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      color: var(--white); font-size: 30px; font-weight: 800;
-      align-items: center; justify-content: center; animation: pop 0.8s ease both;
+    .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+
+    .btn-install {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: var(--white);
+      margin-bottom: 0;
     }
-    .splash-sub { color: rgba(255,255,255,0.6); font-size: 13px; letter-spacing: 1px; margin-top: 14px; }
-    .spinner {
-      margin-top: 28px; width: 30px; height: 30px;
-      border: 3px solid rgba(255, 0, 0, 0.2);
-      border-top-color: #ff3a44; border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .btn-install:hover { background: rgba(255,255,255,0.15); }
+
+    .copyright {
+      text-align: center;
+      font-size: 11px;
+      color: var(--white);
+      margin-top: 16px;
+      user-select: none;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pop {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
     .navbar      { animation: fadeUp 0.6s ease both; }
+    .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
     .content h1  { animation: fadeUp 0.7s 0.3s ease both; }
     .content p   { animation: fadeUp 0.7s 0.4s ease both; }
     .btn-primary { animation: fadeUp 0.7s 0.55s ease both; }
     .btn-ghost   { animation: fadeUp 0.7s 0.65s ease both; }
     .btn-install { animation: fadeUp 0.7s 0.75s ease both; }
     .copyright   { animation: fadeUp 0.7s 0.85s ease both; }
+
     @media (max-width: 360px) {
       .content { padding: 0 22px; }
       .btn { font-size: 14px; padding: 15px; }
       .logo-big { width: 96px; height: 96px; }
+      .install-banner .app-text .t1 { font-size: 12.5px; }
+      .install-banner .btn-banner { padding: 8px 12px; font-size: 11.5px; }
     }
   </style>
 </head>
 <body>
 
-  <div id="splash">
-    <img src="awal.png" alt="Get Car" class="splash-logo"
-         onerror="this.style.display='none'; document.getElementById('splashFallback').style.display='flex';" />
-    <div id="splashFallback" class="splash-fallback">GC</div>
-    <p class="splash-sub">PT Bali Global Trans</p>
-    <div class="spinner"></div>
+  <!-- ==========================================================
+       ✅ POPUP INSTALL DI ATAS — muncul turun otomatis
+       ========================================================== -->
+  <div class="install-banner" id="installBanner">
+    <img src="get.png" alt="Get Car" class="app-icon" id="bannerIcon" />
+    <div class="app-text">
+      <div class="t1">Install Aplikasi Get Car</div>
+      <div class="t2">Gratis • Cepat • Hemat kuota</div>
+    </div>
+    <button class="btn-banner" id="btnBannerInstall">Install</button>
+    <button class="btn-close" id="btnBannerClose">✕</button>
   </div>
-
-  <script>sessionStorage.setItem("gcSplashShown", "1");</script>
 
   <div class="phone">
     <div class="hero">
 
+      <!-- 🔹 Navbar -->
       <nav class="navbar">
         <div class="brand">Get <span>Car</span></div>
         <div class="version">V1.103.1</div>
       </nav>
 
+      <!-- 🔹 Logo -->
       <div class="logo-center">
         <div class="logo-wrap">
-          <img src="logoGC.png" alt="Logo Get Car" class="logo-big"
+          <img src="get.png" alt="Logo Get Car" class="logo-big"
                onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';" />
           <div id="logoFallback" class="logo-fallback">GC</div>
         </div>
       </div>
 
+      <!-- 🔹 Konten -->
       <div class="content">
+        <div class="eyebrow">Mitra Driver Get Car</div>
         <h1>Halo Mitra <span>Get Car</span></h1>
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
+        <!-- 🔹 Tombol -->
         <div class="actions">
 
           <a href="login.html" class="btn btn-primary">
@@ -244,6 +426,7 @@
             Daftar / Cek Status Pendaftaran
           </a>
 
+          <!-- ✅ TOMBOL INSTALL -->
           <button id="btnInstall" class="btn btn-install" style="display:flex;">
             <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
               <path fill="#00d2ff" d="M3.6 1.8 L13.8 12 L3.6 22.2 Z"/>
@@ -261,97 +444,119 @@
     </div>
   </div>
 
-  <!-- ✅ LOGIKA INSTALL -->
+  <!-- ✅ Modal Panduan Install Manual -->
+  <div id="installModal" style="
+    display:none; position:fixed; inset:0; z-index:999;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center; padding:24px;">
+    <div style="
+      background:#0d1f3c; border:1px solid rgba(255,255,255,0.2);
+      border-radius:20px; padding:24px; max-width:340px; width:100%;">
+      <h3 style="font-size:17px; font-weight:800; margin-bottom:14px;">📲 Pasang Aplikasi</h3>
+      <p id="installSteps" style="font-size:13.5px; line-height:1.8; color:rgba(255,255,255,0.8);"></p>
+      <button onclick="document.getElementById('installModal').style.display='none'" style="
+        margin-top:18px; width:100%; padding:13px; border:none; border-radius:12px;
+        background:linear-gradient(135deg,#2f7bff,#0f5ae0); color:#fff;
+        font-family:inherit; font-weight:700; font-size:14px; cursor:pointer;">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ LOGIKA INSTALL + POPUP ATAS -->
   <script>
     let deferredPrompt = null;
-    const btnInstall = document.getElementById("btnInstall");
+    const banner       = document.getElementById("installBanner");
+    const btnBanner    = document.getElementById("btnBannerInstall");
+    const btnClose     = document.getElementById("btnBannerClose");
+    const btnInstall   = document.getElementById("btnInstall");
+    const modal        = document.getElementById("installModal");
+    const steps        = document.getElementById("installSteps");
 
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
                       || window.navigator.standalone === true;
-    if (isStandalone) btnInstall.style.display = "none";
+    const sudahDitutup = localStorage.getItem("getcar_banner_closed") === "1";
 
+    // 🎯 Fungsi: jalankan install otomatis ATAU tampilkan panduan
+    async function mulaiInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          sembunyikanSemua();
+        }
+        deferredPrompt = null;
+        return;
+      }
+      // Tidak bisa otomatis → panduan manual
+      if (isIOS) {
+        steps.innerHTML =
+          "1. Tekan tombol <b>Bagikan</b> ⬆️ di bawah Safari<br>" +
+          "2. Pilih <b>“Tambahkan ke Layar Utama”</b><br>" +
+          "3. Tekan <b>Tambah</b> — selesai! ✅";
+      } else {
+        steps.innerHTML =
+          "1. Buka website ini di <b>Chrome</b><br>" +
+          "2. Tekan menu <b>⋮</b> di pojok kanan atas<br>" +
+          "3. Pilih <b>“Tambahkan ke layar utama”</b> atau <b>“Instal aplikasi”</b><br>" +
+          "4. Tekan <b>Instal</b> — selesai! ✅";
+      }
+      modal.style.display = "flex";
+    }
+
+    // 🎯 Fungsi: tampilkan banner atas
+    function tampilkanBanner() {
+      if (isStandalone || sudahDitutup) return;
+      banner.style.display = "flex";
+      setTimeout(() => banner.classList.add("show"), 1500); // muncul 1.5 detik setelah buka
+    }
+
+    // 🎯 Fungsi: sembunyikan banner + tombol
+    function sembunyikanSemua() {
+      banner.classList.remove("show");
+      setTimeout(() => banner.style.display = "none", 500);
+      btnInstall.style.display = "none";
+    }
+
+    // Browser mendeteksi bisa install otomatis
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
+      tampilkanBanner();
     });
 
+    // Aplikasi terpasang → sembunyikan semua
     window.addEventListener("appinstalled", () => {
-      btnInstall.style.display = "none";
+      sembunyikanSemua();
     });
 
-    async function bukaDialogInstal() {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") btnInstall.style.display = "none";
-      deferredPrompt = null;
+    // Sudah dibuka sebagai aplikasi → jangan tampilkan apa pun
+    if (isStandalone) {
+      btnInstall.style.display = "none";
+    } else {
+      // Fallback: kalau beforeinstallprompt tidak datang (misal Firefox),
+      // tetap tampilkan banner setelah 2.5 detik
+      setTimeout(() => {
+        if (!deferredPrompt) tampilkanBanner();
+      }, 2500);
+
+      // Juga tampilkan jika sebelumnya sudah terdeteksi
+      setTimeout(() => tampilkanBanner(), 100);
     }
 
-    btnInstall.addEventListener("click", async () => {
-      // Chrome siap → popup instal langsung muncul
-      if (deferredPrompt) {
-        await bukaDialogInstal();
-        return;
-      }
+    // Klik tombol Install di banner
+    btnBanner.addEventListener("click", mulaiInstall);
 
-      // Chrome belum siap → tunggu maksimal 8 detik
-      const teksAsli = btnInstall.innerHTML;
-      btnInstall.disabled = true;
-      btnInstall.innerHTML = "⏳ Menyiapkan instalasi...";
-
-      const siap = await new Promise((resolve) => {
-        let t = 0;
-        const iv = setInterval(() => {
-          t += 200;
-          if (deferredPrompt) { clearInterval(iv); resolve(true); }
-          else if (t >= 8000)  { clearInterval(iv); resolve(false); }
-        }, 200);
-      });
-
-      btnInstall.disabled = false;
-      btnInstall.innerHTML = teksAsli;
-
-      if (siap) {
-        await bukaDialogInstal();
-        return;
-      }
-
-      const ua = navigator.userAgent;
-      const isIOS = /iphone|ipad|ipod/i.test(ua);
-      const isChromium = /chrome|crios|edg\//i.test(ua);
-
-      // Browser HP selain Chrome → pindah ke Chrome otomatis
-      if (!isIOS && !isChromium && /android/i.test(ua)) {
-        const target = location.host + location.pathname + location.search + location.hash;
-        window.location.href = "intent://" + target + "#Intent;scheme=https;package=com.android.chrome;end";
-        return;
-      }
-
-      if (isIOS) {
-        alert("Di iPhone, instal lewat Safari:\n1. Tekan Bagikan ⬆️\n2. \"Tambahkan ke Layar Utama\"\n3. Tambah");
-        return;
-      }
-
-      alert("Chrome belum siap.\nMuat ulang halaman, tunggu 10 detik, lalu klik lagi.");
+    // Klik tombol X → tutup banner + simpan agar tidak muncul lagi
+    btnClose.addEventListener("click", () => {
+      localStorage.setItem("getcar_banner_closed", "1");
+      banner.classList.remove("show");
+      setTimeout(() => banner.style.display = "none", 500);
     });
-  </script>
 
-  <!-- ✅ SPLASH -->
-  <script>
-    (function () {
-      const DURATION = 2000;
-      const splash = document.getElementById("splash");
-      if (!splash) return;
-      if (document.documentElement.classList.contains("no-splash")) return;
-      let done = false;
-      function hideSplash() {
-        if (done) return;
-        done = true;
-        splash.classList.add("hide");
-        setTimeout(() => (splash.style.display = "none"), 600);
-      }
-      window.addEventListener("load", () => setTimeout(hideSplash, DURATION));
-      setTimeout(hideSplash, 5000);
-    })();
+    // Klik tombol Install di bawah (tombol putih)
+    btnInstall.addEventListener("click", mulaiInstall);
   </script>
 
 </body>
