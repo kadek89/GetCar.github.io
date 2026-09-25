@@ -6,15 +6,28 @@
   <meta name="theme-color" content="#0a1628" />
   <title>Get Car - Mitra</title>
 
-  <!-- ✅ FAVICON (menghilangkan error 404 favicon.ico) -->
+  <!-- ✅ FAVICON -->
   <link rel="icon" type="image/png" href="get.png" />
   <link rel="apple-touch-icon" href="get.png" />
 
   <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json" />
+
+  <!-- ✅ SERVICE WORKER
+       true  = PRODUKSI (aplikasi jadi, siap dipakai driver)
+       false = DEVELOPMENT (masih sering edit kode, agar perubahan langsung terlihat) -->
   <script>
-    if ("serviceWorker" in navigator) {
+    const ENABLE_SW = true;
+
+    if (ENABLE_SW && "serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+
+  <!-- ✅ CEK SESI — dipasang di <head> agar splash tidak "kedip" saat sudah tampil -->
+  <script>
+    if (sessionStorage.getItem("gcSplashShown") === "1") {
+      document.documentElement.classList.add("no-splash");
     }
   </script>
 
@@ -69,6 +82,9 @@
       justify-content: center;
       overflow: hidden;
     }
+
+    /* ✅ Sembunyikan splash jika sudah tampil di sesi ini */
+    html.no-splash #splash { display: none !important; }
 
     .phone {
       width: 100%;
@@ -164,26 +180,6 @@
       z-index: 10;
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 14px;
-    }
-
-    .eyebrow::before {
-      content: "";
-      width: 22px;
-      height: 2px;
-      background: var(--accent);
-      border-radius: 2px;
-    }
-
     .content h1 {
       font-size: clamp(26px, 7vw, 34px);
       font-weight: 800;
@@ -194,9 +190,7 @@
       text-shadow: 0 2px 20px rgba(0,0,0,0.35);
     }
 
-    .content h1 span {
-      color: var(--white);
-    }
+    .content h1 span { color: var(--white); }
 
     .content p {
       font-size: 14.5px;
@@ -207,7 +201,6 @@
       margin-bottom: 26px;
     }
 
-    /* ❌ CARD DIHAPUS — tombol langsung di atas latar */
     .actions {
       padding: 0 0 calc(6px + env(safe-area-inset-bottom));
     }
@@ -249,7 +242,6 @@
     }
     .btn-ghost:hover { background: rgba(255,255,255,0.15); }
 
-    /* ✅ Tombol Install — putih netral */
     .btn-install {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.25);
@@ -266,6 +258,67 @@
       user-select: none;
     }
 
+    /* ✅ SPLASH SCREEN */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+    #splash.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .splash-logo {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      animation: pop 0.8s ease both;
+    }
+    .splash-fallback {
+      display: none;
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      color: var(--white);
+      font-size: 30px;
+      font-weight: 800;
+      align-items: center;
+      justify-content: center;
+      animation: pop 0.8s ease both;
+    }
+    .splash-title {
+      color: var(--white);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      margin: 18px 0 4px;
+    }
+    .splash-sub {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    /* ✅ Spinner MERAH — mengikuti warna logo */
+    .spinner {
+      margin-top: 28px;
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 0, 0, 0.2);   /* jalur merah redup */
+      border-top-color: #ff3a44;                 /* bagian berputar merah */
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -279,7 +332,6 @@
       50%      { transform: translateY(-8px); }
     }
     .navbar      { animation: fadeUp 0.6s ease both; }
-    .eyebrow     { animation: fadeUp 0.7s 0.2s ease both; }
     .content h1  { animation: fadeUp 0.7s 0.3s ease both; }
     .content p   { animation: fadeUp 0.7s 0.4s ease both; }
     .btn-primary { animation: fadeUp 0.7s 0.55s ease both; }
@@ -295,6 +347,21 @@
   </style>
 </head>
 <body>
+
+  <!-- ✅ SPLASH SCREEN (logo: splash-logo.png — boleh berbeda dari icon PWA) -->
+  <div id="splash">
+    <img src="splash-logo.png" alt="Get Car" class="splash-logo"
+         onerror="this.style.display='none'; document.getElementById('splashFallback').style.display='flex';" />
+    <div id="splashFallback" class="splash-fallback">GC</div>
+    <h2 class="splash-title">GET CAR MITRA</h2>
+    <p class="splash-sub">PT Bali Global Trans</p>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- ✅ Tandai splash sudah tampil di sesi ini (muncul 1x per sesi tab) -->
+  <script>
+    sessionStorage.setItem("gcSplashShown", "1");
+  </script>
 
   <div class="phone">
     <div class="hero">
@@ -320,7 +387,7 @@
         <p>Udah siap beraksi?
         Masuk sekarang dan mulai terima trip dari penumpang di sekitar Anda.</p>
 
-        <!-- 🔹 Tombol (tanpa card) -->
+        <!-- 🔹 Tombol -->
         <div class="actions">
 
           <a href="login.html" class="btn btn-primary">
@@ -333,7 +400,7 @@
             Daftar / Cek Status Pendaftaran
           </a>
 
-          <!-- ✅ TOMBOL INSTALL (putih netral + logo Play Store) -->
+          <!-- ✅ Tombol Install -->
           <button id="btnInstall" class="btn btn-install" style="display:flex;">
             <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
               <path fill="#00d2ff" d="M3.6 1.8 L13.8 12 L3.6 22.2 Z"/>
@@ -415,6 +482,33 @@
       }
       modal.style.display = "flex";
     });
+  </script>
+
+  <!-- ✅ Logika Splash Screen -->
+  <script>
+    (function () {
+      const DURATION = 2000; // ⏱️ durasi splash (2000 = 2 detik)
+      const splash = document.getElementById("splash");
+      if (!splash) return;
+
+      // Jika sesi sudah pernah tampil → langsung selesai
+      if (document.documentElement.classList.contains("no-splash")) return;
+
+      let done = false;
+
+      function hideSplash() {
+        if (done) return;
+        done = true;
+        splash.classList.add("hide");
+        setTimeout(() => (splash.style.display = "none"), 600);
+      }
+
+      // Tampil setelah halaman siap, selama DURATION
+      window.addEventListener("load", () => setTimeout(hideSplash, DURATION));
+
+      // 🛡️ Failsafe: maksimal 5 detik, splash pasti hilang
+      setTimeout(hideSplash, 5000);
+    })();
   </script>
 
 </body>
